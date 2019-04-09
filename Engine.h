@@ -80,7 +80,7 @@ public:
     void reloadMesh();
     void reloadTexture();
     bool loadTexture( const std::wstring &fileName );
-    void setMeshDisplayMode( bool wireframe = false, bool lighting = true );
+    void setMeshDisplayMode(bool wireframe = false, bool lighting = true, bool textureInterpolation = true);
     bool isAnimating();
     void playAnimation();
     void pauseAnimation();

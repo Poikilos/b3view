@@ -54,7 +54,7 @@ if [ ! -f "$try_dest_bin" ]; then
     echo "WARNING: can't write to $prev_dir, so"
 fi
 if [ "@$PROFILE_ENABLE" = "@true" ]; then
-    dest_bin_dir="$USER/.local/bin"
+    dest_bin_dir="$HOME/.local/bin"
     echo "installing to '$dest_bin_dir'."
     echo "Press Ctrl C to cancel..."
     sleep 1

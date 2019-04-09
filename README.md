@@ -10,7 +10,8 @@ bird: [github.com/poikilos/mobs_sky](https://github.com/poikilos/mobs_sky)
 Website: [poikilos.org](https://poikilos.org)
 
 ## Main Features in poikilos fork
-* stabilized (makes sure font, model or texture loads before using)
+* stabilized (makes sure font, model or texture loads before using;
+  makes sure model is loaded before setting View options)
 * modernized includes (`#include` statements specify "irrlicht"
   directory instead of assuming it)
 * double-click after you associate this program with the file types
@@ -123,10 +124,15 @@ only applies to Visual Studio users.)
 * `t` / `e`: cycle through textures in `../textures` using `t` key (`e`
   to go back) such as for Minetest mods, where model must be in
   `modname/models/` and texture must be in `modname/textures/`.
-  If `../textures` doesn't exist relative to the model file's directory,
-  the model file's own directory will be used.
+  - If `"../textures/" + basename(modelName) + ".png"` or `".jpg"` is
+  present, pressing `t` for the first time will load it.
+  - If `../textures` doesn't exist relative to the model file's
+    directory, the model file's own directory will be used.
+* `x`: toggle texture interpolation (shortcut for View, Texture
+  Interpolation)
 * `F5`: Reload last model file
-* `r`: Reload last texture file
+* `r`: Reload last texture file (may not be working due to caching,
+  but does try to load different file if texture edit box changed).
 * drag with middle button: rotate view
 * drag with middle button while holding shift key: pan up and down
 * `z` or `y`: change camera "up" axis to Z or Y (Y is default;

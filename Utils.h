@@ -23,6 +23,7 @@ public:
     static std::wstring toLower(const std::wstring &s);
     static std::wstring toWstring(irr::f32 val);
     static std::wstring toWstring(int val);
+    static std::wstring toWstring(const std::string &str);
     static irr::f32 toF32(std::wstring val);
     // compiler doesn't like template function when class is not a template--instantiate immediately
     // see http://processors.wiki.ti.com/index.php/C%2B%2B_Template_Instantiation_Issues

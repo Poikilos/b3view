@@ -265,6 +265,8 @@ void Engine::loadMesh( const wstring &fileName )
                     }
                 }
             }
+            m_LoadedMesh->setMaterialType(video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF);
+            // EMT_TRANSPARENT_ALPHA_CHANNEL: constant transparency
         }
     }
 }
@@ -279,7 +281,10 @@ void Engine::reloadMesh()
 void Engine::reloadTexture()
 {
     if (this->m_PrevTexturePath.length() > 0) {
-        loadTexture(this->m_PrevTexturePath);
+        if (this->m_UserInterface->texturePathEditBox->getText() != L"")
+            loadTexture(this->m_UserInterface->texturePathEditBox->getText());
+        else
+            loadTexture(this->m_PrevTexturePath);
     }
 }
 
@@ -292,28 +297,53 @@ bool Engine::loadTexture(const wstring &fileName)
         ret = true;
     }
     this->m_PrevTexturePath = fileName;
+    this->m_UserInterface->texturePathEditBox->setText(this->m_PrevTexturePath.c_str());
     return ret;
 }
 
-void Engine::setMeshDisplayMode( bool wireframe, bool lighting )
+void Engine::setMeshDisplayMode( bool wireframe, bool lighting, bool textureInterpolation)
 {
-    for( int materialIndex = 0; materialIndex < m_LoadedMesh->getMaterialCount(); materialIndex ++ )
-    {
-        // Set Wireframe display
-        m_LoadedMesh->getMaterial( materialIndex ).Wireframe = wireframe;
+    if (m_LoadedMesh != nullptr) {
+        for( int materialIndex = 0; materialIndex < m_LoadedMesh->getMaterialCount(); materialIndex ++ )
+        {
+            // Set Wireframe display
+            m_LoadedMesh->getMaterial(materialIndex).Wireframe = wireframe;
 
-        // Set Lighting
-        if( ! lighting )
-        {
-            m_LoadedMesh->getMaterial( materialIndex ).Lighting = false;
-            m_LoadedMesh->getMaterial( materialIndex ).EmissiveColor = SColor( 255, 255, 255, 255 );
-        }
-        else
-        {
-            m_LoadedMesh->getMaterial( materialIndex ).Lighting = true;
-            m_LoadedMesh->getMaterial( materialIndex ).EmissiveColor = SColor( 255, 0, 0, 0 );
+            // Set Lighting
+            if( ! lighting )
+            {
+                m_LoadedMesh->getMaterial(materialIndex).Lighting = false;
+                m_LoadedMesh->getMaterial(materialIndex).EmissiveColor = SColor( 255, 255, 255, 255 );
+            }
+            else
+            {
+                m_LoadedMesh->getMaterial(materialIndex).Lighting = true;
+                m_LoadedMesh->getMaterial(materialIndex).EmissiveColor = SColor( 255, 0, 0, 0 );
+            }
+            // m_LoadedMesh->setMaterialType(video::EMT_TRANSPARENT_ALPHA_CHANNEL); //already done on load
+            // m_LoadedMesh->setMaterialFlag(video::E_ALPHA_SOURCE, true);  // requires EMT_ONETEXTURE
+            if (textureInterpolation) {
+                m_LoadedMesh->setMaterialFlag(video::EMF_BILINEAR_FILTER, true);
+                m_LoadedMesh->setMaterialFlag(video::EMF_TRILINEAR_FILTER, true);
+            }
+            else {
+                m_LoadedMesh->setMaterialFlag(video::EMF_BILINEAR_FILTER, false);
+                m_LoadedMesh->setMaterialFlag(video::EMF_TRILINEAR_FILTER, false);
+                //m_LoadedMesh->setMaterialFlag(video::E_ALPHA_SOURCE, true);
+
+                // below doesn't work for some reason:
+                // video::SMaterial mat = m_LoadedMesh->getMaterial(materialIndex);
+                // mat.UseMipMaps = false;
+                // mat.setFlag(video::EMF_BILINEAR_FILTER, false);
+                // mat.setFlag(video::EMF_TRILINEAR_FILTER, false);
+
+                // below would require patching Irrlicht:
+                // GLint filteringMipMaps = GL_NEAREST_MIPMAP_NEAREST
+                // // above is used by glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filteringMipMaps);
+            }
         }
     }
+    else debug() << "WARNING in setMeshDisplayMode: No mesh is loaded " << endl;
 }
 
 bool Engine::isAnimating()

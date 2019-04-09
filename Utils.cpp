@@ -123,7 +123,7 @@ wstring Utility::delimiter(const wstring &path)
     std::wstring ret = L"/";
     std::wstring::size_type lastSlashPos = path.find_last_of(L"/");
     if (lastSlashPos == std::wstring::npos) {
-        // ret = "/";
+        // ret = L"/";
     }
     else {
         std::wstring::size_type lastSlashPos = path.find_last_of(L"\\");
@@ -145,22 +145,33 @@ bool Utility::isFile(const std::string& name) {
 
 std::string Utility::toString(const std::wstring& ws) {
     std::string ret;
-    // convert to w_string using locale: see Phillipp on <https://stackoverflow.com/questions/4804298/how-to-convert-wstring-into-string>
-    std::setlocale(LC_ALL, "");
-    const std::locale locale("");
-    typedef std::codecvt<wchar_t, char, std::mbstate_t> converter_type;
-    const converter_type& converter = std::use_facet<converter_type>(locale);
-    std::vector<char> to(ws.length() * converter.max_length());
-    std::mbstate_t state;
-    const wchar_t* from_next;
-    char* to_next;
-    const converter_type::result result = converter.out(state, ws.data(), ws.data() + ws.length(), from_next, &to[0], &to[0] + to.size(), to_next);
-    if (result == converter_type::ok or result == converter_type::noconv) {
-        const std::string s(&to[0], to_next);
-        //std::cout <<"std::string =     "<<s<<std::endl;
-        ret = s;
+    if (ws.length() > 0) {
+        // std::string str = "Hello";
+        ret = std::string(ws.length(), L' '); // Make room for characters
+        // Copy string to wstring.
+        std::copy(ws.begin(), ws.end(), ret.begin());
     }
     return ret;
+
+    //below sometimes results in "internal_utf8_loop_single: Assertion `inptr - bytebuf > (state->__count & 7)' failed." on the converter.out call:
+//    if (ws.length() > 0) {
+//        // convert to w_string using locale: see Phillipp on <https://stackoverflow.com/questions/4804298/how-to-convert-wstring-into-string>
+//        std::setlocale(LC_ALL, "");
+//        const std::locale locale("");
+//        typedef std::codecvt<wchar_t, char, std::mbstate_t> converter_type;
+//        const converter_type& converter = std::use_facet<converter_type>(locale);
+//        std::vector<char> to(ws.length() * converter.max_length());
+//        std::mbstate_t state;
+//        const wchar_t* from_next = nullptr;
+//        char* to_next = nullptr;
+//        const converter_type::result result = converter.out(state, ws.data(), ws.data() + ws.length(), from_next, &to[0], &to[0] + to.size(), to_next);
+//        if (result == converter_type::ok or result == converter_type::noconv) {
+//            const std::string s(&to[0], to_next);
+//            //std::cout <<"std::string =     "<<s<<std::endl;
+//            ret = s;
+//        }
+//    }
+//    return ret;
 }
 
 std::string Utility::toLower(const std::string &s)
@@ -185,6 +196,18 @@ wstring Utility::toWstring(irr::f32 val)
 wstring Utility::toWstring(int val)
 {
     return std::to_wstring(val);
+}
+
+wstring Utility::toWstring(const std::string &str)
+{
+    std::wstring ret;
+    if (str.length() > 0) {
+        // std::string str = "Hello";
+        ret = std::wstring(str.length(), L' '); // Make room for characters
+        // Copy string to wstring.
+        std::copy(str.begin(), str.end(), ret.begin());
+    }
+    return ret;
 }
 
 irr::f32 Utility::toF32(wstring val)

@@ -18,16 +18,19 @@ enum UserInterfaceElements
     UIE_LOADTEXTUREDIALOG           = 1006,
     UIE_PLAYBACKINCREASEBUTTON      = 1007,
     UIE_PLAYBACKDECREASEBUTTON      = 1008,
-    UIE_PLAYBACKSETFRAMEEDITBOX     = 1009
+    UIE_PLAYBACKSETFRAMEEDITBOX     = 1009,
+    UIE_TEXTUREPATHSTATICTEXT       = 1010,
+    UIE_TEXTUREPATHEDITBOX          = 1011
 };
 
 enum UserInterfaceCommands
 {
-    UIC_FILE_LOAD           = 1000,
-    UIC_FILE_QUIT           = 1001,
-    UIC_FILE_LOAD_TEXTURE   = 1002,
-    UIC_VIEW_WIREFRAME      = 2000,
-    UIC_VIEW_LIGHTING       = 2001
+    UIC_FILE_LOAD                   = 1000,
+    UIC_FILE_QUIT                   = 1001,
+    UIC_FILE_LOAD_TEXTURE           = 1002,
+    UIC_VIEW_WIREFRAME              = 2000,
+    UIC_VIEW_LIGHTING               = 2001,
+    UIC_VIEW_TEXTURE_INTERPOLATION  = 2002
 };
 
 class UserInterface : public irr::IEventReceiver
@@ -45,12 +48,22 @@ private:
 
     bool m_WireframeDisplay;
     bool m_Lighting;
+    bool m_TextureInterpolation;
 
 public:
+    irr::gui::IGUIContextMenu *menu;
+    irr::gui::IGUIContextMenu *fileMenu;
+    irr::gui::IGUIContextMenu *viewMenu;
     irr::gui::IGUIButton *playbackStartStopButton;
     irr::gui::IGUIButton *playbackIncreaseButton;
     irr::gui::IGUIButton *playbackDecreaseButton;
     irr::gui::IGUIEditBox *playbackSetFrameEditBox;
+    irr::gui::IGUIStaticText *texturePathStaticText;
+    irr::gui::IGUIEditBox *texturePathEditBox;
+    irr::u32 INDEX_VIEW_TEXTURE_INTERPOLATION;
+    irr::u32 INDEX_VIEW_WIREFRAME_MESH;
+    irr::u32 INDEX_VIEW_LIGHTING;
+
 
     UserInterface( Engine *device );
     ~UserInterface();

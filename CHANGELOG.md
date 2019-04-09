@@ -1,5 +1,17 @@
 # Changelog
 
+## [git] - 2019-04-08
+(poikilos)
+### Added
+* toggle texture interpolation (via checkbox and `x` hotkey)
+* INDEX_ variables to store ID of GUI elements
+* Text box show name of loaded texture path
+### Changed
+* check if model is loaded before changing view options (prevents crash)
+* unified checkboxes with m_* booleans, by tracking whether box is
+  checked via INDEX_ variables for each ID of GUI elements.
+* look for ../textures/<model basename>.png & .jpg 1st time pressing `t`
+
 ## [git] - 2019-03-09
 (poikilos)
 ### Added

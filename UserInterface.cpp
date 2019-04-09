@@ -29,20 +29,21 @@ namespace fs = std::experimental::filesystem;
 void UserInterface::setupUserInterface()
 {
     // Menu
-    IGUIContextMenu *menu = m_Gui->addMenu();
+    menu = m_Gui->addMenu();
     menu->addItem( L"File", UIE_FILEMENU, true, true );
     menu->addItem( L"View", UIE_VIEWMENU, true, true );
 
     // File Menu
-    IGUIContextMenu *fileMenu = menu->getSubMenu( 0 );
+    fileMenu = menu->getSubMenu( 0 );
     fileMenu->addItem( L"Load", UIC_FILE_LOAD );
     fileMenu->addItem( L"LoadTexture", UIC_FILE_LOAD_TEXTURE );
     fileMenu->addItem( L"Quit", UIC_FILE_QUIT );
 
     // View Menu
-    IGUIContextMenu *viewMenu = menu->getSubMenu( 1 );
-    viewMenu->addItem( L"Wireframe Mesh", UIC_VIEW_WIREFRAME, true, false, false, true );
-    viewMenu->addItem( L"Lighting",UIC_VIEW_LIGHTING, true, false, true, true );
+    viewMenu = menu->getSubMenu( 1 );
+    INDEX_VIEW_WIREFRAME_MESH = viewMenu->addItem(L"Wireframe Mesh", UIC_VIEW_WIREFRAME, true, false, this->m_WireframeDisplay, true);
+    INDEX_VIEW_LIGHTING = viewMenu->addItem(L"Lighting", UIC_VIEW_LIGHTING, true, false, this->m_Lighting, true );
+    INDEX_VIEW_TEXTURE_INTERPOLATION = viewMenu->addItem(L"Texture Interpolation", UIC_VIEW_TEXTURE_INTERPOLATION, true, false, this->m_TextureInterpolation, true);
 
     // Playback Control Window
     dimension2d<u32> windowSize = m_Engine->m_Driver->getScreenSize();
@@ -85,6 +86,25 @@ void UserInterface::setupUserInterface()
         true,
         playbackWindow,
         UIE_PLAYBACKSETFRAMEEDITBOX
+    );
+
+    y += size_y + spacing_y;
+    texturePathStaticText = m_Gui->addStaticText(
+        L"Texture Path:",
+        rect<s32>( vector2d<s32>( spacing_x, y ), dimension2d<s32>( size_x, size_y )),
+        true,
+        true,
+        playbackWindow,
+        UIE_TEXTUREPATHSTATICTEXT,
+        false
+    );
+    y += size_y + spacing_y;
+    texturePathEditBox = m_Gui->addEditBox(
+        L"",
+        rect<s32>( vector2d<s32>( spacing_x, y ), dimension2d<s32>( size_x, size_y )),
+        true,
+        playbackWindow,
+        UIE_TEXTUREPATHEDITBOX
     );
 
     // Set Font for UI Elements
@@ -155,20 +175,31 @@ void UserInterface::handleMenuItemPressed( IGUIContextMenu *menu )
         break;
 
     case UIC_VIEW_WIREFRAME:
-        m_WireframeDisplay = m_WireframeDisplay ? false : true;
-        m_Engine->setMeshDisplayMode( m_WireframeDisplay, m_Lighting );
+        m_WireframeDisplay = viewMenu->isItemChecked(INDEX_VIEW_WIREFRAME_MESH);
+        m_Engine->setMeshDisplayMode(m_WireframeDisplay, m_Lighting, m_TextureInterpolation);
         break;
 
     case UIC_VIEW_LIGHTING:
-        m_Lighting = m_Lighting ? false : true;
-        m_Engine->setMeshDisplayMode( m_WireframeDisplay, m_Lighting );
+        m_Lighting = viewMenu->isItemChecked(INDEX_VIEW_LIGHTING);
+        m_Engine->setMeshDisplayMode(m_WireframeDisplay, m_Lighting, m_TextureInterpolation);
         break;
+
+    case UIC_VIEW_TEXTURE_INTERPOLATION:
+        m_TextureInterpolation = viewMenu->isItemChecked(INDEX_VIEW_TEXTURE_INTERPOLATION);
+        m_Engine->setMeshDisplayMode(m_WireframeDisplay, m_Lighting, m_TextureInterpolation);
+        break;
+
     }
+
+
 }
 
 // PUBLIC
 UserInterface::UserInterface( Engine *engine )
 {
+    INDEX_VIEW_TEXTURE_INTERPOLATION = -1;
+    INDEX_VIEW_WIREFRAME_MESH = -1;
+    INDEX_VIEW_LIGHTING = -1;
     this->playbackStartStopButton = nullptr;
 
     m_Engine = engine;
@@ -176,6 +207,7 @@ UserInterface::UserInterface( Engine *engine )
 
     m_WireframeDisplay = false;
     m_Lighting = true;
+    m_TextureInterpolation = true;
 
     setupUserInterface();
 }
@@ -230,7 +262,40 @@ bool UserInterface::loadNextTexture(int direction)
                 std::wstring lastPath = L"";
 
                 bool found = false;
+                bool force = false;
+                wstring tryPath;
                 if (fs::is_directory(fs::status(path))) {
+                    if (this->m_Engine->m_PrevTexturePath.length() == 0) {
+                        if (this->m_Engine->m_PreviousPath.length() > 0 ) {
+                            //debug() << "tryPath..." << endl;
+                            tryPath = texturesPath + dirSeparator + Utility::withoutExtension(Utility::basename(this->m_Engine->m_PreviousPath)) + L".png";
+                            // debug() << "tryPath 1a " << Utility::toString(tryPath) << "..." << endl;
+                            tryPath = Utility::toWstring(Utility::toString(tryPath));
+                            // debug() << "tryPath 1b " << Utility::toString(tryPath) << "..." << endl;
+                            // tryPath = texturesPath + dirSeparator + Utility::basename(this->m_Engine->m_PreviousPath) + L".png";
+                            if (!Utility::isFile(tryPath)) {
+                                //asdf
+                                tryPath = texturesPath + dirSeparator + Utility::withoutExtension(Utility::basename(this->m_Engine->m_PreviousPath)) + L".jpg";
+                                // debug() << "tryPath 2a " << Utility::toString(tryPath) << "..." << endl;
+                                tryPath = Utility::toWstring(Utility::toString(tryPath));
+                                // tryPath = Utility::toWstring(Utility::toString(L"debug1")); // ../iconv/loop.c:457: internal_utf8_loop_single: Assertion `inptr - (state->__count & 7)' failed.
+                                // debug() << "tryPath 2b " << Utility::toString(tryPath) << "..." << endl;
+                                // tryPath = texturesPath + dirSeparator + Utility::basename(this->m_Engine->m_PreviousPath) + L".jpg";
+                                if (Utility::isFile(tryPath)) {
+                                    nextPath = tryPath;
+                                    found = true;
+                                    force = true;
+                                }
+                            }
+                            else {
+                                nextPath = tryPath;
+                                found = true;
+                                force = true;
+                            }
+                        }
+                    }
+                    //debug() << "tryPath: " << Utility::toString(tryPath) << endl;
+                    //debug() << "nextPath: " << Utility::toString(nextPath) << endl;
                     for (const auto & itr : fs::directory_iterator(path)) {
                         std::wstring ext = Utility::extensionOf(itr.path().wstring());  // no dot!
                         if (!is_directory(itr.status())
@@ -240,14 +305,14 @@ bool UserInterface::loadNextTexture(int direction)
                             if (nextPath.length() == 0) nextPath = itr.path().wstring();
                             lastPath = itr.path().wstring();
                             if (found && direction > 0) {
-                                nextPath = itr.path().wstring();
+                                if (!force) nextPath = itr.path().wstring();
                                 break;
                             }
-                            if (itr.path().wstring()==this->m_Engine->m_PrevTexturePath) found = true;
+                            if (itr.path().wstring() == this->m_Engine->m_PrevTexturePath) found = true;
                             if (!found) retroPath = itr.path().wstring();
                         }
                     }
-                    if (retroPath.length()==0)
+                    if (retroPath.length() == 0)
                         retroPath = lastPath;  // previous is last if at beginning
                     if (direction < 0)
                         nextPath = retroPath;
@@ -285,6 +350,14 @@ bool UserInterface::OnEvent( const SEvent &event )
             }
             else if (event.KeyInput.Key == irr::KEY_KEY_Y) {
                 m_Engine->setZUp(false);
+            }
+            else if (event.KeyInput.Key == irr::KEY_KEY_X) {
+                // IGUIContextMenu* textureInterpolationElement = dynamic_cast<IGUIContextMenu*>(viewMenu->getElementFromId(UIC_VIEW_TEXTURE_INTERPOLATION));
+                //m_TextureInterpolation = textureInterpolationElement->isItemChecked(UIC_VIEW_TEXTURE_INTERPOLATION);
+                m_TextureInterpolation = m_TextureInterpolation ? false : true;
+                //doesn't work: m_TextureInterpolation = viewMenu->isItemChecked(UIC_VIEW_TEXTURE_INTERPOLATION);
+                m_Engine->setMeshDisplayMode(m_WireframeDisplay, m_Lighting, m_TextureInterpolation);
+                viewMenu->setItemChecked(INDEX_VIEW_TEXTURE_INTERPOLATION, m_TextureInterpolation);
             }
             else if (event.KeyInput.Char == L'+' || event.KeyInput.Char == L'=') {
                 m_Engine->setAnimationFPS(m_Engine->animationFPS() + 5);
