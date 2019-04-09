@@ -11,6 +11,8 @@
 * unified checkboxes with m_* booleans, by tracking whether box is
   checked via INDEX_ variables for each ID of GUI elements.
 * look for ../textures/<model basename>.png & .jpg 1st time pressing `t`
+* Use alpha on textures by default
+  (see EMT_TRANSPARENT_ALPHA_CHANNEL_REF in Engine.cpp)
 
 ## [git] - 2019-03-09
 (poikilos)

@@ -70,8 +70,8 @@ fi
 if [ "@$PROFILE_ENABLE" = "@true" ]; then
     if [ ! -d "$dest_bin_dir" ]; then mkdir "$dest_bin_dir"; fi
     cp -f $src_path "$dest_bin_dir/"
-    icons_root="$USER/.local/share/icons"
-    applications_path="$USER/.local/share/applications"
+    icons_root="$HOME/.local/share/icons"
+    applications_path="$HOME/.local/share/applications"
     MIMETYPES_DB_PATH="$USER_MIMETYPES_DB_PATH"
 fi
 if [ ! -d "$icons_root" ]; then
@@ -90,6 +90,7 @@ fi
 
 #if [ "@$PROFILE_ENABLE" = "@true" ]; then
 # always rewrite, since PREFIX may differ
+echo "Rewriting $applications_path/$shortcut_name..."
 if [ -f "$shortcut_src_path" ]; then
     cat "$shortcut_src_path" | grep -v Exec= | grep -v Icon= > "$applications_path/$shortcut_name"
     echo "Exec=$dest_bin_dir/$project_unix_name" >> "$applications_path/$shortcut_name"
