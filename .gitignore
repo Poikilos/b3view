@@ -35,4 +35,7 @@ Makefile*
 
 # QtCtreator CMake
 CMakeLists.txt.user
+
+# dev generated files
 nohup.out
+*.tmp

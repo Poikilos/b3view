@@ -298,7 +298,7 @@ Environment(env), Driver(nullptr), tt_face(nullptr), GlobalKerningWidth(0), Glob
     if (Driver)
         Driver->grab();
 
-    setInvisibleCharacters ( L" " );
+    setInvisibleCharacters (L" ");
 
     // Glyphs isn't reference counted, so don't try to delete when we free the array.
     Glyphs.set_free_when_destroyed(false);
@@ -659,7 +659,7 @@ core::vector2di CGUITTFont::getKerning(const wchar_t thisLetter, const wchar_t p
     return ret;
 }
 
-void CGUITTFont::setInvisibleCharacters( const wchar_t *s )
+void CGUITTFont::setInvisibleCharacters(const wchar_t *s)
 {
     Invisible = s;
 }

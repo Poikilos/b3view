@@ -3,11 +3,11 @@
 using std::cout;
 using std::endl;
 using std::ostream;
-using std::wcout;
 using std::wcerr;
+using std::wcout;
 
-ostream & debug()
+ostream& debug()
 {
-    std::flush( cout );
+    std::flush(cout);
     return cout;
 }

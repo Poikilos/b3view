@@ -3,6 +3,6 @@
 
 #include <iostream>
 
-std::ostream & debug();
+std::ostream& debug();
 
 #endif // DEBUG_H

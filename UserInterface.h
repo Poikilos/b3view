@@ -1,14 +1,13 @@
 #ifndef USERINTERFACE_H
 #define USERINTERFACE_H
 
-#include <irrlicht/irrlicht.h>
 #include "extlib/CGUITTFont.h"
+#include <irrlicht/irrlicht.h>
 
 // Forward declaration of class Engine
 class Engine;
 
-enum UserInterfaceElements
-{
+enum UserInterfaceElements {
     UIE_FILEMENU                    = 1003,
     UIE_LOADFILEDIALOG              = 1100,
     // UIE_LOADBUTTON                  = 1101,
@@ -25,8 +24,7 @@ enum UserInterfaceElements
     UIE_TEXTUREPATHEDITBOX          = 3006
 };
 
-enum UserInterfaceCommands
-{
+enum UserInterfaceCommands {
     UIC_FILE_LOAD                   = 1000,
     UIC_FILE_QUIT                   = 1001,
     UIC_FILE_LOAD_TEXTURE           = 1002,
@@ -35,46 +33,48 @@ enum UserInterfaceCommands
     UIC_VIEW_TEXTURE_INTERPOLATION  = 2003
 };
 
-class UserInterface : public irr::IEventReceiver
-{
+class UserInterface : public irr::IEventReceiver {
 private:
-    Engine *m_Engine;
-    irr::gui::IGUIEnvironment *m_Gui;
-    irr::gui::CGUITTFont *m_GuiFont;
-    irr::gui::CGUITTFace *m_GuiFontFace;
+    irr::s32 spacing_y;
+    Engine* m_Engine;
+    irr::gui::IGUIEnvironment* m_Gui;
+    irr::gui::CGUITTFont* m_GuiFont;
+    irr::gui::CGUITTFace* m_GuiFontFace;
 
     void setupUserInterface();
     void displayLoadFileDialog();
     void displayLoadTextureDialog();
-    void handleMenuItemPressed(irr::gui::IGUIContextMenu *menu);
+    void handleMenuItemPressed(irr::gui::IGUIContextMenu* menu);
 
     bool m_WireframeDisplay;
     bool m_Lighting;
     bool m_TextureInterpolation;
-    irr::gui::IGUIWindow *playbackWindow;
+    irr::gui::IGUIWindow* playbackWindow;
+    irr::core::dimension2d<irr::u32> m_WindowSize; // previous size
 public:
-    irr::gui::IGUIContextMenu *menu;
-    irr::gui::IGUIContextMenu *fileMenu;
-    irr::gui::IGUIContextMenu *viewMenu;
-    irr::gui::IGUIButton *playbackStartStopButton;
-    irr::gui::IGUIButton *playbackIncreaseButton;
-    irr::gui::IGUIButton *playbackDecreaseButton;
-    irr::gui::IGUIEditBox *playbackSetFrameEditBox;
-    irr::gui::IGUIStaticText *texturePathStaticText;
-    irr::gui::IGUIEditBox *texturePathEditBox;
+    irr::gui::IGUIContextMenu* menu;
+    irr::gui::IGUIContextMenu* fileMenu;
+    irr::gui::IGUIContextMenu* viewMenu;
+    irr::gui::IGUIButton* playbackStartStopButton;
+    irr::gui::IGUIButton* playbackIncreaseButton;
+    irr::gui::IGUIButton* playbackDecreaseButton;
+    irr::gui::IGUIEditBox* playbackSetFrameEditBox;
+    irr::gui::IGUIStaticText* texturePathStaticText;
+    irr::gui::IGUIEditBox* texturePathEditBox;
     irr::u32 INDEX_VIEW_TEXTURE_INTERPOLATION;
     irr::u32 INDEX_VIEW_WIREFRAME_MESH;
     irr::u32 INDEX_VIEW_LIGHTING;
 
+    void snapWidgets();
 
-    UserInterface( Engine *device );
+    UserInterface(Engine* device);
     ~UserInterface();
-    irr::gui::IGUIEnvironment *getGUIEnvironment() const;
+    irr::gui::IGUIEnvironment* getGUIEnvironment() const;
     void drawStatusLine() const;
     bool loadNextTexture(int direction);
 
     // IEventReceiver
-    virtual bool OnEvent( const irr::SEvent &event );
+    virtual bool OnEvent(const irr::SEvent& event);
 };
 
 #endif // USERINTERFACE_H

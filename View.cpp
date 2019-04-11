@@ -1,6 +1,6 @@
 #include "View.h"
-#include <iostream>
 #include "Engine.h"
+#include <iostream>
 
 using namespace irr;
 using namespace irr::core;
@@ -14,12 +14,11 @@ void View::setNewCameraPosition()
 void View::setNewCameraPosition(bool zUp)
 {
     vector3d<f32> newCameraPosition;
-    ICameraSceneNode *camera = m_Engine->m_Scene->getActiveCamera();
+    ICameraSceneNode* camera = m_Engine->m_Scene->getActiveCamera();
 
     if (zUp) {
         camera->setUpVector(vector3df(0, 0, 1));
-    }
-    else {
+    } else {
         camera->setUpVector(vector3df(0, 1, 0));
     }
 
@@ -47,11 +46,10 @@ void View::setNewCameraPosition(bool zUp)
         newCameraPosition.Y = m_CameraDistance * cos(m_Pitch);
         newCameraPosition.Z = m_CameraDistance * sin(m_Pitch);
         yawMatrix.setRotationRadians(vector3df(0, 0, m_Yaw));
-    }
-    else {
+    } else {
         newCameraPosition.X = 0;
-        newCameraPosition.Y = m_CameraDistance * sin( m_Pitch );
-        newCameraPosition.Z = m_CameraDistance * cos( m_Pitch );
+        newCameraPosition.Y = m_CameraDistance * sin(m_Pitch);
+        newCameraPosition.Z = m_CameraDistance * cos(m_Pitch);
         yawMatrix.setRotationRadians(vector3df(0, m_Yaw, 0));
     }
 
@@ -60,33 +58,32 @@ void View::setNewCameraPosition(bool zUp)
     if (zUp) {
         //camera->setUpVector(vector3df(0, 0, 1));
         //newCameraPosition.Z = oldCamPos.Z;
-    }
-    else {
+    } else {
         //camera->setUpVector(vector3df(0, 1, 0));
         //newCameraPosition.Y = oldCamPos.Y;
     }
-    camera->setPosition( newCameraPosition );
+    camera->setPosition(newCameraPosition);
     // vector3df newRotation();
     // camera->setRotation();
     camera->setTarget(m_Engine->m_CamTarget);
 
     // Set Light direction
-    setNewLightDirection( newCameraPosition );
+    setNewLightDirection(newCameraPosition);
     m_zUp = zUp;
     // std::wcerr << L"  setCameraPosition pitch: " << m_Pitch << endl;
 }
 
-void View::setNewLightDirection( const vector3df &cameraPosition )
+void View::setNewLightDirection(const vector3df& cameraPosition)
 {
-    ILightSceneNode *light = static_cast<ILightSceneNode *>( m_Engine->m_Scene->getSceneNodeFromId( SIID_LIGHT ));
+    ILightSceneNode* light = static_cast<ILightSceneNode*>(m_Engine->m_Scene->getSceneNodeFromId(SIID_LIGHT));
 
     matrix4 m;
-    m.buildRotateFromTo( vector3df( 0, 0, 1 ), vector3df( cameraPosition ).invert().normalize() );
+    m.buildRotateFromTo(vector3df(0, 0, 1), vector3df(cameraPosition).invert().normalize());
 
-    light->setRotation( m.getRotationDegrees() );
+    light->setRotation(m.getRotationDegrees());
 }
 
-View::View( Engine *engine )
+View::View(Engine* engine)
 {
     m_zUp = false;
     m_Engine = engine;
@@ -101,10 +98,9 @@ View::View( Engine *engine )
     // Calculate offsetVec3 manually, since the object is needed later
     // (Vectors for angle are opposite, since camera revolves around center):
     vector3df offsetVec3(
-        engine->m_CamPos.X-engine->m_CamTarget.X,
-        engine->m_CamPos.Y-engine->m_CamTarget.Y,
-        engine->m_CamPos.Z-engine->m_CamTarget.Z
-    );
+        engine->m_CamPos.X - engine->m_CamTarget.X,
+        engine->m_CamPos.Y - engine->m_CamTarget.Y,
+        engine->m_CamPos.Z - engine->m_CamTarget.Z);
     m_CameraDistance = offsetVec3.getLength();
 
     // NOTE: rotationToDirection converts a rotation to a vec3 direction
@@ -147,45 +143,36 @@ bool View::zUp()
 }
 
 // IEventReceiver
-bool View::OnEvent( const SEvent &event )
+bool View::OnEvent(const SEvent& event)
 {
     // If it's not a mouse event or window resize event, return
-    if( event.EventType != EET_MOUSE_INPUT_EVENT && !( event.EventType == EET_USER_EVENT && event.UserEvent.UserData1 == UEI_WINDOWSIZECHANGED ))
+    if (event.EventType != EET_MOUSE_INPUT_EVENT && !(event.EventType == EET_USER_EVENT && event.UserEvent.UserData1 == UEI_WINDOWSIZECHANGED))
         return false;
 
     // Handle window resize
-    if( event.EventType == EET_USER_EVENT && event.UserEvent.UserData1 == UEI_WINDOWSIZECHANGED )
-    {
+    if (event.EventType == EET_USER_EVENT && event.UserEvent.UserData1 == UEI_WINDOWSIZECHANGED) {
         dimension2d<u32> windowSize = m_Engine->m_Driver->getScreenSize();
         f32 aspectRatio = static_cast<f32>(windowSize.Width) / static_cast<f32>(windowSize.Height);
         debug() << "Setting aspect to: " << aspectRatio << endl;
-        m_Engine->m_Scene->getActiveCamera()->setAspectRatio( aspectRatio );
-
+        m_Engine->m_Scene->getActiveCamera()->setAspectRatio(aspectRatio);
     }
 
     // Handle mouse event
-    const SEvent::SMouseInput *mouseEvent = &( event.MouseInput );
+    const SEvent::SMouseInput* mouseEvent = &(event.MouseInput);
 
-    if( mouseEvent->Event == EMIE_MMOUSE_PRESSED_DOWN )
-    {
+    if (mouseEvent->Event == EMIE_MMOUSE_PRESSED_DOWN) {
         m_RotMouse = true;
         m_LastMousePosition->X = mouseEvent->X;
         m_LastMousePosition->Y = mouseEvent->Y;
-    }
-    else if( mouseEvent->Event == EMIE_MMOUSE_LEFT_UP )
-    {
+    } else if (mouseEvent->Event == EMIE_MMOUSE_LEFT_UP) {
         m_RotMouse = false;
-    }
-    else if( mouseEvent->Event == EMIE_MOUSE_WHEEL )
-    {
+    } else if (mouseEvent->Event == EMIE_MOUSE_WHEEL) {
         f32 distanceDelta = mouseEvent->Wheel / 2.5f;
-        if( m_CameraDistance - distanceDelta > 0.1f )
+        if (m_CameraDistance - distanceDelta > 0.1f)
             m_CameraDistance -= distanceDelta;
 
         setNewCameraPosition();
-    }
-    else if( m_RotMouse )
-    {
+    } else if (m_RotMouse) {
         int dx = mouseEvent->X - m_LastMousePosition->X;
         int dy = mouseEvent->Y - m_LastMousePosition->Y;
 
@@ -194,7 +181,7 @@ bool View::OnEvent( const SEvent &event )
         if (m_Engine->KeyIsDown[irr::KEY_RSHIFT] || m_Engine->KeyIsDown[irr::KEY_LSHIFT]) {
             // Pan camera.
             float yDelta = (dy / 400.0f) * m_CameraDistance;
-            ICameraSceneNode *camera = m_Engine->m_Scene->getActiveCamera();
+            ICameraSceneNode* camera = m_Engine->m_Scene->getActiveCamera();
             vector3df rotationVec3;
             rotationVec3 = camera->getRotation();
             vector3df forwards(0, 0, 1);
@@ -208,17 +195,16 @@ bool View::OnEvent( const SEvent &event )
                 forwards = vector3df(0, 1, 0);
                 dirVec3.rotateYZBy(camRot.X);
                 dirVec3.rotateXYBy(camRot.Z);
-            }
-            else {
+            } else {
                 camRot.Z = m_Pitch;
                 dirVec3.rotateYZBy(camRot.X);
                 dirVec3.rotateXYBy(camRot.Y);
             }
-//            vector3df dirVec3 = rotationVec3.rotationToDirection(forwards);
-//            // move up and down, not in and out:
-//            float z = dirVec3.Z;
-//            dirVec3.Z = dirVec3.Y;
-//            dirVec3.Z = z;
+            //            vector3df dirVec3 = rotationVec3.rotationToDirection(forwards);
+            //            // move up and down, not in and out:
+            //            float z = dirVec3.Z;
+            //            dirVec3.Z = dirVec3.Y;
+            //            dirVec3.Z = z;
             dirVec3.X *= yDelta;
             dirVec3.Y *= yDelta;
             dirVec3.Z *= yDelta;
@@ -231,36 +217,35 @@ bool View::OnEvent( const SEvent &event )
             if (m_zUp) {
                 //m_Engine->m_CamPos.Z += yDelta;
                 //m_Engine->m_CamTarget.Z += yDelta;
-            }
-            else {
+            } else {
                 //m_Engine->m_CamPos.Y += yDelta;
                 //m_Engine->m_CamTarget.Y += yDelta;
             }
             camera->setPosition(m_Engine->m_CamPos);
             camera->setTarget(m_Engine->m_CamTarget);
             vector3df offsetVec3(
-                m_Engine->m_CamPos.X-m_Engine->m_CamTarget.X,
-                m_Engine->m_CamPos.Y-m_Engine->m_CamTarget.Y,
-                m_Engine->m_CamPos.Z-m_Engine->m_CamTarget.Z
-            );
+                m_Engine->m_CamPos.X - m_Engine->m_CamTarget.X,
+                m_Engine->m_CamPos.Y - m_Engine->m_CamTarget.Y,
+                m_Engine->m_CamPos.Z - m_Engine->m_CamTarget.Z);
             m_CameraDistance = offsetVec3.getLength();
 
             m_Yaw = atan2(offsetVec3.X, offsetVec3.Z);
             m_Pitch = asin(-offsetVec3.Y);
             setNewCameraPosition();
-        }
-        else {
+        } else {
             // Revolve camera around object.
             // increments of 120 pixels * PI are equal to 180 deg (PI radians):
             f32 pitchDelta = dy / 120.0f;
             // (This old code which may make assumptions about view tends to lock on min/max)
-            // if(( m_Pitch - pitchDelta > ( PI - ( PI / 2 ))) && ( m_Pitch - pitchDelta < PI + ( PI/2 )))
-                // m_Pitch -= dy / 120.0f;
+            // if ((m_Pitch - pitchDelta > (PI - (PI / 2))) && (m_Pitch - pitchDelta < PI + (PI/2)))
+            // m_Pitch -= dy / 120.0f;
             m_Pitch += pitchDelta;
-            float minPitch = -PI/2.0f + PI/1000.0f;
-            float maxPitch = PI/2.0f - PI/1000.0f;
-            if (m_Pitch < minPitch) m_Pitch = minPitch;
-            else if (m_Pitch > maxPitch) m_Pitch = maxPitch;
+            float minPitch = -PI / 2.0f + PI / 1000.0f;
+            float maxPitch = PI / 2.0f - PI / 1000.0f;
+            if (m_Pitch < minPitch)
+                m_Pitch = minPitch;
+            else if (m_Pitch > maxPitch)
+                m_Pitch = maxPitch;
             // std::wcerr << "pitch = " << m_Pitch << endl;
 
             m_Yaw += dx / 120.0f;
