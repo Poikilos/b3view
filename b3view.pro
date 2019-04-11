@@ -8,15 +8,15 @@ SOURCES += main.cpp \
     UserInterface.cpp \
     Debug.cpp \
     View.cpp \
-    Utils.cpp \
-    extlib/CGUITTFont.cpp
+    extlib/CGUITTFont.cpp \
+    Utility.cpp
 HEADERS += Engine.h \
     EventHandler.h \
     UserInterface.h \
     Debug.h \
     View.h \
-    Utils.h \
-    extlib/CGUITTFont.h
+    extlib/CGUITTFont.h \
+    Utility.h
 CONFIG += warn_off
 
 # Irrlicht
