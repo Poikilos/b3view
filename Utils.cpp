@@ -37,7 +37,7 @@ void Utility::dumpMeshInfoToConsole( IAnimatedMeshSceneNode *node )
 
     debug() << "[MESH]: # of frames            : " << mesh->getFrameCount() << endl;
     debug() << "[MESH]: # of materials         : " << node->getMaterialCount() << endl;
-    for( int matIndex = 0; matIndex < node->getMaterialCount(); matIndex ++ )
+    for( irr::u32 matIndex = 0; matIndex < node->getMaterialCount(); matIndex ++ )
     {
         debug() << "[MESH]:   Material # " << matIndex << endl;
         const SMaterial &material = node->getMaterial( matIndex );
@@ -47,7 +47,7 @@ void Utility::dumpMeshInfoToConsole( IAnimatedMeshSceneNode *node )
 
         // check for # textures
         int textures = 0;
-        for( int ti = 0; ti < MATERIAL_MAX_TEXTURES; ti ++ )
+        for( irr::u32 ti = 0; ti < MATERIAL_MAX_TEXTURES; ti ++ )
             if( material.getTexture( ti ) != nullptr ) textures ++;
         debug() << "[MESH]:      # of textures       : " << textures << endl;
     }
@@ -62,7 +62,7 @@ std::wstring Utility::parentOfPath(const wstring &path)
     else {
         std::wstring::size_type lastSlashPos = path.find_last_of(L"/");
         if (lastSlashPos == std::wstring::npos) {
-            std::wstring::size_type lastSlashPos = path.find_last_of(L"\\");
+            lastSlashPos = path.find_last_of(L"\\");
         }
         if (lastSlashPos != std::wstring::npos) {
             ret = path.substr(0, lastSlashPos);
@@ -76,7 +76,7 @@ wstring Utility::basename(const wstring &path)
     std::wstring ret = path;
     std::wstring::size_type lastSlashPos = path.find_last_of(L"/");
     if (lastSlashPos == std::wstring::npos) {
-        std::wstring::size_type lastSlashPos = path.find_last_of(L"\\");
+        lastSlashPos = path.find_last_of(L"\\");
     }
     if (lastSlashPos != std::wstring::npos) {
         ret = path.substr(lastSlashPos+1);
@@ -91,7 +91,7 @@ wstring Utility::withoutExtension(const wstring &path)
     if (lastDotPos != std::wstring::npos) {
         std::wstring::size_type lastSlashPos = path.find_last_of(L"/");
         if (lastSlashPos == std::wstring::npos) {
-            std::wstring::size_type lastSlashPos = path.find_last_of(L"\\");
+            lastSlashPos = path.find_last_of(L"\\");
         }
         if (lastSlashPos != std::wstring::npos) {
             if (lastDotPos > lastSlashPos) ret = path.substr(0, lastDotPos);
@@ -108,7 +108,7 @@ wstring Utility::extensionOf(const wstring &path)
     if (lastDotPos != std::wstring::npos) {
         std::wstring::size_type lastSlashPos = path.find_last_of(L"/");
         if (lastSlashPos == std::wstring::npos) {
-            std::wstring::size_type lastSlashPos = path.find_last_of(L"\\");
+            lastSlashPos = path.find_last_of(L"\\");
         }
         if (lastSlashPos != std::wstring::npos) {
             if (lastDotPos > lastSlashPos) ret = path.substr(lastDotPos + 1);

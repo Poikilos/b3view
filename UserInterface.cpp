@@ -158,39 +158,41 @@ void UserInterface::displayLoadTextureDialog()
 
 void UserInterface::handleMenuItemPressed( IGUIContextMenu *menu )
 {
-    s32 id = menu->getItemCommandId( menu->getSelectedItem() );
+    s32 selected = menu->getSelectedItem();
+    if (selected > -1) {
+        s32 id = menu->getItemCommandId(static_cast<u32>(selected));
 
-    switch( id )
-    {
-    case UIC_FILE_LOAD:
-        displayLoadFileDialog();
-        break;
+        switch( id )
+        {
+        case UIC_FILE_LOAD:
+            displayLoadFileDialog();
+            break;
 
-    case UIC_FILE_LOAD_TEXTURE:
-        displayLoadTextureDialog();
-        break;
+        case UIC_FILE_LOAD_TEXTURE:
+            displayLoadTextureDialog();
+            break;
 
-    case UIC_FILE_QUIT:
-        m_Engine->m_RunEngine = false;
-        break;
+        case UIC_FILE_QUIT:
+            m_Engine->m_RunEngine = false;
+            break;
 
-    case UIC_VIEW_WIREFRAME:
-        m_WireframeDisplay = viewMenu->isItemChecked(INDEX_VIEW_WIREFRAME_MESH);
-        m_Engine->setMeshDisplayMode(m_WireframeDisplay, m_Lighting, m_TextureInterpolation);
-        break;
+        case UIC_VIEW_WIREFRAME:
+            m_WireframeDisplay = viewMenu->isItemChecked(INDEX_VIEW_WIREFRAME_MESH);
+            m_Engine->setMeshDisplayMode(m_WireframeDisplay, m_Lighting, m_TextureInterpolation);
+            break;
 
-    case UIC_VIEW_LIGHTING:
-        m_Lighting = viewMenu->isItemChecked(INDEX_VIEW_LIGHTING);
-        m_Engine->setMeshDisplayMode(m_WireframeDisplay, m_Lighting, m_TextureInterpolation);
-        break;
+        case UIC_VIEW_LIGHTING:
+            m_Lighting = viewMenu->isItemChecked(INDEX_VIEW_LIGHTING);
+            m_Engine->setMeshDisplayMode(m_WireframeDisplay, m_Lighting, m_TextureInterpolation);
+            break;
 
-    case UIC_VIEW_TEXTURE_INTERPOLATION:
-        m_TextureInterpolation = viewMenu->isItemChecked(INDEX_VIEW_TEXTURE_INTERPOLATION);
-        m_Engine->setMeshDisplayMode(m_WireframeDisplay, m_Lighting, m_TextureInterpolation);
-        break;
+        case UIC_VIEW_TEXTURE_INTERPOLATION:
+            m_TextureInterpolation = viewMenu->isItemChecked(INDEX_VIEW_TEXTURE_INTERPOLATION);
+            m_Engine->setMeshDisplayMode(m_WireframeDisplay, m_Lighting, m_TextureInterpolation);
+            break;
 
+        }
     }
-
 
 }
 
