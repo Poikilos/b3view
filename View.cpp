@@ -157,9 +157,10 @@ bool View::OnEvent( const SEvent &event )
     if( event.EventType == EET_USER_EVENT && event.UserEvent.UserData1 == UEI_WINDOWSIZECHANGED )
     {
         dimension2d<u32> windowSize = m_Engine->m_Driver->getScreenSize();
-        f32 aspectRatio = (f32) windowSize.Width / windowSize.Height;
+        f32 aspectRatio = static_cast<f32>(windowSize.Width) / static_cast<f32>(windowSize.Height);
         debug() << "Setting aspect to: " << aspectRatio << endl;
         m_Engine->m_Scene->getActiveCamera()->setAspectRatio( aspectRatio );
+
     }
 
     // Handle mouse event

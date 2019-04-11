@@ -9,18 +9,20 @@ class Engine;
 
 enum UserInterfaceElements
 {
-    UIE_PLAYBACKWINDOW              = 1000,
-    UIE_LOADBUTTON                  = 1001,
-    UIE_LOADFILEDIALOG              = 1002,
     UIE_FILEMENU                    = 1003,
-    UIE_PLAYBACKSTARTSTOPBUTTON     = 1004,
-    UIE_VIEWMENU                    = 1005,
-    UIE_LOADTEXTUREDIALOG           = 1006,
-    UIE_PLAYBACKINCREASEBUTTON      = 1007,
-    UIE_PLAYBACKDECREASEBUTTON      = 1008,
-    UIE_PLAYBACKSETFRAMEEDITBOX     = 1009,
-    UIE_TEXTUREPATHSTATICTEXT       = 1010,
-    UIE_TEXTUREPATHEDITBOX          = 1011
+    UIE_LOADFILEDIALOG              = 1100,
+    // UIE_LOADBUTTON                  = 1101,
+    UIE_LOADTEXTUREDIALOG           = 1200,
+
+    UIE_VIEWMENU                    = 2000,
+
+    UIE_PLAYBACKWINDOW              = 3000,
+    UIE_PLAYBACKSTARTSTOPBUTTON     = 3001,
+    UIE_PLAYBACKINCREASEBUTTON      = 3002,
+    UIE_PLAYBACKDECREASEBUTTON      = 3003,
+    UIE_PLAYBACKSETFRAMEEDITBOX     = 3004,
+    UIE_TEXTUREPATHSTATICTEXT       = 3005,
+    UIE_TEXTUREPATHEDITBOX          = 3006
 };
 
 enum UserInterfaceCommands
@@ -28,9 +30,9 @@ enum UserInterfaceCommands
     UIC_FILE_LOAD                   = 1000,
     UIC_FILE_QUIT                   = 1001,
     UIC_FILE_LOAD_TEXTURE           = 1002,
-    UIC_VIEW_WIREFRAME              = 2000,
-    UIC_VIEW_LIGHTING               = 2001,
-    UIC_VIEW_TEXTURE_INTERPOLATION  = 2002
+    UIC_VIEW_WIREFRAME              = 2001,
+    UIC_VIEW_LIGHTING               = 2002,
+    UIC_VIEW_TEXTURE_INTERPOLATION  = 2003
 };
 
 class UserInterface : public irr::IEventReceiver
@@ -49,7 +51,7 @@ private:
     bool m_WireframeDisplay;
     bool m_Lighting;
     bool m_TextureInterpolation;
-
+    irr::gui::IGUIWindow *playbackWindow;
 public:
     irr::gui::IGUIContextMenu *menu;
     irr::gui::IGUIContextMenu *fileMenu;

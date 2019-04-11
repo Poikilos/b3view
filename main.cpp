@@ -60,10 +60,10 @@ int main( int argc, char **argv )
 
 wchar_t * getWideCharString( char *str )
 {
-    wchar_t *dest = ( wchar_t * ) malloc( sizeof( wchar_t ) * ( strlen( str ) + 1 ));
+    wchar_t *dest = static_cast<wchar_t *>(malloc(sizeof(wchar_t) * (strlen(str) + 1)));
 
-    int resultSize = mbstowcs( nullptr, str, strlen( str ));
-    mbstowcs( dest, str, strlen( str ));
+    size_t resultSize = mbstowcs(nullptr, str, strlen(str));
+    mbstowcs(dest, str, strlen(str));
 
     dest[resultSize] = '\0';
 

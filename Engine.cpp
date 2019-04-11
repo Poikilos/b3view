@@ -1,3 +1,5 @@
+#include <string>
+
 #include "Engine.h"
 
 #include "UserInterface.h"
@@ -35,7 +37,7 @@ void Engine::setupScene()
     m_CamPos = vector3df( 4.5, 3, 9 );
     m_CamTarget = vector3df(0, 3, 0);
     ICameraSceneNode *camera = m_Scene->addCameraSceneNode(nullptr, m_CamPos, m_CamTarget); // this will be overridden by View m_Yaw and m_Pitch--see "calculate m_Yaw" further down
-    camera->setAspectRatio((f32)m_Driver->getScreenSize().Width / m_Driver->getScreenSize().Height);
+    camera->setAspectRatio(static_cast<f32>(m_Driver->getScreenSize().Width) / static_cast<f32>(m_Driver->getScreenSize().Height));
 }
 
 IGUIEnvironment * Engine::getGUIEnvironment() const
@@ -60,7 +62,7 @@ void Engine::drawAxisLines()
 
     m_Driver->setMaterial( *lineX );
     m_Driver->draw3DLine( vector3df(), vector3df( 5, 0, 0 ), SColor( 255, 255, 0, 0 ));
-    position2d<s32> textPos = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition( vector3df( 5.2, 0, 0 ));
+    position2d<s32> textPos = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition( vector3df( 5.2f, 0, 0 ));
     dimension2d<u32> textSize;
     if (m_AxisFont != nullptr) {
         textSize = m_AxisFont->getDimension( L"X+" );
@@ -68,14 +70,14 @@ void Engine::drawAxisLines()
     }
     m_Driver->setMaterial( *lineY );
     m_Driver->draw3DLine( vector3df(), vector3df( 0, 5, 0 ), SColor( 255, 0, 255, 0 ));
-    textPos = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition( vector3df( 0, 5.2, 0 ));
+    textPos = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition( vector3df( 0, 5.2f, 0 ));
     if (m_AxisFont != nullptr) {
         textSize = m_AxisFont->getDimension( L"Y+" );
         m_AxisFont->draw( L"Y+", rect<s32>( textPos, textSize ), SColor( 255, 0, 255, 0 ), true, true );
     }
     m_Driver->setMaterial( *lineZ );
     m_Driver->draw3DLine( vector3df(), vector3df( 0, 0, 5 ), SColor( 255, 0, 0, 255 ));
-    textPos = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition( vector3df( 0, 0, 5.2 ));
+    textPos = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition( vector3df( 0, 0, 5.2f ));
     if (m_AxisFont != nullptr) {
         textSize = m_AxisFont->getDimension( L"Z+" );
         m_AxisFont->draw( L"Z+", rect<s32>( textPos, textSize ), SColor( 255, 0, 0, 255 ), true, true );
@@ -88,7 +90,7 @@ void Engine::drawAxisLines()
 void Engine::drawBackground()
 {
     dimension2d<u32> screenSize = m_Driver->getScreenSize();
-    m_Driver->draw2DRectangle( rect<s32>( 0, 0, screenSize.Width, screenSize.Height ),
+    m_Driver->draw2DRectangle( rect<s32>( 0, 0, static_cast<s32>(screenSize.Width), static_cast<s32>(screenSize.Height) ),
         SColor( 255, 128, 128, 255 ),
         SColor( 255, 128, 128, 255 ),
         SColor( 255, 224, 224, 255 ),
@@ -108,8 +110,8 @@ void Engine::checkResize()
         SEvent event;
         event.EventType = EET_USER_EVENT;
         event.UserEvent.UserData1 = UEI_WINDOWSIZECHANGED;
-
         eventReceiver->OnEvent( event );
+        //m_UserInterface->
     }
 }
 
@@ -118,7 +120,7 @@ s32 Engine::getNumberOfVertices()
     IMesh *mesh = m_LoadedMesh->getMesh()->getMesh( 0, 255, -1, -1 );
 
     int vertices = 0;
-    for( int bufferIndex = 0; bufferIndex < mesh->getMeshBufferCount(); bufferIndex ++ )
+    for( irr::u32 bufferIndex = 0; bufferIndex < mesh->getMeshBufferCount(); bufferIndex ++ )
         vertices += mesh->getMeshBuffer( bufferIndex )->getVertexCount();
 
     cout << vertices << endl;
@@ -228,7 +230,7 @@ void Engine::loadMesh( const wstring &fileName )
         if (m_LoadedMesh != nullptr) {
             ICameraSceneNode *camera = this->m_Scene->getActiveCamera();
             aabbox3d<f32> box = m_LoadedMesh->getTransformedBoundingBox();
-            vector3d<float> extents = box.getExtent();
+            //vector3d<float> extents = box.getExtent();
             if (m_View->zUp()) {
                 float oldDist = m_CamPos.getDistanceFrom(m_CamTarget);
                 float newDist = oldDist;
@@ -281,7 +283,7 @@ void Engine::reloadMesh()
 void Engine::reloadTexture()
 {
     if (this->m_PrevTexturePath.length() > 0) {
-        if (this->m_UserInterface->texturePathEditBox->getText() != L"")
+        if (wcslen(this->m_UserInterface->texturePathEditBox->getText()) == 0)
             loadTexture(this->m_UserInterface->texturePathEditBox->getText());
         else
             loadTexture(this->m_PrevTexturePath);
@@ -304,7 +306,7 @@ bool Engine::loadTexture(const wstring &fileName)
 void Engine::setMeshDisplayMode( bool wireframe, bool lighting, bool textureInterpolation)
 {
     if (m_LoadedMesh != nullptr) {
-        for( int materialIndex = 0; materialIndex < m_LoadedMesh->getMaterialCount(); materialIndex ++ )
+        for( u32 materialIndex = 0; materialIndex < m_LoadedMesh->getMaterialCount(); materialIndex ++ )
         {
             // Set Wireframe display
             m_LoadedMesh->getMaterial(materialIndex).Wireframe = wireframe;
@@ -417,7 +419,7 @@ void Engine::run()
 {
     u32 timePerFrame = 1000.0f;
     if (this->worldFPS > 0) {
-        timePerFrame = ( u32 ) ( 1000.0f / this->worldFPS );
+        timePerFrame = static_cast<u32>( 1000.0f / this->worldFPS );
     }
     ITimer *timer = m_Device->getTimer();       
 

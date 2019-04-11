@@ -57,13 +57,13 @@ if [ "@$PROFILE_ENABLE" = "@true" ]; then
     dest_bin_dir="$HOME/.local/bin"
     echo "installing to '$dest_bin_dir'."
     echo "Press Ctrl C to cancel..."
-    sleep 1
-    echo "3..."
-    sleep 1
-    echo "2..."
-    sleep 1
-    echo "1..."
-    sleep 1
+    #sleep 1
+    #echo "3..."
+    #sleep 1
+    #echo "2..."
+    #sleep 1
+    #echo "1..."
+    #sleep 1
 else
     echo "Successfully installed as '$try_dest_bin'"
 fi

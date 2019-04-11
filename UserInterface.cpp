@@ -47,7 +47,7 @@ void UserInterface::setupUserInterface()
 
     // Playback Control Window
     dimension2d<u32> windowSize = m_Engine->m_Driver->getScreenSize();
-    IGUIWindow *playbackWindow = m_Gui->addWindow(
+    playbackWindow = m_Gui->addWindow(
             rect<s32>( vector2d<s32>( windowSize.Width - 4 - 160, 28 ), dimension2d<s32>( 160, 300 )), false, L"Playback", nullptr, UIE_PLAYBACKWINDOW );
     playbackWindow->getCloseButton()->setVisible( false );
     s32 spacing_x = 4;
@@ -197,9 +197,9 @@ void UserInterface::handleMenuItemPressed( IGUIContextMenu *menu )
 // PUBLIC
 UserInterface::UserInterface( Engine *engine )
 {
-    INDEX_VIEW_TEXTURE_INTERPOLATION = -1;
-    INDEX_VIEW_WIREFRAME_MESH = -1;
-    INDEX_VIEW_LIGHTING = -1;
+    INDEX_VIEW_TEXTURE_INTERPOLATION = 0;
+    INDEX_VIEW_WIREFRAME_MESH = 0;
+    INDEX_VIEW_LIGHTING = 0;
     this->playbackStartStopButton = nullptr;
 
     m_Engine = engine;
@@ -208,6 +208,7 @@ UserInterface::UserInterface( Engine *engine )
     m_WireframeDisplay = false;
     m_Lighting = true;
     m_TextureInterpolation = true;
+    playbackWindow = nullptr;
 
     setupUserInterface();
 }
