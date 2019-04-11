@@ -4,7 +4,7 @@
 
 #include "UserInterface.h"
 #include "View.h"
-#include "Utils.h"
+#include "Utility.h"
 
 using std::cout;
 using std::wcerr;
