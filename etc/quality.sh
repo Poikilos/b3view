@@ -18,18 +18,19 @@ if [ ! -f $flag_file ]; then
     echo "ERROR: There was no $flag_file in working or parent directory."
     exit 1
 fi
-echo "* rewriting .clang-format to avoid clang-format version issues..."
-#rewriting avoids the following error:
-#YAML:94:22: error: unknown key 'Delimiter'
-#  - Delimiter:       pb
-clang-format -style=WebKit -dump-config > .clang-format
 dump_dest=/tmp/$project_dir_name
 if [ -d "$dump_dest" ]; then
     rm -Rf "$dump_dest" || customDie "Cannot remove old $dump_dest"
 fi
 mkdir "$dump_dest" || customDie "Cannot mkdir $dump_dest"
 chmod +x ./etc/pushtmp.sh
-echo "* writing $dump_dest using .clang-format..."
+echo "* Using -style=WebKit to avoid .clang-format version issues..."
+#echo "* rewriting .clang-format to avoid clang-format version issues..."
+#rewriting avoids the following error:
+#YAML:94:22: error: unknown key 'Delimiter'
+#  - Delimiter:       pb
+# clang-format -style=WebKit -dump-config > .clang-format
+# echo "* writing $dump_dest using .clang-format..."
 find -maxdepth 1 -name "*.cpp" -exec ./etc/pushtmp.sh {} "$dump_dest" \;
 find -maxdepth 1 -name "*.h" -exec ./etc/pushtmp.sh {} "$dump_dest" \;
 
