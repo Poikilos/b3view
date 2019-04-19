@@ -37,22 +37,23 @@ void UserInterface::setupUserInterface()
     fileMenu = menu->getSubMenu(0);
     fileMenu->addItem(L"Open", UIC_FILE_OPEN);
     fileMenu->addItem(L"Change Texture", UIC_FILE_OPEN_TEXTURE);
-    fileMenu->addItem(L"Previous Texture  Shift F3", UIC_FILE_PREVIOUS_TEXTURE);
-    fileMenu->addItem(L"Next Texture  F3", UIC_FILE_NEXT_TEXTURE);
+    fileMenu->addItem(L"Previous Texture    Shift F3", UIC_FILE_PREVIOUS_TEXTURE);
+    fileMenu->addItem(L"Next Texture        F3", UIC_FILE_NEXT_TEXTURE);
     fileMenu->addItem(L"Quit", UIC_FILE_QUIT);
 
     // View Menu
     viewMenu = menu->getSubMenu(1);
     viewWireframeIdx = viewMenu->addItem(L"Wireframe", UIC_VIEW_WIREFRAME, true, false, this->m_WireframeDisplay, true);
     viewLightingIdx = viewMenu->addItem(L"Lighting", UIC_VIEW_LIGHTING, true, false, this->m_Lighting, true);
-    viewTargetIdx = viewMenu->addItem(L"Camera Target", UIC_VIEW_TARGET, true, false, true, true);
+    viewAxisWidgetIdx = viewMenu->addItem(L"Origin Axis Widget", UIC_VIEW_AXIS_WIDGET, true, false, true, true);
+    viewTargetIdx = viewMenu->addItem(L"Camera Target", UIC_VIEW_TARGET, true, false, false, true);
 
     viewTextureInterpolationIdx = viewMenu->addItem(L"Texture Interpolation  Ctrl i", UIC_VIEW_TEXTURE_INTERPOLATION, true, false, this->m_TextureInterpolation, true);
 
     viewYUpIdx = viewMenu->addItem(L"Y Up", UIC_VIEW_Y_UP, true, false, true, true);
     viewZUpIdx = viewMenu->addItem(L"Z Up", UIC_VIEW_Z_UP, true, false, false, true);
-    viewMenu->addItem(L"Slower  Ctrl Left", UIC_VIEW_SLOWER, true, false, false, false);
-    viewMenu->addItem(L"Faster  Ctrl Right", UIC_VIEW_FASTER, true, false, false, false);
+    viewMenu->addItem(L"Slower               Ctrl Left", UIC_VIEW_SLOWER, true, false, false, false);
+    viewMenu->addItem(L"Faster               Ctrl Right", UIC_VIEW_FASTER, true, false, false, false);
 
     // Playback Control Window
     dimension2d<u32> windowSize = m_Engine->m_Driver->getScreenSize();

@@ -59,15 +59,14 @@ void Engine::drawAxisLines()
     zMaterial.EmissiveColor = SColor(255, 0, 0, 255);
 
     SMaterial descenderMaterialVert(xMaterial);
-    descenderMaterialVert.EmissiveColor = SColor(128, 128, 128, 128); // ARGB
+    descenderMaterialVert.EmissiveColor = SColor(128, 100, 140, 190); // ARGB
     SMaterial descenderMaterialHorz(xMaterial);
     descenderMaterialHorz.EmissiveColor = SColor(255, 255, 255, 255);
 
     vector3df descend3df(0, 0, 0);
     // vector3df target = m_View->c
-
+    bool enableAxisWidget = true;
     m_Driver->setTransform(ETS_WORLD, matrix4());
-
     if (m_View != nullptr) {
         if (this->m_UserInterface->viewMenu->isItemChecked(this->m_UserInterface->viewTargetIdx)) {
             if (m_View->zUp()) {
@@ -119,37 +118,39 @@ void Engine::drawAxisLines()
             //     m_AxisFont->draw(L"target", rect<s32>(targetPos2d, textSize), descenderMaterial.EmissiveColor, true, true);
             // }
         }
+        enableAxisWidget = this->m_UserInterface->viewMenu->isItemChecked(this->m_UserInterface->viewAxisWidgetIdx);
     }
 
 
+    if (enableAxisWidget) {
+        m_Driver->setMaterial(xMaterial);
+        m_Driver->draw3DLine(vector3df(), vector3df(axisLength, 0, 0), SColor(255, 255, 0, 0));
+        position2d<s32> textPos = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(vector3df(axisLength + axisLength*.1f, 0, 0));
+        dimension2d<u32> textSize;
+        if (m_AxisFont != nullptr) {
+            textSize = m_AxisFont->getDimension(L"X+");
+            m_AxisFont->draw(L"X+", rect<s32>(textPos, textSize), SColor(255, 255, 0, 0), true, true);
+        }
 
-    m_Driver->setMaterial(xMaterial);
-    m_Driver->draw3DLine(vector3df(), vector3df(axisLength, 0, 0), SColor(255, 255, 0, 0));
-    position2d<s32> textPos = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(vector3df(axisLength + axisLength*.1f, 0, 0));
-    dimension2d<u32> textSize;
-    if (m_AxisFont != nullptr) {
-        textSize = m_AxisFont->getDimension(L"X+");
-        m_AxisFont->draw(L"X+", rect<s32>(textPos, textSize), SColor(255, 255, 0, 0), true, true);
-    }
+        m_Driver->setMaterial(yMaterial);
+        m_Driver->draw3DLine(vector3df(), vector3df(0, axisLength, 0), SColor(255, 0, 255, 0));
+        textPos = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(vector3df(0, axisLength + axisLength*.1f, 0));
+        if (m_AxisFont != nullptr) {
+            textSize = m_AxisFont->getDimension(L"Y+");
+            m_AxisFont->draw(L"Y+", rect<s32>(textPos, textSize), SColor(255, 0, 255, 0), true, true);
+        }
 
-    m_Driver->setMaterial(yMaterial);
-    m_Driver->draw3DLine(vector3df(), vector3df(0, axisLength, 0), SColor(255, 0, 255, 0));
-    textPos = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(vector3df(0, axisLength + axisLength*.1f, 0));
-    if (m_AxisFont != nullptr) {
-        textSize = m_AxisFont->getDimension(L"Y+");
-        m_AxisFont->draw(L"Y+", rect<s32>(textPos, textSize), SColor(255, 0, 255, 0), true, true);
+        m_Driver->setMaterial(zMaterial);
+        m_Driver->draw3DLine(vector3df(), vector3df(0, 0, axisLength), SColor(255, 0, 0, 255));
+        textPos = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(vector3df(0, 0, axisLength + axisLength*.1f));
+        if (m_AxisFont != nullptr) {
+            textSize = m_AxisFont->getDimension(L"Z+");
+            m_AxisFont->draw(L"Z+", rect<s32>(textPos, textSize), SColor(255, 0, 0, 255), true, true);
+        }
+        //delete xMaterial;
+        //delete yMaterial;
+        //delete zMaterial;
     }
-
-    m_Driver->setMaterial(zMaterial);
-    m_Driver->draw3DLine(vector3df(), vector3df(0, 0, axisLength), SColor(255, 0, 0, 255));
-    textPos = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(vector3df(0, 0, axisLength + axisLength*.1f));
-    if (m_AxisFont != nullptr) {
-        textSize = m_AxisFont->getDimension(L"Z+");
-        m_AxisFont->draw(L"Z+", rect<s32>(textPos, textSize), SColor(255, 0, 0, 255), true, true);
-    }
-    //delete xMaterial;
-    //delete yMaterial;
-    //delete zMaterial;
 }
 
 void Engine::drawBackground()
@@ -285,6 +286,7 @@ void Engine::loadMesh(const wstring& fileName)
 
     irr::scene::IAnimatedMesh* mesh = m_Scene->getMesh(fileName.c_str());
     if (mesh != nullptr) {
+        m_Device->setWindowCaption(( wstring(L"b3view - ") + fileName).c_str());
         m_LoadedMesh = m_Scene->addAnimatedMeshSceneNode(mesh);
         Utility::dumpMeshInfoToConsole(m_LoadedMesh);
         if (Utility::toLower(Utility::extensionOf(fileName)) == L"3ds") {

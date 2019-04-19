@@ -35,12 +35,13 @@ enum UserInterfaceCommands {
     UIC_FILE_PREVIOUS_TEXTURE       = 1004,
     UIC_VIEW_WIREFRAME              = 2001,
     UIC_VIEW_LIGHTING               = 2002,
-    UIC_VIEW_TARGET                 = 2003,
-    UIC_VIEW_TEXTURE_INTERPOLATION  = 2004,
-    UIC_VIEW_Y_UP                   = 2005,
-    UIC_VIEW_Z_UP                   = 2006,
-    UIC_VIEW_SLOWER                 = 2007,
-    UIC_VIEW_FASTER                 = 2008
+    UIC_VIEW_AXIS_WIDGET            = 2003,
+    UIC_VIEW_TARGET                 = 2004,
+    UIC_VIEW_TEXTURE_INTERPOLATION  = 2005,
+    UIC_VIEW_Y_UP                   = 2006,
+    UIC_VIEW_Z_UP                   = 2007,
+    UIC_VIEW_SLOWER                 = 2008,
+    UIC_VIEW_FASTER                 = 2009
 };
 
 class UserInterface : public irr::IEventReceiver {
@@ -76,6 +77,7 @@ public:
     irr::gui::IGUIEditBox* axisSizeEditBox;
     irr::u32 viewTextureInterpolationIdx;
     irr::u32 viewWireframeIdx;
+    irr::u32 viewAxisWidgetIdx;
     irr::u32 viewLightingIdx;
     irr::u32 viewTargetIdx;
     irr::u32 viewYUpIdx;

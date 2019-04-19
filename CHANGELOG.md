@@ -1,14 +1,18 @@
 # Changelog
 
-## [git] - 2019-04-18
+## [git] - 2019-04-19
 (poikilos)
 ### Added
 * box for axis length (size of the axis widget)
 * box for frame rate
+* Camera Target widget
+* option for turning off origin axis widget
 
 ### Changed
-* Reorder boxes.
-* Changed hotkeys so they aren't triggered when typing in the panel.
+* Reorder items on panel.
+* Hotkeys are different so they're not triggered when typing in the
+  panel.
+* Don't reset yaw nor camera distance when panning
 
 ## [git] - 2019-04-08
 (poikilos)
