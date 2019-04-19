@@ -13,6 +13,7 @@
 * Hotkeys are different so they're not triggered when typing in the
   panel.
 * Don't reset yaw nor camera distance when panning.
+* Show name of loaded model on title bar.
 
 ## [git] - 2019-04-08
 (poikilos)
