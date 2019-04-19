@@ -218,6 +218,12 @@ irr::f32 Utility::toF32(wstring val)
     return ret;
 }
 
+irr::f32 Utility::distance(const vector3df &start, const vector3df &end)
+{
+    vector3df offsetVec3(end.X - start.X, end.Y - start.Y, end.Z - start.Z);
+    return offsetVec3.getLength();
+}
+
 bool Utility::isFile(const std::wstring& name)
 {
     std::string name_s = toString(name);

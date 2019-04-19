@@ -17,20 +17,30 @@ enum UserInterfaceElements {
 
     UIE_PLAYBACKWINDOW              = 3000,
     UIE_PLAYBACKSTARTSTOPBUTTON     = 3001,
-    UIE_PLAYBACKINCREASEBUTTON      = 3002,
-    UIE_PLAYBACKDECREASEBUTTON      = 3003,
-    UIE_PLAYBACKSETFRAMEEDITBOX     = 3004,
-    UIE_TEXTUREPATHSTATICTEXT       = 3005,
-    UIE_TEXTUREPATHEDITBOX          = 3006
+    UIE_PLAYBACKSETFRAMEEDITBOX     = 3002,
+    UIE_PLAYBACKINCREASEBUTTON      = 3003,
+    UIE_PLAYBACKDECREASEBUTTON      = 3004,
+    UIE_FPSEDITBOX                  = 3005,
+    UIE_TEXTUREPATHSTATICTEXT       = 3006,
+    UIE_TEXTUREPATHEDITBOX          = 3007,
+    UIE_AXISSIZESTATICTEXT          = 3008,
+    UIE_AXISSIZEEDITBOX             = 3009
 };
 
 enum UserInterfaceCommands {
-    UIC_FILE_LOAD                   = 1000,
+    UIC_FILE_OPEN                   = 1000,
     UIC_FILE_QUIT                   = 1001,
-    UIC_FILE_LOAD_TEXTURE           = 1002,
+    UIC_FILE_OPEN_TEXTURE           = 1002,
+    UIC_FILE_NEXT_TEXTURE           = 1003,
+    UIC_FILE_PREVIOUS_TEXTURE       = 1004,
     UIC_VIEW_WIREFRAME              = 2001,
     UIC_VIEW_LIGHTING               = 2002,
-    UIC_VIEW_TEXTURE_INTERPOLATION  = 2003
+    UIC_VIEW_TARGET                 = 2003,
+    UIC_VIEW_TEXTURE_INTERPOLATION  = 2004,
+    UIC_VIEW_Y_UP                   = 2005,
+    UIC_VIEW_Z_UP                   = 2006,
+    UIC_VIEW_SLOWER                 = 2007,
+    UIC_VIEW_FASTER                 = 2008
 };
 
 class UserInterface : public irr::IEventReceiver {
@@ -56,14 +66,20 @@ public:
     irr::gui::IGUIContextMenu* fileMenu;
     irr::gui::IGUIContextMenu* viewMenu;
     irr::gui::IGUIButton* playbackStartStopButton;
+    irr::gui::IGUIEditBox* playbackSetFrameEditBox;
     irr::gui::IGUIButton* playbackIncreaseButton;
     irr::gui::IGUIButton* playbackDecreaseButton;
-    irr::gui::IGUIEditBox* playbackSetFrameEditBox;
+    irr::gui::IGUIEditBox* playbackFPSEditBox;
     irr::gui::IGUIStaticText* texturePathStaticText;
     irr::gui::IGUIEditBox* texturePathEditBox;
-    irr::u32 INDEX_VIEW_TEXTURE_INTERPOLATION;
-    irr::u32 INDEX_VIEW_WIREFRAME_MESH;
-    irr::u32 INDEX_VIEW_LIGHTING;
+    irr::gui::IGUIStaticText* axisSizeStaticText;
+    irr::gui::IGUIEditBox* axisSizeEditBox;
+    irr::u32 viewTextureInterpolationIdx;
+    irr::u32 viewWireframeIdx;
+    irr::u32 viewLightingIdx;
+    irr::u32 viewTargetIdx;
+    irr::u32 viewYUpIdx;
+    irr::u32 viewZUpIdx;
 
     void snapWidgets();
 

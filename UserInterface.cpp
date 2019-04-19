@@ -35,15 +35,24 @@ void UserInterface::setupUserInterface()
 
     // File Menu
     fileMenu = menu->getSubMenu(0);
-    fileMenu->addItem(L"Load", UIC_FILE_LOAD);
-    fileMenu->addItem(L"LoadTexture", UIC_FILE_LOAD_TEXTURE);
+    fileMenu->addItem(L"Open", UIC_FILE_OPEN);
+    fileMenu->addItem(L"Change Texture", UIC_FILE_OPEN_TEXTURE);
+    fileMenu->addItem(L"Previous Texture  Shift F3", UIC_FILE_PREVIOUS_TEXTURE);
+    fileMenu->addItem(L"Next Texture  F3", UIC_FILE_NEXT_TEXTURE);
     fileMenu->addItem(L"Quit", UIC_FILE_QUIT);
 
     // View Menu
     viewMenu = menu->getSubMenu(1);
-    INDEX_VIEW_WIREFRAME_MESH = viewMenu->addItem(L"Wireframe Mesh", UIC_VIEW_WIREFRAME, true, false, this->m_WireframeDisplay, true);
-    INDEX_VIEW_LIGHTING = viewMenu->addItem(L"Lighting", UIC_VIEW_LIGHTING, true, false, this->m_Lighting, true);
-    INDEX_VIEW_TEXTURE_INTERPOLATION = viewMenu->addItem(L"Texture Interpolation", UIC_VIEW_TEXTURE_INTERPOLATION, true, false, this->m_TextureInterpolation, true);
+    viewWireframeIdx = viewMenu->addItem(L"Wireframe", UIC_VIEW_WIREFRAME, true, false, this->m_WireframeDisplay, true);
+    viewLightingIdx = viewMenu->addItem(L"Lighting", UIC_VIEW_LIGHTING, true, false, this->m_Lighting, true);
+    viewTargetIdx = viewMenu->addItem(L"Camera Target", UIC_VIEW_TARGET, true, false, true, true);
+
+    viewTextureInterpolationIdx = viewMenu->addItem(L"Texture Interpolation  Ctrl i", UIC_VIEW_TEXTURE_INTERPOLATION, true, false, this->m_TextureInterpolation, true);
+
+    viewYUpIdx = viewMenu->addItem(L"Y Up", UIC_VIEW_Y_UP, true, false, true, true);
+    viewZUpIdx = viewMenu->addItem(L"Z Up", UIC_VIEW_Z_UP, true, false, false, true);
+    viewMenu->addItem(L"Slower  Ctrl Left", UIC_VIEW_SLOWER, true, false, false, false);
+    viewMenu->addItem(L"Faster  Ctrl Right", UIC_VIEW_FASTER, true, false, false, false);
 
     // Playback Control Window
     dimension2d<u32> windowSize = m_Engine->m_Driver->getScreenSize();
@@ -51,6 +60,7 @@ void UserInterface::setupUserInterface()
         rect<s32>(vector2d<s32>(windowSize.Width - 4 - 160, 28), dimension2d<s32>(160, 300)), false, L"Playback", nullptr, UIE_PLAYBACKWINDOW);
     playbackWindow->getCloseButton()->setVisible(false);
     s32 spacing_x = 4;
+    s32 margin_y = 4;
     spacing_y = 4;
     s32 size_x = playbackWindow->getClientRect().getWidth() - 8;
     s32 size_y = 24;
@@ -61,6 +71,16 @@ void UserInterface::setupUserInterface()
         UIE_PLAYBACKSTARTSTOPBUTTON,
         L"Start/Stop",
         nullptr);
+
+    y += size_y + spacing_y;
+    playbackSetFrameEditBox = m_Gui->addEditBox(
+        L"",
+        rect<s32>(vector2d<s32>(spacing_x, y), dimension2d<s32>(size_x, size_y)),
+        true,
+        playbackWindow,
+        UIE_PLAYBACKSETFRAMEEDITBOX);
+    y += margin_y;
+
     y += size_y + spacing_y;
     playbackIncreaseButton = m_Gui->addButton(
         rect<s32>(vector2d<s32>(spacing_x, y), dimension2d<s32>(size_x, size_y)),
@@ -68,6 +88,7 @@ void UserInterface::setupUserInterface()
         UIE_PLAYBACKINCREASEBUTTON,
         L"Faster",
         nullptr);
+
     y += size_y + spacing_y;
     playbackDecreaseButton = m_Gui->addButton(
         rect<s32>(vector2d<s32>(spacing_x, y), dimension2d<s32>(size_x, size_y)),
@@ -77,12 +98,13 @@ void UserInterface::setupUserInterface()
         nullptr);
 
     y += size_y + spacing_y;
-    playbackSetFrameEditBox = m_Gui->addEditBox(
+    playbackFPSEditBox = m_Gui->addEditBox(
         L"",
         rect<s32>(vector2d<s32>(spacing_x, y), dimension2d<s32>(size_x, size_y)),
         true,
         playbackWindow,
-        UIE_PLAYBACKSETFRAMEEDITBOX);
+        UIE_FPSEDITBOX);
+    y += margin_y;
 
     y += size_y + spacing_y;
     texturePathStaticText = m_Gui->addStaticText(
@@ -93,6 +115,7 @@ void UserInterface::setupUserInterface()
         playbackWindow,
         UIE_TEXTUREPATHSTATICTEXT,
         false);
+
     y += size_y + spacing_y;
     texturePathEditBox = m_Gui->addEditBox(
         L"",
@@ -100,6 +123,28 @@ void UserInterface::setupUserInterface()
         true,
         playbackWindow,
         UIE_TEXTUREPATHEDITBOX);
+    y += margin_y;
+
+    y += size_y + spacing_y;
+    axisSizeStaticText = m_Gui->addStaticText(
+        L"Axis Size:",
+        rect<s32>(vector2d<s32>(spacing_x, y), dimension2d<s32>(size_x, size_y)),
+        true,
+        true,
+        playbackWindow,
+        UIE_AXISSIZESTATICTEXT,
+        false);
+
+    y += size_y + spacing_y;
+    axisSizeEditBox = m_Gui->addEditBox(
+        L"",
+        rect<s32>(vector2d<s32>(spacing_x, y), dimension2d<s32>(size_x, size_y)),
+        true,
+        playbackWindow,
+        UIE_AXISSIZEEDITBOX);
+    y += margin_y;
+
+    y += size_y + spacing_y;
 
     // Set Font for UI Elements
     m_GuiFontFace = new CGUITTFace();
@@ -156,12 +201,20 @@ void UserInterface::handleMenuItemPressed(IGUIContextMenu* menu)
         s32 id = menu->getItemCommandId(static_cast<u32>(selected));
 
         switch (id) {
-        case UIC_FILE_LOAD:
+        case UIC_FILE_OPEN:
             displayLoadFileDialog();
             break;
 
-        case UIC_FILE_LOAD_TEXTURE:
+        case UIC_FILE_OPEN_TEXTURE:
             displayLoadTextureDialog();
+            break;
+
+        case UIC_FILE_PREVIOUS_TEXTURE:
+            loadNextTexture(-1);
+            break;
+
+        case UIC_FILE_NEXT_TEXTURE:
+            loadNextTexture(1);
             break;
 
         case UIC_FILE_QUIT:
@@ -169,17 +222,31 @@ void UserInterface::handleMenuItemPressed(IGUIContextMenu* menu)
             break;
 
         case UIC_VIEW_WIREFRAME:
-            m_WireframeDisplay = viewMenu->isItemChecked(INDEX_VIEW_WIREFRAME_MESH);
+            m_WireframeDisplay = viewMenu->isItemChecked(viewWireframeIdx);
             m_Engine->setMeshDisplayMode(m_WireframeDisplay, m_Lighting, m_TextureInterpolation);
             break;
 
         case UIC_VIEW_LIGHTING:
-            m_Lighting = viewMenu->isItemChecked(INDEX_VIEW_LIGHTING);
+            m_Lighting = viewMenu->isItemChecked(viewLightingIdx);
             m_Engine->setMeshDisplayMode(m_WireframeDisplay, m_Lighting, m_TextureInterpolation);
             break;
 
+        case UIC_VIEW_TARGET:
+            //
+            break;
+
+        case UIC_VIEW_Y_UP:
+            m_Engine->setZUp(false);
+            viewMenu->setItemChecked(viewZUpIdx, false);
+            break;
+
+        case UIC_VIEW_Z_UP:
+            m_Engine->setZUp(true);
+            viewMenu->setItemChecked(viewYUpIdx, false);
+            break;
+
         case UIC_VIEW_TEXTURE_INTERPOLATION:
-            m_TextureInterpolation = viewMenu->isItemChecked(INDEX_VIEW_TEXTURE_INTERPOLATION);
+            m_TextureInterpolation = viewMenu->isItemChecked(viewTextureInterpolationIdx);
             m_Engine->setMeshDisplayMode(m_WireframeDisplay, m_Lighting, m_TextureInterpolation);
             break;
         }
@@ -210,9 +277,9 @@ void UserInterface::snapWidgets()
 // PUBLIC
 UserInterface::UserInterface(Engine* engine)
 {
-    INDEX_VIEW_TEXTURE_INTERPOLATION = 0;
-    INDEX_VIEW_WIREFRAME_MESH = 0;
-    INDEX_VIEW_LIGHTING = 0;
+    viewTextureInterpolationIdx = 0;
+    viewWireframeIdx = 0;
+    viewLightingIdx = 0;
     this->playbackStartStopButton = nullptr;
 
     m_Engine = engine;
@@ -286,7 +353,6 @@ bool UserInterface::loadNextTexture(int direction)
                             // debug() << "tryPath 1b " << Utility::toString(tryPath) << "..." << endl;
                             // tryPath = texturesPath + dirSeparator + Utility::basename(this->m_Engine->m_PreviousPath) + L".png";
                             if (!Utility::isFile(tryPath)) {
-                                //asdf
                                 tryPath = texturesPath + dirSeparator + Utility::withoutExtension(Utility::basename(this->m_Engine->m_PreviousPath)) + L".jpg";
                                 // debug() << "tryPath 2a " << Utility::toString(tryPath) << "..." << endl;
                                 tryPath = Utility::toWstring(Utility::toString(tryPath));
@@ -305,8 +371,8 @@ bool UserInterface::loadNextTexture(int direction)
                             }
                         }
                     }
-                    //debug() << "tryPath: " << Utility::toString(tryPath) << endl;
-                    //debug() << "nextPath: " << Utility::toString(nextPath) << endl;
+                    // debug() << "tryPath: " << Utility::toString(tryPath) << endl;
+                    // debug() << "nextPath: " << Utility::toString(nextPath) << endl;
                     for (const auto& itr : fs::directory_iterator(path)) {
                         std::wstring ext = Utility::extensionOf(itr.path().wstring()); // no dot!
                         if (!is_directory(itr.status())
@@ -346,40 +412,128 @@ bool UserInterface::loadNextTexture(int direction)
 bool UserInterface::OnEvent(const SEvent& event)
 {
     // Events arriving here should be destined for us
+    bool handled = false;
     if (event.EventType == EET_USER_EVENT) {
+        // debug() << "EET_USER_EVENT..." << endl;
         if (event.UserEvent.UserData1 == UEI_WINDOWSIZECHANGED) {
             if ((m_WindowSize.Width != m_Engine->m_Driver->getScreenSize().Width) || (m_WindowSize.Height != m_Engine->m_Driver->getScreenSize().Height)) {
                 snapWidgets();
             }
+            handled = true;
         }
-        return true;
+    } else if (event.EventType == EET_GUI_EVENT) {
+        // debug() << "EET_GUI_EVENT..." << endl;
+        handled = true; // set to false below if not handled
+        const SEvent::SGUIEvent* ge = &(event.GUIEvent);
+        switch (ge->Caller->getID()) {
+        case UIE_FILEMENU:
+        case UIE_VIEWMENU:
+            // call handler for all menu related actions
+            handleMenuItemPressed(static_cast<IGUIContextMenu*>(ge->Caller));
+            break;
+
+        case UIE_LOADFILEDIALOG:
+            if (ge->EventType == EGET_FILE_SELECTED) {
+                IGUIFileOpenDialog* fileOpenDialog = static_cast<IGUIFileOpenDialog*>(ge->Caller);
+                m_Engine->loadMesh(fileOpenDialog->getFileName());
+            }
+            break;
+
+        case UIE_LOADTEXTUREDIALOG:
+            if (ge->EventType == EGET_FILE_SELECTED) {
+                IGUIFileOpenDialog* fileOpenDialog = static_cast<IGUIFileOpenDialog*>(ge->Caller);
+                m_Engine->loadTexture(fileOpenDialog->getFileName());
+            }
+            break;
+
+        case UIE_PLAYBACKSTARTSTOPBUTTON:
+            if (ge->EventType == EGET_BUTTON_CLICKED) {
+                this->m_Engine->toggleAnimation();
+            }
+            break;
+
+        case UIE_PLAYBACKINCREASEBUTTON:
+            if (ge->EventType == EGET_BUTTON_CLICKED) {
+                this->m_Engine->incrementAnimationFPS(5);
+            }
+            break;
+
+        case UIE_PLAYBACKDECREASEBUTTON:
+            if (ge->EventType == EGET_BUTTON_CLICKED) {
+                this->m_Engine->incrementAnimationFPS(-5);
+            }
+            break;
+        case UIE_PLAYBACKSETFRAMEEDITBOX:
+            if (ge->EventType == EGET_EDITBOX_ENTER) {
+                if (this->m_Engine->m_LoadedMesh != nullptr) {
+                    this->m_Engine->m_LoadedMesh->setCurrentFrame(Utility::toF32(this->playbackSetFrameEditBox->getText()));
+                }
+            }
+            break;
+        case UIE_TEXTUREPATHEDITBOX:
+            if (ge->EventType == EGET_EDITBOX_ENTER) {
+                if (this->m_Engine->m_LoadedMesh != nullptr) {
+                    this->m_Engine->loadTexture(texturePathEditBox->getText());
+                }
+            }
+            break;
+        case UIE_FPSEDITBOX:
+            if (ge->EventType == EGET_EDITBOX_ENTER) {
+                if (this->m_Engine->m_LoadedMesh != nullptr) {
+                    this->m_Engine->m_LoadedMesh->setAnimationSpeed(Utility::toF32(this->playbackFPSEditBox->getText()));
+                }
+            }
+            break;
+        case UIE_AXISSIZEEDITBOX:
+            if (ge->EventType == EGET_EDITBOX_ENTER) {
+                this->m_Engine->axisLength = Utility::toF32(this->axisSizeEditBox->getText());
+            }
+            break;
+
+        default:
+            // break;
+            handled = false;
+        }
     } else if (event.EventType == EET_KEY_INPUT_EVENT) {
+        // debug() << "EET_KEY_INPUT_EVENT..." << endl;
+        handled = true; // set to false below if not handled
         if (event.KeyInput.PressedDown && !m_Engine->KeyIsDown[event.KeyInput.Key]) {
             if (event.KeyInput.Key == irr::KEY_F5) {
-                m_Engine->reloadMesh();
-            } else if (event.KeyInput.Key == irr::KEY_KEY_T) {
-                loadNextTexture(1);
-            } else if (event.KeyInput.Key == irr::KEY_KEY_E) {
-                loadNextTexture(-1);
-            } else if (event.KeyInput.Key == irr::KEY_KEY_R) {
-                m_Engine->reloadTexture();
-            } else if (event.KeyInput.Key == irr::KEY_KEY_Z) {
-                m_Engine->setZUp(true);
-            } else if (event.KeyInput.Key == irr::KEY_KEY_Y) {
-                m_Engine->setZUp(false);
-            } else if (event.KeyInput.Key == irr::KEY_KEY_X) {
-                // IGUIContextMenu* textureInterpolationElement = dynamic_cast<IGUIContextMenu*>(viewMenu->getElementFromId(UIC_VIEW_TEXTURE_INTERPOLATION));
-                //m_TextureInterpolation = textureInterpolationElement->isItemChecked(UIC_VIEW_TEXTURE_INTERPOLATION);
-                m_TextureInterpolation = m_TextureInterpolation ? false : true;
-                //doesn't work: m_TextureInterpolation = viewMenu->isItemChecked(UIC_VIEW_TEXTURE_INTERPOLATION);
-                m_Engine->setMeshDisplayMode(m_WireframeDisplay, m_Lighting, m_TextureInterpolation);
-                viewMenu->setItemChecked(INDEX_VIEW_TEXTURE_INTERPOLATION, m_TextureInterpolation);
-            } else if (event.KeyInput.Char == L'+' || event.KeyInput.Char == L'=') {
-                m_Engine->setAnimationFPS(m_Engine->animationFPS() + 5);
-            } else if (event.KeyInput.Char == L'-') {
-                if (m_Engine->animationFPS() > 0) {
-                    m_Engine->setAnimationFPS(m_Engine->animationFPS() - 5);
+                if (m_Engine->KeyIsDown[irr::KEY_LSHIFT] || m_Engine->KeyIsDown[irr::KEY_RSHIFT]) {
+                    m_Engine->reloadTexture();
                 }
+                else
+                    m_Engine->reloadMesh();
+            } else if (event.KeyInput.Key == irr::KEY_F3) {
+                if (m_Engine->KeyIsDown[irr::KEY_LSHIFT] || m_Engine->KeyIsDown[irr::KEY_RSHIFT]) {
+                    loadNextTexture(-1);
+                    debug() << "  - back" << endl;
+                }
+                else
+                    loadNextTexture(1);
+            } else if (event.KeyInput.Key == irr::KEY_KEY_I) {
+                if (m_Engine->KeyIsDown[irr::KEY_LCONTROL] || m_Engine->KeyIsDown[irr::KEY_RCONTROL]) {
+                    // IGUIContextMenu* textureInterpolationElement = dynamic_cast<IGUIContextMenu*>(viewMenu->getElementFromId(UIC_VIEW_TEXTURE_INTERPOLATION));
+                    // m_TextureInterpolation = textureInterpolationElement->isItemChecked(UIC_VIEW_TEXTURE_INTERPOLATION);
+                    m_TextureInterpolation = m_TextureInterpolation ? false : true;
+                    // doesn't work: m_TextureInterpolation = viewMenu->isItemChecked(UIC_VIEW_TEXTURE_INTERPOLATION);
+                    m_Engine->setMeshDisplayMode(m_WireframeDisplay, m_Lighting, m_TextureInterpolation);
+                    viewMenu->setItemChecked(viewTextureInterpolationIdx, m_TextureInterpolation);
+                }
+                else
+                    handled = false;
+            } else if (event.KeyInput.Key == irr::KEY_RIGHT) {
+                if (m_Engine->KeyIsDown[irr::KEY_LCONTROL] || m_Engine->KeyIsDown[irr::KEY_RCONTROL]) {
+                    m_Engine->incrementAnimationFPS(5);
+                }
+                else
+                    handled = false;
+            } else if (event.KeyInput.Key == irr::KEY_LEFT) {
+                if (m_Engine->KeyIsDown[irr::KEY_LCONTROL] || m_Engine->KeyIsDown[irr::KEY_RCONTROL]) {
+                    m_Engine->incrementAnimationFPS(-5);
+                }
+                else
+                    handled = false;
             } else if (event.KeyInput.Char == L' ') {
                 m_Engine->toggleAnimation();
             } else if (event.KeyInput.Key == irr::KEY_LEFT) {
@@ -397,13 +551,18 @@ bool UserInterface::OnEvent(const SEvent& event)
                     this->playbackSetFrameEditBox->setText(Utility::toWstring(this->m_Engine->m_LoadedMesh->getFrameNr()).c_str());
                 }
             }
+            else
+                handled = false;
             // std::wcerr << "Char: " << event.KeyInput.Char << endl;
         }
         m_Engine->KeyIsDown[event.KeyInput.Key] = event.KeyInput.PressedDown;
-
         return true;
     } else if (event.EventType == EET_MOUSE_INPUT_EVENT) {
-        // TODO: improve this copypasta
+        // debug() << "EET_MOUSE_INPUT_EVENT..." << endl;
+        handled = true; // set to false below if not handled
+        // TODO: improve this copypasta (or elsewhere use states 1 and 3 as
+        // events, and add 1 as "handled" (or set back to 0 for no drag feature)
+        // as intended for drag or long press handling).
         switch (event.MouseInput.Event) {
         case EMIE_LMOUSE_LEFT_UP:
             if (m_Engine->LMouseState == 2) {
@@ -428,63 +587,9 @@ bool UserInterface::OnEvent(const SEvent& event)
                 m_Engine->RMouseState = 1;
             }
             break;
+        default:
+            handled = false;
         }
-    } else if (!(event.EventType == EET_GUI_EVENT))
-        return false;
-
-    const SEvent::SGUIEvent* ge = &(event.GUIEvent);
-
-    switch (ge->Caller->getID()) {
-    case UIE_FILEMENU:
-    case UIE_VIEWMENU:
-        // call handler for all menu related actions
-        handleMenuItemPressed(static_cast<IGUIContextMenu*>(ge->Caller));
-        break;
-
-    case UIE_LOADFILEDIALOG:
-        if (ge->EventType == EGET_FILE_SELECTED) {
-            IGUIFileOpenDialog* fileOpenDialog = static_cast<IGUIFileOpenDialog*>(ge->Caller);
-            m_Engine->loadMesh(fileOpenDialog->getFileName());
-        }
-        break;
-
-    case UIE_LOADTEXTUREDIALOG:
-        if (ge->EventType == EGET_FILE_SELECTED) {
-            IGUIFileOpenDialog* fileOpenDialog = static_cast<IGUIFileOpenDialog*>(ge->Caller);
-            m_Engine->loadTexture(fileOpenDialog->getFileName());
-        }
-        break;
-
-    case UIE_PLAYBACKSTARTSTOPBUTTON:
-        if (ge->EventType == EGET_BUTTON_CLICKED) {
-            this->m_Engine->toggleAnimation();
-        }
-        break;
-
-    case UIE_PLAYBACKINCREASEBUTTON:
-        if (ge->EventType == EGET_BUTTON_CLICKED) {
-            this->m_Engine->setAnimationFPS(this->m_Engine->animationFPS() + 5);
-        }
-        break;
-
-    case UIE_PLAYBACKDECREASEBUTTON:
-        if (ge->EventType == EGET_BUTTON_CLICKED) {
-            if (this->m_Engine->animationFPS() >= 5) {
-                this->m_Engine->setAnimationFPS(this->m_Engine->animationFPS() - 5);
-            }
-        }
-        break;
-    case UIE_PLAYBACKSETFRAMEEDITBOX:
-        if (ge->EventType == EGET_EDITBOX_ENTER) {
-            if (this->m_Engine->m_LoadedMesh != nullptr) {
-                this->m_Engine->m_LoadedMesh->setCurrentFrame(Utility::toF32(this->playbackSetFrameEditBox->getText()));
-            }
-        }
-        break;
-
-    default:
-        break;
     }
-
-    return true;
+    return handled;
 }

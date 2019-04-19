@@ -34,7 +34,7 @@ void Engine::setupScene()
 
     // Setup Camera
     // (so z-forward characters face camera partially (formerly vector3df(0, 0, -10), vector3df())
-    m_CamPos = vector3df(4.5, 3, 9);
+    m_CamPos = vector3df(4.5, 3.5, 9);
     m_CamTarget = vector3df(0, 3, 0);
     ICameraSceneNode* camera = m_Scene->addCameraSceneNode(nullptr, m_CamPos, m_CamTarget); // this will be overridden by View m_Yaw and m_Pitch--see "calculate m_Yaw" further down
     camera->setAspectRatio(static_cast<f32>(m_Driver->getScreenSize().Width) / static_cast<f32>(m_Driver->getScreenSize().Height));
@@ -47,44 +47,109 @@ IGUIEnvironment* Engine::getGUIEnvironment() const
 
 void Engine::drawAxisLines()
 {
-    SMaterial* lineX = new SMaterial();
-    lineX->Lighting = false;
-    lineX->EmissiveColor = SColor(255, 255, 0, 0);
-    lineX->Thickness = 1.0f;
+    SMaterial xMaterial;
+    xMaterial.Lighting = false;
+    xMaterial.EmissiveColor = SColor(255, 255, 0, 0);
+    xMaterial.Thickness = 1.0f;
 
-    SMaterial* lineY = new SMaterial(*lineX);
-    lineY->EmissiveColor = SColor(255, 0, 255, 0);
+    SMaterial yMaterial(xMaterial);
+    yMaterial.EmissiveColor = SColor(255, 0, 255, 0);
 
-    SMaterial* lineZ = new SMaterial(*lineX);
-    lineZ->EmissiveColor = SColor(255, 0, 0, 255);
+    SMaterial zMaterial(xMaterial);
+    zMaterial.EmissiveColor = SColor(255, 0, 0, 255);
+
+    SMaterial descenderMaterialVert(xMaterial);
+    descenderMaterialVert.EmissiveColor = SColor(128, 128, 128, 128); // ARGB
+    SMaterial descenderMaterialHorz(xMaterial);
+    descenderMaterialHorz.EmissiveColor = SColor(255, 255, 255, 255);
+
+    vector3df descend3df(0, 0, 0);
+    // vector3df target = m_View->c
 
     m_Driver->setTransform(ETS_WORLD, matrix4());
 
-    m_Driver->setMaterial(*lineX);
-    m_Driver->draw3DLine(vector3df(), vector3df(5, 0, 0), SColor(255, 255, 0, 0));
-    position2d<s32> textPos = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(vector3df(5.2f, 0, 0));
+    if (m_View != nullptr) {
+        if (this->m_UserInterface->viewMenu->isItemChecked(this->m_UserInterface->viewTargetIdx)) {
+            if (m_View->zUp()) {
+                descend3df.Z = this->m_CamTarget.Z;
+            }
+            else {
+                descend3df.Y = this->m_CamTarget.Y;
+            }
+            vector3df descendSideways3df(descend3df);
+            descendSideways3df.X = this->m_CamTarget.X;
+            vector3df descendSidewaysForward3df(descendSideways3df);
+            if (m_View->zUp()) {
+                descendSidewaysForward3df.Y = this->m_CamTarget.Y;
+            }
+            else {
+                descendSidewaysForward3df.Z = this->m_CamTarget.Z;
+            }
+            m_Driver->setMaterial(descenderMaterialVert);
+            m_Driver->draw3DLine(vector3df(), descend3df, descenderMaterialVert.EmissiveColor);
+            m_Driver->setMaterial(descenderMaterialHorz);
+            m_Driver->draw3DLine(descend3df, descendSideways3df, descenderMaterialHorz.EmissiveColor);
+            m_Driver->draw3DLine(descendSideways3df, descendSidewaysForward3df, descenderMaterialHorz.EmissiveColor);
+            f32 arrowDirection = 1.0f;
+            vector3df arrowLeft3df(descendSidewaysForward3df);
+            vector3df arrowRight3df(descendSidewaysForward3df);
+            f32 arrowSize = this->m_View->cameraDistance() / 30;
+            if (m_View->zUp()) {
+                if (descendSidewaysForward3df.Y > descendSideways3df.Y)
+                    arrowDirection = -1.0f;
+                arrowLeft3df.X += arrowSize;
+                arrowLeft3df.Y += arrowSize * arrowDirection;
+                arrowRight3df.X -= arrowSize;
+                arrowRight3df.Y += arrowSize * arrowDirection;
+            }
+            else {
+                if (descendSidewaysForward3df.Z > descendSideways3df.Z)
+                    arrowDirection = -1.0f;
+                arrowLeft3df.X += arrowSize;
+                arrowLeft3df.Z += arrowSize * arrowDirection;
+                arrowRight3df.X -= arrowSize;
+                arrowRight3df.Z += arrowSize * arrowDirection;
+            }
+            m_Driver->draw3DLine(descendSidewaysForward3df, arrowLeft3df, descenderMaterialHorz.EmissiveColor);
+            m_Driver->draw3DLine(descendSidewaysForward3df, arrowRight3df, descenderMaterialHorz.EmissiveColor);
+            // position2d<s32> targetPos2d = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(this->m_CamTarget);
+            // dimension2d<u32> textSize;
+            // if (m_AxisFont != nullptr) {
+            //     textSize = m_AxisFont->getDimension(L"target");
+            //     m_AxisFont->draw(L"target", rect<s32>(targetPos2d, textSize), descenderMaterial.EmissiveColor, true, true);
+            // }
+        }
+    }
+
+
+
+    m_Driver->setMaterial(xMaterial);
+    m_Driver->draw3DLine(vector3df(), vector3df(axisLength, 0, 0), SColor(255, 255, 0, 0));
+    position2d<s32> textPos = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(vector3df(axisLength + axisLength*.1f, 0, 0));
     dimension2d<u32> textSize;
     if (m_AxisFont != nullptr) {
         textSize = m_AxisFont->getDimension(L"X+");
         m_AxisFont->draw(L"X+", rect<s32>(textPos, textSize), SColor(255, 255, 0, 0), true, true);
     }
-    m_Driver->setMaterial(*lineY);
-    m_Driver->draw3DLine(vector3df(), vector3df(0, 5, 0), SColor(255, 0, 255, 0));
-    textPos = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(vector3df(0, 5.2f, 0));
+
+    m_Driver->setMaterial(yMaterial);
+    m_Driver->draw3DLine(vector3df(), vector3df(0, axisLength, 0), SColor(255, 0, 255, 0));
+    textPos = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(vector3df(0, axisLength + axisLength*.1f, 0));
     if (m_AxisFont != nullptr) {
         textSize = m_AxisFont->getDimension(L"Y+");
         m_AxisFont->draw(L"Y+", rect<s32>(textPos, textSize), SColor(255, 0, 255, 0), true, true);
     }
-    m_Driver->setMaterial(*lineZ);
-    m_Driver->draw3DLine(vector3df(), vector3df(0, 0, 5), SColor(255, 0, 0, 255));
-    textPos = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(vector3df(0, 0, 5.2f));
+
+    m_Driver->setMaterial(zMaterial);
+    m_Driver->draw3DLine(vector3df(), vector3df(0, 0, axisLength), SColor(255, 0, 0, 255));
+    textPos = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(vector3df(0, 0, axisLength + axisLength*.1f));
     if (m_AxisFont != nullptr) {
         textSize = m_AxisFont->getDimension(L"Z+");
         m_AxisFont->draw(L"Z+", rect<s32>(textPos, textSize), SColor(255, 0, 0, 255), true, true);
     }
-    delete lineX;
-    delete lineY;
-    delete lineZ;
+    //delete xMaterial;
+    //delete yMaterial;
+    //delete zMaterial;
 }
 
 void Engine::drawBackground()
@@ -141,7 +206,7 @@ Engine::Engine()
         keyState[i] = 0;
     LMouseState = 0;
     RMouseState = 0;
-
+    this->axisLength = 10;
     this->worldFPS = 60;
     this->prevFPS = 30;
     this->textureExtensions.push_back(L"png");
@@ -205,6 +270,11 @@ Engine::~Engine()
     delete m_AxisFontFace;
 }
 
+vector3df Engine::camTarget()
+{
+    return m_CamTarget;
+}
+
 void Engine::loadMesh(const wstring& fileName)
 {
     this->m_PreviousPath = fileName; // even if bad, set this
@@ -223,6 +293,7 @@ void Engine::loadMesh(const wstring& fileName)
             m_View->setZUp(false);
         }
         if (m_LoadedMesh != nullptr) {
+            this->m_UserInterface->playbackFPSEditBox->setText(Utility::toWstring(m_LoadedMesh->getAnimationSpeed()).c_str());
             ICameraSceneNode* camera = this->m_Scene->getActiveCamera();
             aabbox3d<f32> box = m_LoadedMesh->getTransformedBoundingBox();
             //vector3d<float> extents = box.getExtent();
@@ -288,14 +359,16 @@ void Engine::reloadTexture()
 
 bool Engine::loadTexture(const wstring& fileName)
 {
-    ITexture* texture = this->m_Driver->getTexture(fileName.c_str());
     bool ret = false;
-    if (texture != nullptr) {
-        m_LoadedMesh->setMaterialTexture(0, texture);
-        ret = true;
+    if (m_LoadedMesh != nullptr) {
+        ITexture* texture = this->m_Driver->getTexture(fileName.c_str());
+        if (texture != nullptr) {
+            m_LoadedMesh->setMaterialTexture(0, texture);
+            ret = true;
+        }
+        this->m_PrevTexturePath = fileName;
+        this->m_UserInterface->texturePathEditBox->setText(this->m_PrevTexturePath.c_str());
     }
-    this->m_PrevTexturePath = fileName;
-    this->m_UserInterface->texturePathEditBox->setText(this->m_PrevTexturePath.c_str());
     return ret;
 }
 
@@ -385,7 +458,25 @@ void Engine::toggleAnimation()
 void Engine::setAnimationFPS(u32 animationFPS)
 {
     if (this->m_LoadedMesh != nullptr) {
+        if (animationFPS > 0) this->isPlaying = true;
+        // Do NOT call playAnimation, otherwise infinite recursion occurs (it calls setAnimationFPS).
         this->m_LoadedMesh->setAnimationSpeed(animationFPS);
+        this->m_UserInterface->playbackFPSEditBox->setText(Utility::toWstring(this->m_LoadedMesh->getAnimationSpeed()).c_str());
+    }
+}
+
+void Engine::incrementAnimationFPS(irr::f32 by)
+{
+    if (this->m_LoadedMesh != nullptr) {
+        if (by < 0) {
+            if (this->m_LoadedMesh->getAnimationSpeed() + by >= 0.999999f) // don't use this->animationFPS(), because its unsigned!
+                this->setAnimationFPS(this->m_LoadedMesh->getAnimationSpeed() + by);
+            else
+                this->setAnimationFPS(1);
+        }
+        else {
+            this->setAnimationFPS(this->animationFPS() + by);
+        }
     }
 }
 
@@ -398,11 +489,11 @@ void Engine::setZUp(bool zUp)
 
 u32 Engine::animationFPS()
 {
-    u32 ret = 0;
+    f32 ret = 0;
     if (this->m_LoadedMesh != nullptr) {
         ret = this->m_LoadedMesh->getAnimationSpeed();
     }
-    return ret;
+    return static_cast<u32>(ret);
 }
 
 void Engine::run()

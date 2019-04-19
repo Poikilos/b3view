@@ -1,5 +1,28 @@
 # Changelog
 
+## [git] - 2019-04-18
+(poikilos)
+### Added
+* box for axis length (size of the axis widget)
+* box for frame rate
+
+### Changed
+* Reorder boxes.
+* Changed hotkeys so they aren't triggered when typing in the panel.
+
+## [git] - 2019-04-08
+(poikilos)
+### Added
+* snapWidgets (move playbackWindow on resize, not leave past edge)
+
+### Changed
+* changed enum values to leave room in between, comment unused
+* fixed issue in Utility not detecting backslashes correctly
+* renamed Utils.* to Utility.* to match class name
+* coding style to WebKit (run ./etc/quality.sh to check)
+* improve pan - don't reset view
+* improve initial camera settings: angle calculation
+
 ## [git] - 2019-04-08
 (poikilos)
 ### Added

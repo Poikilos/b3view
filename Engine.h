@@ -68,10 +68,13 @@ private:
 public:
     std::wstring m_PreviousPath;
     std::wstring m_PrevTexturePath;
+    irr::f32 axisLength;
+    bool m_zUp;
 
     Engine();
     ~Engine();
 
+    irr::core::vector3df camTarget();
     void run();
     void loadMesh(const std::wstring& fileName);
     void reloadMesh();
@@ -83,6 +86,7 @@ public:
     void pauseAnimation();
     void toggleAnimation();
     void setAnimationFPS(irr::u32 animationFPS);
+    void incrementAnimationFPS(irr::f32 by);
     void setZUp(bool zUp);
     irr::u32 animationFPS();
 };

@@ -24,6 +24,9 @@ if [ -d "$dump_dest" ]; then
 fi
 mkdir "$dump_dest" || customDie "Cannot mkdir $dump_dest"
 chmod +x ./etc/pushtmp.sh
+if [ ! -f "`command -v clang-format`" ]; then
+    customDie "clang-format command is not in path. You must install clang."
+fi
 echo "* Using -style=WebKit to avoid .clang-format version issues..."
 #echo "* rewriting .clang-format to avoid clang-format version issues..."
 #rewriting avoids the following error:

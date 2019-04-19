@@ -42,6 +42,7 @@ bool EventHandler::OnEvent(const SEvent& event)
     } else if (event.EventType == EET_USER_EVENT) {
         if (event.UserEvent.UserData1 == UEI_WINDOWSIZECHANGED) {
             // Window resize handling - send to all subscribers
+            // (UserInterface will call snapWidgets to fix playbackWindow position)
             map<EventReceiverType, IEventReceiver*>::iterator iter;
             for (iter = m_EventReceivers->begin(); iter != m_EventReceivers->end(); iter++)
                 iter->second->OnEvent(event);
