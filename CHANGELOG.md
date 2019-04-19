@@ -5,14 +5,14 @@
 ### Added
 * box for axis length (size of the axis widget)
 * box for frame rate
-* Camera Target widget
+* camera target widget
 * option for turning off origin axis widget
 
 ### Changed
 * Reorder items on panel.
 * Hotkeys are different so they're not triggered when typing in the
   panel.
-* Don't reset yaw nor camera distance when panning
+* Don't reset yaw nor camera distance when panning.
 
 ## [git] - 2019-04-08
 (poikilos)
