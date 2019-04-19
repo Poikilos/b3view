@@ -176,9 +176,6 @@ void Engine::drawAxisLines()
             m_AxisFont->draw(L"Z+", rect<s32>(textPos, textSize),
                              SColor(255, 0, 0, 255), true, true);
         }
-        //delete xMaterial;
-        //delete yMaterial;
-        //delete zMaterial;
     }
 }
 

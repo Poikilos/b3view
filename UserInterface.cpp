@@ -160,7 +160,7 @@ void UserInterface::setupUserInterface()
     y += size_y + spacing_y;
     axisSizeStaticText = m_Gui->addStaticText(
         L"Axis Size:",
-        rect<s32>(vector2d<s32>(spacing_x, y)
+        rect<s32>(vector2d<s32>(spacing_x, y),
                   dimension2d<s32>(size_x, size_y)),
         true,
         true,

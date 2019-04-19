@@ -184,7 +184,8 @@ bool View::OnEvent(const SEvent& event)
         vector3df offsetVec3(
             m_Engine->m_CamPos.X - m_Engine->m_CamTarget.X,
             m_Engine->m_CamPos.Y - m_Engine->m_CamTarget.Y,
-            m_Engine->m_CamPos.Z - m_Engine->m_CamTarget.Z);
+            m_Engine->m_CamPos.Z - m_Engine->m_CamTarget.Z
+        );
 
         f32 distanceDelta = mouseEvent->Wheel * -1 * (offsetVec3.getLength() / 10);
         ICameraSceneNode* camera = m_Engine->m_Scene->getActiveCamera();
@@ -210,7 +211,12 @@ bool View::OnEvent(const SEvent& event)
         // m_Pitch = asin(offsetVec3.Y);
 
         // m_CameraDistance = Utility::distance(m_Engine->m_CamPos, m_Engine->m_CamTarget);
-        m_CameraDistance += distanceDelta;
+        if (m_CameraDistance + distanceDelta > 0.0001f) {
+            m_CameraDistance += distanceDelta;
+        }
+        else {
+            m_CameraDistance /= 2;
+        }
         setNewCameraPosition();
         debug() << "m_CamPos: " << m_Engine->m_CamPos.X
                 << "," << m_Engine->m_CamPos.Y
