@@ -216,7 +216,7 @@ void UserInterface::setupUserInterface()
             std::wcerr << L"WARNING: Keeping old font loaded." << endl;
         }
     }
-    //}
+    // }
 }
 
 void UserInterface::displayLoadFileDialog()
@@ -299,8 +299,8 @@ void UserInterface::snapWidgets()
 {
     dimension2d<u32> screenSize = m_Engine->m_Driver->getScreenSize();
     rect<s32> newRect;
-    //newRect.LowerRightCorner.X = static_cast<s32>(size.Width);
-    //newRect.LowerRightCorner.Y = static_cast<s32>(size.Height);
+    // newRect.LowerRightCorner.X = static_cast<s32>(size.Width);
+    // newRect.LowerRightCorner.Y = static_cast<s32>(size.Height);
     rect<s32> prevRect = playbackWindow->getRelativePosition();
     newRect.UpperLeftCorner.X = static_cast<s32>(screenSize.Width)
                                 - prevRect.getWidth() - spacing_y;
@@ -571,7 +571,8 @@ bool UserInterface::OnEvent(const SEvent& event)
     } else if (event.EventType == EET_KEY_INPUT_EVENT) {
         // debug() << "EET_KEY_INPUT_EVENT..." << endl;
         handled = true; // set to false below if not handled
-        if (event.KeyInput.PressedDown && !m_Engine->KeyIsDown[event.KeyInput.Key]) {
+        if (event.KeyInput.PressedDown
+                && !m_Engine->KeyIsDown[event.KeyInput.Key]) {
             if (event.KeyInput.Key == irr::KEY_F5) {
                 if (m_Engine->KeyIsDown[irr::KEY_LSHIFT]
                         || m_Engine->KeyIsDown[irr::KEY_RSHIFT]) {
@@ -597,11 +598,11 @@ bool UserInterface::OnEvent(const SEvent& event)
                     //         )
                     //     );
                     // )
-                    // m_TextureInterpolation = textureInterpolationElement->isItemChecked(UIC_VIEW_TEXTURE_INTERPOLATION);
                     m_TextureInterpolation = m_TextureInterpolation ? false : true;
-                    // doesn't work: m_TextureInterpolation = viewMenu->isItemChecked(UIC_VIEW_TEXTURE_INTERPOLATION);
-                    m_Engine->setMeshDisplayMode(m_WireframeDisplay, m_Lighting, m_TextureInterpolation);
-                    viewMenu->setItemChecked(viewTextureInterpolationIdx, m_TextureInterpolation);
+                    m_Engine->setMeshDisplayMode(m_WireframeDisplay, m_Lighting,
+                                                 m_TextureInterpolation);
+                    viewMenu->setItemChecked(viewTextureInterpolationIdx,
+                                             m_TextureInterpolation);
                 }
                 else
                     handled = false;
