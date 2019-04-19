@@ -7,6 +7,7 @@
 * box for frame rate
 * camera target widget
 * option for turning off origin axis widget
+* Add menu items for hotkeys, and show hotkey on relevant menu items.
 
 ### Changed
 * Reorder items on panel.
@@ -14,6 +15,8 @@
   panel.
 * Don't reset yaw nor camera distance when panning.
 * Show name of loaded model on title bar.
+* Fix crash on loading texture before model.
+* Fix use of unsigned frame delta for slow and fast options.
 
 ## [git] - 2019-04-08
 (poikilos)
