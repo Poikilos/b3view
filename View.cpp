@@ -91,7 +91,7 @@ View::View(Engine* engine)
     m_LastMousePosition = new vector2d<int>();
     m_RotMouse = false;
 
-    //m_Pitch = PI;
+    // m_Pitch = PI;
 
     // Initial camera values: see Engine::setupScene
 
@@ -154,11 +154,15 @@ bool View::zUp()
 bool View::OnEvent(const SEvent& event)
 {
     // If it's not a mouse event or window resize event, return
-    if (event.EventType != EET_MOUSE_INPUT_EVENT && !(event.EventType == EET_USER_EVENT && event.UserEvent.UserData1 == UEI_WINDOWSIZECHANGED))
+    if (event.EventType != EET_MOUSE_INPUT_EVENT
+            && !(event.EventType == EET_USER_EVENT
+                 && event.UserEvent.UserData1 == UEI_WINDOWSIZECHANGED)) {
         return false;
+    }
 
     // Handle window resize
-    if (event.EventType == EET_USER_EVENT && event.UserEvent.UserData1 == UEI_WINDOWSIZECHANGED) {
+    if (event.EventType == EET_USER_EVENT
+            && event.UserEvent.UserData1 == UEI_WINDOWSIZECHANGED) {
         dimension2d<u32> windowSize = m_Engine->m_Driver->getScreenSize();
         f32 aspectRatio = static_cast<f32>(windowSize.Width) / static_cast<f32>(windowSize.Height);
         // debug() << "Setting aspect to: " << aspectRatio << endl;
@@ -176,7 +180,7 @@ bool View::OnEvent(const SEvent& event)
         m_RotMouse = false;
     } else if (mouseEvent->Event == EMIE_MOUSE_WHEEL) {
         // Zoom camera.
-        //debug() << "Wheel=" << mouseEvent->Wheel; // -1 or 1
+        // debug() << "Wheel=" << mouseEvent->Wheel; // -1 or 1
         vector3df offsetVec3(
             m_Engine->m_CamPos.X - m_Engine->m_CamTarget.X,
             m_Engine->m_CamPos.Y - m_Engine->m_CamTarget.Y,
@@ -185,29 +189,33 @@ bool View::OnEvent(const SEvent& event)
         f32 distanceDelta = mouseEvent->Wheel * -1 * (offsetVec3.getLength() / 10);
         ICameraSceneNode* camera = m_Engine->m_Scene->getActiveCamera();
         f32 distanceFactor = distanceDelta / Utility::distance(m_Engine->m_CamPos, m_Engine->m_CamTarget);
-        ////m_Engine->m_CamPos.interpolate(m_Engine->m_CamPos, m_Engine->m_CamTarget, distanceFactor);
-        ////offsetVec3.normalize();
-        //m_Engine->m_CamPos.X -= offsetVec3.X * distanceFactor;
-        //m_Engine->m_CamPos.Y -= offsetVec3.Y * distanceFactor;
-        //m_Engine->m_CamPos.Z -= offsetVec3.Z * distanceFactor;
-        //m_Engine->m_CamTarget.X -= offsetVec3.X * distanceFactor;
-        //m_Engine->m_CamTarget.Y -= offsetVec3.Y * distanceFactor;
-        //m_Engine->m_CamTarget.Z -= offsetVec3.Z * distanceFactor;
+        //// m_Engine->m_CamPos.interpolate(m_Engine->m_CamPos, m_Engine->m_CamTarget, distanceFactor);
+        //// offsetVec3.normalize();
+        // m_Engine->m_CamPos.X -= offsetVec3.X * distanceFactor;
+        // m_Engine->m_CamPos.Y -= offsetVec3.Y * distanceFactor;
+        // m_Engine->m_CamPos.Z -= offsetVec3.Z * distanceFactor;
+        // m_Engine->m_CamTarget.X -= offsetVec3.X * distanceFactor;
+        // m_Engine->m_CamTarget.Y -= offsetVec3.Y * distanceFactor;
+        // m_Engine->m_CamTarget.Z -= offsetVec3.Z * distanceFactor;
 
         offsetVec3 = vector3df(
                     m_Engine->m_CamPos.X - m_Engine->m_CamTarget.X,
                     m_Engine->m_CamPos.Y - m_Engine->m_CamTarget.Y,
-                    m_Engine->m_CamPos.Z - m_Engine->m_CamTarget.Z);
-        //camera->setPosition(m_Engine->m_CamPos);
-        //camera->setTarget(m_Engine->m_CamTarget);
+                    m_Engine->m_CamPos.Z - m_Engine->m_CamTarget.Z
+        );
+        // camera->setPosition(m_Engine->m_CamPos);
+        // camera->setTarget(m_Engine->m_CamTarget);
 
-        //m_Yaw = atan2(offsetVec3.X, offsetVec3.Z);
-        //m_Pitch = asin(offsetVec3.Y);
+        // m_Yaw = atan2(offsetVec3.X, offsetVec3.Z);
+        // m_Pitch = asin(offsetVec3.Y);
 
-        //m_CameraDistance = Utility::distance(m_Engine->m_CamPos, m_Engine->m_CamTarget);
+        // m_CameraDistance = Utility::distance(m_Engine->m_CamPos, m_Engine->m_CamTarget);
         m_CameraDistance += distanceDelta;
         setNewCameraPosition();
-        debug() << "m_CamPos: " << m_Engine->m_CamPos.X << "," << m_Engine->m_CamPos.Y << " m_CamTarget: " << m_Engine->m_CamTarget.X << "," << m_Engine->m_CamTarget.Y << endl;
+        debug() << "m_CamPos: " << m_Engine->m_CamPos.X
+                << "," << m_Engine->m_CamPos.Y
+                << " m_CamTarget: " << m_Engine->m_CamTarget.X
+                << "," << m_Engine->m_CamTarget.Y << endl;
     } else if (m_RotMouse) {
         // debug() << "Yaw: " << radToDeg(m_Yaw) << " Pitch: " << radToDeg(m_Pitch) << endl;
         int dx = mouseEvent->X - m_LastMousePosition->X;
@@ -250,11 +258,11 @@ bool View::OnEvent(const SEvent& event)
                 dirVec3.rotateYZBy(camRot.X);
                 dirVec3.rotateXYBy(camRot.Y);
             }
-            //            vector3df dirVec3 = rotationVec3.rotationToDirection(forwards);
-            //            // move up and down, not in and out:
-            //            float z = dirVec3.Z;
-            //            dirVec3.Z = dirVec3.Y;
-            //            dirVec3.Z = z;
+            // vector3df dirVec3 = rotationVec3.rotationToDirection(forwards);
+            // // move up and down, not in and out:
+            // float z = dirVec3.Z;
+            // dirVec3.Z = dirVec3.Y;
+            // dirVec3.Z = z;
             dirVec3.X *= yDelta;
             dirVec3.Y *= yDelta;
             dirVec3.Z *= yDelta;
@@ -267,11 +275,11 @@ bool View::OnEvent(const SEvent& event)
 
 
             if (m_zUp) {
-                //m_Engine->m_CamPos.Z += yDelta;
-                //m_Engine->m_CamTarget.Z += yDelta;
+                // m_Engine->m_CamPos.Z += yDelta;
+                // m_Engine->m_CamTarget.Z += yDelta;
             } else {
-                //m_Engine->m_CamPos.Y += yDelta;
-                //m_Engine->m_CamTarget.Y += yDelta;
+                // m_Engine->m_CamPos.Y += yDelta;
+                // m_Engine->m_CamTarget.Y += yDelta;
             }
             // camera->setPosition(m_Engine->m_CamPos);
             // camera->setTarget(m_Engine->m_CamTarget);
@@ -286,7 +294,8 @@ bool View::OnEvent(const SEvent& event)
             // m_Yaw = atan2(offsetVec3.X, offsetVec3.Z);
             // m_Pitch = asin(offsetVec3.Y);
             setNewCameraPosition();
-            debug() << "AFTER Yaw: " << radToDeg(m_YawFromTarget)<< " Pitch: " << radToDeg(m_PitchFromTarget) << endl;
+            debug() << "AFTER Yaw: " << radToDeg(m_YawFromTarget)
+                    << " Pitch: " << radToDeg(m_PitchFromTarget) << endl;
 
             float xDelta = (dx / static_cast<float>(m_Engine->m_Driver->getScreenSize().Width/2)) * m_CameraDistance;
 
@@ -311,7 +320,8 @@ bool View::OnEvent(const SEvent& event)
                 sidewaysVec3.Z = xDelta * sin(sidewaysAngle);
                 sidewaysVec3.Y = 0;
             }
-            debug() << "sidewaysAngle:" << sidewaysAngle << "  zUp:" << ((m_zUp)?"true":"false") << endl;
+            debug() << "sidewaysAngle:" << sidewaysAngle
+                    << "  zUp:" << ((m_zUp)?"true":"false") << endl;
             m_Engine->m_CamPos.X += sidewaysVec3.X;
             m_Engine->m_CamPos.Y += sidewaysVec3.Y;
             m_Engine->m_CamPos.Z += sidewaysVec3.Z;
@@ -341,6 +351,5 @@ bool View::OnEvent(const SEvent& event)
             setNewCameraPosition();
         }
     }
-
     return true;
 }

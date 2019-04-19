@@ -43,22 +43,46 @@ void UserInterface::setupUserInterface()
 
     // View Menu
     viewMenu = menu->getSubMenu(1);
-    viewWireframeIdx = viewMenu->addItem(L"Wireframe", UIC_VIEW_WIREFRAME, true, false, this->m_WireframeDisplay, true);
-    viewLightingIdx = viewMenu->addItem(L"Lighting", UIC_VIEW_LIGHTING, true, false, this->m_Lighting, true);
-    viewAxisWidgetIdx = viewMenu->addItem(L"Origin Axis Widget", UIC_VIEW_AXIS_WIDGET, true, false, true, true);
-    viewTargetIdx = viewMenu->addItem(L"Camera Target", UIC_VIEW_TARGET, true, false, false, true);
+    viewWireframeIdx = viewMenu->addItem(L"Wireframe",
+                                         UIC_VIEW_WIREFRAME, true,
+                                         false, this->m_WireframeDisplay, true);
+    viewLightingIdx = viewMenu->addItem(L"Lighting",
+                                        UIC_VIEW_LIGHTING, true,
+                                        false, this->m_Lighting, true);
+    viewAxisWidgetIdx = viewMenu->addItem(L"Origin Axis Widget",
+                                          UIC_VIEW_AXIS_WIDGET, true, false,
+                                          true, true);
+    viewTargetIdx = viewMenu->addItem(L"Camera Target",
+                                      UIC_VIEW_TARGET, true, false,
+                                      false, true);
 
-    viewTextureInterpolationIdx = viewMenu->addItem(L"Texture Interpolation  Ctrl i", UIC_VIEW_TEXTURE_INTERPOLATION, true, false, this->m_TextureInterpolation, true);
+    viewTextureInterpolationIdx = viewMenu->addItem(L"Texture Interpolation  Ctrl i",
+                                                    UIC_VIEW_TEXTURE_INTERPOLATION, true, false,
+                                                    this->m_TextureInterpolation, true);
 
-    viewYUpIdx = viewMenu->addItem(L"Y Up", UIC_VIEW_Y_UP, true, false, true, true);
-    viewZUpIdx = viewMenu->addItem(L"Z Up", UIC_VIEW_Z_UP, true, false, false, true);
-    viewMenu->addItem(L"Slower               Ctrl Left", UIC_VIEW_SLOWER, true, false, false, false);
-    viewMenu->addItem(L"Faster               Ctrl Right", UIC_VIEW_FASTER, true, false, false, false);
+    viewYUpIdx = viewMenu->addItem(L"Y Up",
+                                   UIC_VIEW_Y_UP, true, false,
+                                   true, true);
+    viewZUpIdx = viewMenu->addItem(L"Z Up",
+                                   UIC_VIEW_Z_UP, true, false,
+                                   false, true);
+    viewMenu->addItem(L"Slower               Ctrl Left",
+                      UIC_VIEW_SLOWER, true, false,
+                      false, false);
+    viewMenu->addItem(L"Faster               Ctrl Right",
+                      UIC_VIEW_FASTER, true, false,
+                      false, false);
 
     // Playback Control Window
     dimension2d<u32> windowSize = m_Engine->m_Driver->getScreenSize();
     playbackWindow = m_Gui->addWindow(
-        rect<s32>(vector2d<s32>(windowSize.Width - 4 - 160, 28), dimension2d<s32>(160, 300)), false, L"Playback", nullptr, UIE_PLAYBACKWINDOW);
+        rect<s32>(vector2d<s32>(windowSize.Width - 4 - 160, 28),
+                  dimension2d<s32>(160, 300)),
+        false,
+        L"Playback",
+        nullptr,
+        UIE_PLAYBACKWINDOW
+    );
     playbackWindow->getCloseButton()->setVisible(false);
     s32 spacing_x = 4;
     s32 margin_y = 4;
@@ -67,7 +91,8 @@ void UserInterface::setupUserInterface()
     s32 size_y = 24;
     s32 y = 24;
     playbackStartStopButton = m_Gui->addButton(
-        rect<s32>(vector2d<s32>(spacing_x, y), dimension2d<s32>(size_x, size_y)),
+        rect<s32>(vector2d<s32>(spacing_x, y),
+                  dimension2d<s32>(size_x, size_y)),
         playbackWindow,
         UIE_PLAYBACKSTARTSTOPBUTTON,
         L"Start/Stop",
@@ -76,7 +101,8 @@ void UserInterface::setupUserInterface()
     y += size_y + spacing_y;
     playbackSetFrameEditBox = m_Gui->addEditBox(
         L"",
-        rect<s32>(vector2d<s32>(spacing_x, y), dimension2d<s32>(size_x, size_y)),
+        rect<s32>(vector2d<s32>(spacing_x, y),
+                  dimension2d<s32>(size_x, size_y)),
         true,
         playbackWindow,
         UIE_PLAYBACKSETFRAMEEDITBOX);
@@ -84,7 +110,8 @@ void UserInterface::setupUserInterface()
 
     y += size_y + spacing_y;
     playbackIncreaseButton = m_Gui->addButton(
-        rect<s32>(vector2d<s32>(spacing_x, y), dimension2d<s32>(size_x, size_y)),
+        rect<s32>(vector2d<s32>(spacing_x, y),
+                  dimension2d<s32>(size_x, size_y)),
         playbackWindow,
         UIE_PLAYBACKINCREASEBUTTON,
         L"Faster",
@@ -92,7 +119,8 @@ void UserInterface::setupUserInterface()
 
     y += size_y + spacing_y;
     playbackDecreaseButton = m_Gui->addButton(
-        rect<s32>(vector2d<s32>(spacing_x, y), dimension2d<s32>(size_x, size_y)),
+        rect<s32>(vector2d<s32>(spacing_x, y),
+                  dimension2d<s32>(size_x, size_y)),
         playbackWindow,
         UIE_PLAYBACKDECREASEBUTTON,
         L"Slower",
@@ -101,7 +129,8 @@ void UserInterface::setupUserInterface()
     y += size_y + spacing_y;
     playbackFPSEditBox = m_Gui->addEditBox(
         L"",
-        rect<s32>(vector2d<s32>(spacing_x, y), dimension2d<s32>(size_x, size_y)),
+        rect<s32>(vector2d<s32>(spacing_x, y),
+                  dimension2d<s32>(size_x, size_y)),
         true,
         playbackWindow,
         UIE_FPSEDITBOX);
@@ -110,7 +139,8 @@ void UserInterface::setupUserInterface()
     y += size_y + spacing_y;
     texturePathStaticText = m_Gui->addStaticText(
         L"Texture Path:",
-        rect<s32>(vector2d<s32>(spacing_x, y), dimension2d<s32>(size_x, size_y)),
+        rect<s32>(vector2d<s32>(spacing_x, y),
+                  dimension2d<s32>(size_x, size_y)),
         true,
         true,
         playbackWindow,
@@ -120,7 +150,8 @@ void UserInterface::setupUserInterface()
     y += size_y + spacing_y;
     texturePathEditBox = m_Gui->addEditBox(
         L"",
-        rect<s32>(vector2d<s32>(spacing_x, y), dimension2d<s32>(size_x, size_y)),
+        rect<s32>(vector2d<s32>(spacing_x, y),
+                  dimension2d<s32>(size_x, size_y)),
         true,
         playbackWindow,
         UIE_TEXTUREPATHEDITBOX);
@@ -129,7 +160,8 @@ void UserInterface::setupUserInterface()
     y += size_y + spacing_y;
     axisSizeStaticText = m_Gui->addStaticText(
         L"Axis Size:",
-        rect<s32>(vector2d<s32>(spacing_x, y), dimension2d<s32>(size_x, size_y)),
+        rect<s32>(vector2d<s32>(spacing_x, y)
+                  dimension2d<s32>(size_x, size_y)),
         true,
         true,
         playbackWindow,
@@ -139,7 +171,8 @@ void UserInterface::setupUserInterface()
     y += size_y + spacing_y;
     axisSizeEditBox = m_Gui->addEditBox(
         L"",
-        rect<s32>(vector2d<s32>(spacing_x, y), dimension2d<s32>(size_x, size_y)),
+        rect<s32>(vector2d<s32>(spacing_x, y),
+                  dimension2d<s32>(size_x, size_y)),
         true,
         playbackWindow,
         UIE_AXISSIZEEDITBOX);
@@ -175,7 +208,8 @@ void UserInterface::setupUserInterface()
         m_GuiFont->attach(m_GuiFontFace, 14);
         m_Gui->getSkin()->setFont(m_GuiFont);
     } else {
-        std::wcerr << L"WARNING: Missing '" << m_Engine->m_FontPath << L"'" << endl;
+        std::wcerr << L"WARNING: Missing '" << m_Engine->m_FontPath << L"'"
+                   << endl;
         delete m_GuiFontFace;
         m_GuiFontFace = nullptr;
         if (m_GuiFont != nullptr) {
@@ -187,12 +221,14 @@ void UserInterface::setupUserInterface()
 
 void UserInterface::displayLoadFileDialog()
 {
-    m_Gui->addFileOpenDialog(L"Select file to load", true, nullptr, UIE_LOADFILEDIALOG);
+    m_Gui->addFileOpenDialog(L"Select file to load",
+                             true, nullptr, UIE_LOADFILEDIALOG);
 }
 
 void UserInterface::displayLoadTextureDialog()
 {
-    m_Gui->addFileOpenDialog(L"Select file to load", true, nullptr, UIE_LOADTEXTUREDIALOG);
+    m_Gui->addFileOpenDialog(L"Select file to load",
+                             true, nullptr, UIE_LOADTEXTUREDIALOG);
 }
 
 void UserInterface::handleMenuItemPressed(IGUIContextMenu* menu)
@@ -224,12 +260,14 @@ void UserInterface::handleMenuItemPressed(IGUIContextMenu* menu)
 
         case UIC_VIEW_WIREFRAME:
             m_WireframeDisplay = viewMenu->isItemChecked(viewWireframeIdx);
-            m_Engine->setMeshDisplayMode(m_WireframeDisplay, m_Lighting, m_TextureInterpolation);
+            m_Engine->setMeshDisplayMode(m_WireframeDisplay, m_Lighting,
+                                         m_TextureInterpolation);
             break;
 
         case UIC_VIEW_LIGHTING:
             m_Lighting = viewMenu->isItemChecked(viewLightingIdx);
-            m_Engine->setMeshDisplayMode(m_WireframeDisplay, m_Lighting, m_TextureInterpolation);
+            m_Engine->setMeshDisplayMode(m_WireframeDisplay, m_Lighting,
+                                         m_TextureInterpolation);
             break;
 
         case UIC_VIEW_TARGET:
@@ -247,8 +285,11 @@ void UserInterface::handleMenuItemPressed(IGUIContextMenu* menu)
             break;
 
         case UIC_VIEW_TEXTURE_INTERPOLATION:
-            m_TextureInterpolation = viewMenu->isItemChecked(viewTextureInterpolationIdx);
-            m_Engine->setMeshDisplayMode(m_WireframeDisplay, m_Lighting, m_TextureInterpolation);
+            m_TextureInterpolation = viewMenu->isItemChecked(
+                viewTextureInterpolationIdx
+            );
+            m_Engine->setMeshDisplayMode(m_WireframeDisplay, m_Lighting,
+                                         m_TextureInterpolation);
             break;
         }
     }
@@ -261,15 +302,21 @@ void UserInterface::snapWidgets()
     //newRect.LowerRightCorner.X = static_cast<s32>(size.Width);
     //newRect.LowerRightCorner.Y = static_cast<s32>(size.Height);
     rect<s32> prevRect = playbackWindow->getRelativePosition();
-    newRect.UpperLeftCorner.X = static_cast<s32>(screenSize.Width) - prevRect.getWidth() - spacing_y;
-    //debug() << "screen size: " << screenSize.Width << "x" << screenSize.Height;
-    //debug() << "  prevRect: "
-    //        << prevRect.UpperLeftCorner.X << "," << prevRect.UpperLeftCorner.Y << ","
-    //        << prevRect.LowerRightCorner.X << "," << prevRect.LowerRightCorner.Y
-    //        << " size=(" << prevRect.getWidth() << "," <<prevRect.getHeight() << ")" << endl;
+    newRect.UpperLeftCorner.X = static_cast<s32>(screenSize.Width)
+                                - prevRect.getWidth() - spacing_y;
+    // debug() << "screen size: " << screenSize.Width << "x" << screenSize.Height;
+    // debug() << "  prevRect: "
+    //         << prevRect.UpperLeftCorner.X << ","
+    //         << prevRect.UpperLeftCorner.Y << ","
+    //         << prevRect.LowerRightCorner.X << ","
+    //         << prevRect.LowerRightCorner.Y
+    //         << " size=(" << prevRect.getWidth() << ","
+    //         << prevRect.getHeight() << ")" << endl;
     newRect.UpperLeftCorner.Y = prevRect.UpperLeftCorner.Y;
-    newRect.LowerRightCorner.X = newRect.UpperLeftCorner.X + prevRect.getWidth();
-    newRect.LowerRightCorner.Y = newRect.UpperLeftCorner.Y + prevRect.getHeight();
+    newRect.LowerRightCorner.X = newRect.UpperLeftCorner.X
+                                 + prevRect.getWidth();
+    newRect.LowerRightCorner.Y = newRect.UpperLeftCorner.Y
+                                 + prevRect.getHeight();
     playbackWindow->setRelativePosition(newRect);
     m_WindowSize.Width = m_Engine->m_Driver->getScreenSize().Width;
     m_WindowSize.Height = m_Engine->m_Driver->getScreenSize().Height;
@@ -315,17 +362,26 @@ bool UserInterface::loadNextTexture(int direction)
     this->m_Engine->m_NextPath = L"";
     std::wstring basePath = L".";
     if (this->m_Engine->m_PreviousPath.length() > 0) {
-        std::wstring lastName = Utility::basename(this->m_Engine->m_PreviousPath);
-        std::wstring lastDirPath = Utility::parentOfPath(this->m_Engine->m_PreviousPath);
+        std::wstring lastName = Utility::basename(
+            this->m_Engine->m_PreviousPath
+        );
+        std::wstring lastDirPath = Utility::parentOfPath(
+            this->m_Engine->m_PreviousPath
+        );
         std::wstring parentPath = Utility::parentOfPath(lastDirPath);
-        std::wstring dirSeparator = Utility::delimiter(this->m_Engine->m_PreviousPath);
+        std::wstring dirSeparator = Utility::delimiter(
+            this->m_Engine->m_PreviousPath
+        );
         std::wstring texturesPath = parentPath + dirSeparator + L"textures";
-        std::wstring tryTexPath = texturesPath + dirSeparator + Utility::withoutExtension(lastName) + L".png";
+        std::wstring tryTexPath = texturesPath + dirSeparator
+                                  + Utility::withoutExtension(lastName)
+                                  + L".png";
         if (direction == 0 && Utility::isFile(tryTexPath)) {
             this->m_Engine->m_NextPath = tryTexPath;
             this->m_Engine->loadTexture(this->m_Engine->m_NextPath);
         } else {
-            tryTexPath = lastDirPath + dirSeparator + Utility::withoutExtension(lastName) + L".png";
+            tryTexPath = lastDirPath + dirSeparator
+                         + Utility::withoutExtension(lastName) + L".png";
             if (direction == 0 && Utility::isFile(tryTexPath)) {
                 this->m_Engine->m_NextPath = tryTexPath;
                 ret = this->m_Engine->loadTexture(this->m_Engine->m_NextPath);
@@ -333,9 +389,9 @@ bool UserInterface::loadNextTexture(int direction)
                 std::wstring path = texturesPath;
 
                 if (!fs::is_directory(fs::status(path)))
-                    path = lastDirPath; // cycle textures in model's directory instead
+                    path = lastDirPath; // cycle in model's directory instead
 
-                fs::directory_iterator end_itr; // default construction yields past-the-end
+                fs::directory_iterator end_itr; // default yields past-the-end
 
                 std::wstring nextPath = L"";
                 std::wstring retroPath = L"";
@@ -347,19 +403,25 @@ bool UserInterface::loadNextTexture(int direction)
                 if (fs::is_directory(fs::status(path))) {
                     if (this->m_Engine->m_PrevTexturePath.length() == 0) {
                         if (this->m_Engine->m_PreviousPath.length() > 0) {
-                            //debug() << "tryPath..." << endl;
-                            tryPath = texturesPath + dirSeparator + Utility::withoutExtension(Utility::basename(this->m_Engine->m_PreviousPath)) + L".png";
-                            // debug() << "tryPath 1a " << Utility::toString(tryPath) << "..." << endl;
+                            tryPath = texturesPath + dirSeparator
+                                      + Utility::withoutExtension(
+                                            Utility::basename(
+                                                this->m_Engine->m_PreviousPath
+                                            )
+                                        )
+                                      + L".png";
                             tryPath = Utility::toWstring(Utility::toString(tryPath));
-                            // debug() << "tryPath 1b " << Utility::toString(tryPath) << "..." << endl;
-                            // tryPath = texturesPath + dirSeparator + Utility::basename(this->m_Engine->m_PreviousPath) + L".png";
                             if (!Utility::isFile(tryPath)) {
-                                tryPath = texturesPath + dirSeparator + Utility::withoutExtension(Utility::basename(this->m_Engine->m_PreviousPath)) + L".jpg";
-                                // debug() << "tryPath 2a " << Utility::toString(tryPath) << "..." << endl;
-                                tryPath = Utility::toWstring(Utility::toString(tryPath));
-                                // tryPath = Utility::toWstring(Utility::toString(L"debug1")); // ../iconv/loop.c:457: internal_utf8_loop_single: Assertion `inptr - (state->__count & 7)' failed.
-                                // debug() << "tryPath 2b " << Utility::toString(tryPath) << "..." << endl;
-                                // tryPath = texturesPath + dirSeparator + Utility::basename(this->m_Engine->m_PreviousPath) + L".jpg";
+                                tryPath = texturesPath + dirSeparator
+                                          + Utility::withoutExtension(
+                                                Utility::basename(
+                                                    this->m_Engine->m_PreviousPath
+                                                )
+                                            )
+                                          + L".jpg";
+                                tryPath = Utility::toWstring(
+                                              Utility::toString(tryPath)
+                                          );
                                 if (Utility::isFile(tryPath)) {
                                     nextPath = tryPath;
                                     found = true;
@@ -372,14 +434,17 @@ bool UserInterface::loadNextTexture(int direction)
                             }
                         }
                     }
-                    // debug() << "tryPath: " << Utility::toString(tryPath) << endl;
-                    // debug() << "nextPath: " << Utility::toString(nextPath) << endl;
                     for (const auto& itr : fs::directory_iterator(path)) {
-                        std::wstring ext = Utility::extensionOf(itr.path().wstring()); // no dot!
+                        std::wstring ext = Utility::extensionOf(
+                                               itr.path().wstring()
+                                           ); // no dot!
                         if (!is_directory(itr.status())
-                            && std::find(m_Engine->textureExtensions.begin(), m_Engine->textureExtensions.end(), ext) != m_Engine->textureExtensions.end()) {
-                            // cycle through files (go to next after m_PrevTexturePath
-                            // if any previously loaded, otherwise first)
+                            && std::find(m_Engine->textureExtensions.begin(),
+                                         m_Engine->textureExtensions.end(), ext)
+                               != m_Engine->textureExtensions.end()) {
+                            // cycle through files (go to next after
+                            // m_PrevTexturePath if any previously loaded,
+                            // otherwise first)
                             if (nextPath.length() == 0)
                                 nextPath = itr.path().wstring();
                             lastPath = itr.path().wstring();
@@ -388,14 +453,15 @@ bool UserInterface::loadNextTexture(int direction)
                                     nextPath = itr.path().wstring();
                                 break;
                             }
-                            if (itr.path().wstring() == this->m_Engine->m_PrevTexturePath)
+                            if (itr.path().wstring()
+                                    == this->m_Engine->m_PrevTexturePath)
                                 found = true;
                             if (!found)
                                 retroPath = itr.path().wstring();
                         }
                     }
                     if (retroPath.length() == 0)
-                        retroPath = lastPath; // previous is last if at beginning
+                        retroPath = lastPath; // previous is last if at start
                     if (direction < 0)
                         nextPath = retroPath;
                     if (nextPath.length() > 0) {
@@ -417,7 +483,8 @@ bool UserInterface::OnEvent(const SEvent& event)
     if (event.EventType == EET_USER_EVENT) {
         // debug() << "EET_USER_EVENT..." << endl;
         if (event.UserEvent.UserData1 == UEI_WINDOWSIZECHANGED) {
-            if ((m_WindowSize.Width != m_Engine->m_Driver->getScreenSize().Width) || (m_WindowSize.Height != m_Engine->m_Driver->getScreenSize().Height)) {
+            if ((m_WindowSize.Width != m_Engine->m_Driver->getScreenSize().Width)
+                    || (m_WindowSize.Height != m_Engine->m_Driver->getScreenSize().Height)) {
                 snapWidgets();
             }
             handled = true;
@@ -467,7 +534,9 @@ bool UserInterface::OnEvent(const SEvent& event)
         case UIE_PLAYBACKSETFRAMEEDITBOX:
             if (ge->EventType == EGET_EDITBOX_ENTER) {
                 if (this->m_Engine->m_LoadedMesh != nullptr) {
-                    this->m_Engine->m_LoadedMesh->setCurrentFrame(Utility::toF32(this->playbackSetFrameEditBox->getText()));
+                    this->m_Engine->m_LoadedMesh->setCurrentFrame(
+                        Utility::toF32(this->playbackSetFrameEditBox->getText())
+                    );
                 }
             }
             break;
@@ -481,13 +550,17 @@ bool UserInterface::OnEvent(const SEvent& event)
         case UIE_FPSEDITBOX:
             if (ge->EventType == EGET_EDITBOX_ENTER) {
                 if (this->m_Engine->m_LoadedMesh != nullptr) {
-                    this->m_Engine->m_LoadedMesh->setAnimationSpeed(Utility::toF32(this->playbackFPSEditBox->getText()));
+                    this->m_Engine->m_LoadedMesh->setAnimationSpeed(
+                        Utility::toF32(this->playbackFPSEditBox->getText())
+                    );
                 }
             }
             break;
         case UIE_AXISSIZEEDITBOX:
             if (ge->EventType == EGET_EDITBOX_ENTER) {
-                this->m_Engine->axisLength = Utility::toF32(this->axisSizeEditBox->getText());
+                this->m_Engine->axisLength = Utility::toF32(
+                    this->axisSizeEditBox->getText()
+                );
             }
             break;
 
@@ -500,21 +573,30 @@ bool UserInterface::OnEvent(const SEvent& event)
         handled = true; // set to false below if not handled
         if (event.KeyInput.PressedDown && !m_Engine->KeyIsDown[event.KeyInput.Key]) {
             if (event.KeyInput.Key == irr::KEY_F5) {
-                if (m_Engine->KeyIsDown[irr::KEY_LSHIFT] || m_Engine->KeyIsDown[irr::KEY_RSHIFT]) {
+                if (m_Engine->KeyIsDown[irr::KEY_LSHIFT]
+                        || m_Engine->KeyIsDown[irr::KEY_RSHIFT]) {
                     m_Engine->reloadTexture();
                 }
                 else
                     m_Engine->reloadMesh();
             } else if (event.KeyInput.Key == irr::KEY_F3) {
-                if (m_Engine->KeyIsDown[irr::KEY_LSHIFT] || m_Engine->KeyIsDown[irr::KEY_RSHIFT]) {
+                if (m_Engine->KeyIsDown[irr::KEY_LSHIFT]
+                        || m_Engine->KeyIsDown[irr::KEY_RSHIFT]) {
                     loadNextTexture(-1);
                     debug() << "  - back" << endl;
                 }
                 else
                     loadNextTexture(1);
             } else if (event.KeyInput.Key == irr::KEY_KEY_I) {
-                if (m_Engine->KeyIsDown[irr::KEY_LCONTROL] || m_Engine->KeyIsDown[irr::KEY_RCONTROL]) {
-                    // IGUIContextMenu* textureInterpolationElement = dynamic_cast<IGUIContextMenu*>(viewMenu->getElementFromId(UIC_VIEW_TEXTURE_INTERPOLATION));
+                if (m_Engine->KeyIsDown[irr::KEY_LCONTROL]
+                        || m_Engine->KeyIsDown[irr::KEY_RCONTROL]) {
+                    // IGUIContextMenu* textureInterpolationElement = (
+                    //     dynamic_cast<IGUIContextMenu*>(
+                    //         viewMenu->getElementFromId(
+                    //             UIC_VIEW_TEXTURE_INTERPOLATION
+                    //         )
+                    //     );
+                    // )
                     // m_TextureInterpolation = textureInterpolationElement->isItemChecked(UIC_VIEW_TEXTURE_INTERPOLATION);
                     m_TextureInterpolation = m_TextureInterpolation ? false : true;
                     // doesn't work: m_TextureInterpolation = viewMenu->isItemChecked(UIC_VIEW_TEXTURE_INTERPOLATION);
@@ -524,13 +606,15 @@ bool UserInterface::OnEvent(const SEvent& event)
                 else
                     handled = false;
             } else if (event.KeyInput.Key == irr::KEY_RIGHT) {
-                if (m_Engine->KeyIsDown[irr::KEY_LCONTROL] || m_Engine->KeyIsDown[irr::KEY_RCONTROL]) {
+                if (m_Engine->KeyIsDown[irr::KEY_LCONTROL]
+                        || m_Engine->KeyIsDown[irr::KEY_RCONTROL]) {
                     m_Engine->incrementAnimationFPS(5);
                 }
                 else
                     handled = false;
             } else if (event.KeyInput.Key == irr::KEY_LEFT) {
-                if (m_Engine->KeyIsDown[irr::KEY_LCONTROL] || m_Engine->KeyIsDown[irr::KEY_RCONTROL]) {
+                if (m_Engine->KeyIsDown[irr::KEY_LCONTROL]
+                        || m_Engine->KeyIsDown[irr::KEY_RCONTROL]) {
                     m_Engine->incrementAnimationFPS(-5);
                 }
                 else
@@ -541,15 +625,27 @@ bool UserInterface::OnEvent(const SEvent& event)
                 if (this->m_Engine->m_LoadedMesh != nullptr) {
                     if (m_Engine->isPlaying)
                         m_Engine->toggleAnimation();
-                    this->m_Engine->m_LoadedMesh->setCurrentFrame(round(this->m_Engine->m_LoadedMesh->getFrameNr()) - 1);
-                    this->playbackSetFrameEditBox->setText(Utility::toWstring(this->m_Engine->m_LoadedMesh->getFrameNr()).c_str());
+                    this->m_Engine->m_LoadedMesh->setCurrentFrame(
+                        round(this->m_Engine->m_LoadedMesh->getFrameNr()) - 1
+                    );
+                    this->playbackSetFrameEditBox->setText(
+                        Utility::toWstring(
+                            this->m_Engine->m_LoadedMesh->getFrameNr()
+                        ).c_str()
+                    );
                 }
             } else if (event.KeyInput.Key == irr::KEY_RIGHT) {
                 if (this->m_Engine->m_LoadedMesh != nullptr) {
                     if (m_Engine->isPlaying)
                         m_Engine->toggleAnimation();
-                    this->m_Engine->m_LoadedMesh->setCurrentFrame(round(this->m_Engine->m_LoadedMesh->getFrameNr()) + 1);
-                    this->playbackSetFrameEditBox->setText(Utility::toWstring(this->m_Engine->m_LoadedMesh->getFrameNr()).c_str());
+                    this->m_Engine->m_LoadedMesh->setCurrentFrame(
+                        round(this->m_Engine->m_LoadedMesh->getFrameNr()) + 1
+                    );
+                    this->playbackSetFrameEditBox->setText(
+                        Utility::toWstring(
+                            this->m_Engine->m_LoadedMesh->getFrameNr()
+                        ).c_str()
+                    );
                 }
             }
             else

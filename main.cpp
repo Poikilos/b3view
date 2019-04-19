@@ -13,7 +13,8 @@ wchar_t* getWideCharString(char* str);
 
 #ifdef WIN32
 #include <Windows.h>
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
+                   LPSTR lpCmdLine, int nCmdShow)
 #else
 int main(int argc, char** argv)
 #endif
@@ -58,7 +59,9 @@ int main(int argc, char** argv)
 
 wchar_t* getWideCharString(char* str)
 {
-    wchar_t* dest = static_cast<wchar_t*>(malloc(sizeof(wchar_t) * (strlen(str) + 1)));
+    wchar_t* dest = static_cast<wchar_t*>(
+        malloc(sizeof(wchar_t) * (strlen(str) + 1))
+    );
 
     size_t resultSize = mbstowcs(nullptr, str, strlen(str));
     mbstowcs(dest, str, strlen(str));

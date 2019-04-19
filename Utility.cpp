@@ -34,14 +34,25 @@ void Utility::dumpMeshInfoToConsole(IAnimatedMeshSceneNode* node)
     // Dump some information about the mesh to the console
     IAnimatedMesh* mesh = node->getMesh();
 
-    debug() << "[MESH]: # of frames            : " << mesh->getFrameCount() << endl;
-    debug() << "[MESH]: # of materials         : " << node->getMaterialCount() << endl;
+    debug() << "[MESH]: # of frames            : " << mesh->getFrameCount()
+            << endl;
+    debug() << "[MESH]: # of materials         : " << node->getMaterialCount()
+            << endl;
     for (irr::u32 matIndex = 0; matIndex < node->getMaterialCount(); matIndex++) {
         debug() << "[MESH]:   Material # " << matIndex << endl;
         const SMaterial& material = node->getMaterial(matIndex);
-        debug() << "[MESH]:      Diffuse Color       : A" << material.DiffuseColor.getAlpha() << " R" << material.DiffuseColor.getRed() << " G" << material.DiffuseColor.getGreen() << " B" << material.DiffuseColor.getBlue() << endl;
-        debug() << "[MESH]:      Specular Color      : A" << material.SpecularColor.getAlpha() << " R" << material.SpecularColor.getRed() << " G" << material.SpecularColor.getGreen() << " B" << material.SpecularColor.getBlue() << endl;
-        debug() << "[MESH]:      Specular Shininess  : " << material.Shininess << endl;
+        debug() << "[MESH]:      Diffuse Color       : A"
+                << material.DiffuseColor.getAlpha()
+                << " R" << material.DiffuseColor.getRed()
+                << " G" << material.DiffuseColor.getGreen()
+                << " B" << material.DiffuseColor.getBlue() << endl;
+        debug() << "[MESH]:      Specular Color      : A"
+                << material.SpecularColor.getAlpha()
+                << " R" << material.SpecularColor.getRed()
+                << " G" << material.SpecularColor.getGreen()
+                << " B" << material.SpecularColor.getBlue() << endl;
+        debug() << "[MESH]:      Specular Shininess  : "
+                << material.Shininess << endl;
 
         // check for # textures
         int textures = 0;
@@ -154,23 +165,33 @@ std::string Utility::toString(const std::wstring& ws)
     }
     return ret;
 
-    //below sometimes results in "internal_utf8_loop_single: Assertion `inptr - bytebuf > (state->__count & 7)' failed." on the converter.out call:
-    //if (ws.length() > 0) {
-    //    // convert to w_string using locale: see Phillipp on <https://stackoverflow.com/questions/4804298/how-to-convert-wstring-into-string>
-    //    std::setlocale(LC_ALL, "");
-    //    const std::locale locale("");
-    //    typedef std::codecvt<wchar_t, char, std::mbstate_t> converter_type;
-    //    const converter_type& converter = std::use_facet<converter_type>(locale);
-    //    std::vector<char> to(ws.length() * converter.max_length());
-    //    std::mbstate_t state;
-    //    const wchar_t* from_next = nullptr;
-    //    char* to_next = nullptr;
-    //    const converter_type::result result = converter.out(state, ws.data(), ws.data() + ws.length(), from_next, &to[0], &to[0] + to.size(), to_next);
-    //    if (result == converter_type::ok or result == converter_type::noconv) {
-    //        const std::string s(&to[0], to_next);
-    //        //std::cout <<"std::string =     "<<s<<std::endl;
-    //        ret = s;
-    //    }
+    // below sometimes results in "internal_utf8_loop_single: Assertion
+    //   `inptr - bytebuf > (state->__count & 7)' failed."
+    //   on the converter.out call:
+    // if (ws.length() > 0) {
+    // // convert to w_string using locale: see Phillipp on
+    // // <https://stackoverflow.com/questions/4804298/how-to-convert-wstring-into-string>
+    // std::setlocale(LC_ALL, "");
+    // const std::locale locale("");
+    // typedef std::codecvt<wchar_t, char, std::mbstate_t> converter_type;
+    // const converter_type& converter = std::use_facet<converter_type>(locale);
+    // std::vector<char> to(ws.length() * converter.max_length());
+    // std::mbstate_t state;
+    // const wchar_t* from_next = nullptr;
+    // char* to_next = nullptr;
+    // const converter_type::result result = converter.out(
+    //     state, ws.data(),
+    //     ws.data() + ws.length(),
+    //     from_next,
+    //     &to[0],
+    //     &to[0] + to.size(),
+    //     to_next
+    // );
+    // if (result == converter_type::ok or result == converter_type::noconv) {
+    //     const std::string s(&to[0], to_next);
+    //     // std::cout <<"std::string =     "<<s<<std::endl;
+    //     ret = s;
+    // }
     //return ret;
 }
 
@@ -240,9 +261,10 @@ std::string Utility::toString(irr::f32 val)
     return std::to_string(val);
 }
 
-//don't do late instantiation (see header file)
-//template<typename T>
-//bool Utility::equalsApprox(T f1, T f2)
-//{
-//    return abs(f2-f1) < .00000001;  // TODO: kEpsilon? (see also <https://en.wikipedia.org/wiki/Machine_epsilon#How_to_determine_machine_epsilon>)
-//}
+// don't do late instantiation (see header file)
+// template<typename T>
+// bool Utility::equalsApprox(T f1, T f2)
+// {
+//     return abs(f2-f1) < .00000001;  // TODO: kEpsilon? (see also
+//     // <https://en.wikipedia.org/wiki/Machine_epsilon#How_to_determine_machine_epsilon>)
+// }

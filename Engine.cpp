@@ -33,11 +33,16 @@ void Engine::setupScene()
     m_Scene->setAmbientLight(SColorf(0.2f, 0.2f, 0.2f));
 
     // Setup Camera
-    // (so z-forward characters face camera partially (formerly vector3df(0, 0, -10), vector3df())
+    // (so z-forward characters face camera partially
+    // (formerly vector3df(0, 0, -10), vector3df())
     m_CamPos = vector3df(4.5, 3.5, 9);
     m_CamTarget = vector3df(0, 3, 0);
-    ICameraSceneNode* camera = m_Scene->addCameraSceneNode(nullptr, m_CamPos, m_CamTarget); // this will be overridden by View m_Yaw and m_Pitch--see "calculate m_Yaw" further down
-    camera->setAspectRatio(static_cast<f32>(m_Driver->getScreenSize().Width) / static_cast<f32>(m_Driver->getScreenSize().Height));
+    // Below will be overridden by View m_Yaw and m_Pitch--see "calculate m_Yaw"
+    // further down.
+    ICameraSceneNode* camera = m_Scene->addCameraSceneNode(nullptr, m_CamPos,
+                                                           m_CamTarget);
+    camera->setAspectRatio(static_cast<f32>(m_Driver->getScreenSize().Width)
+                           / static_cast<f32>(m_Driver->getScreenSize().Height));
 }
 
 IGUIEnvironment* Engine::getGUIEnvironment() const
@@ -68,7 +73,8 @@ void Engine::drawAxisLines()
     bool enableAxisWidget = true;
     m_Driver->setTransform(ETS_WORLD, matrix4());
     if (m_View != nullptr) {
-        if (this->m_UserInterface->viewMenu->isItemChecked(this->m_UserInterface->viewTargetIdx)) {
+        if (this->m_UserInterface->viewMenu->isItemChecked(
+                    this->m_UserInterface->viewTargetIdx)) {
             if (m_View->zUp()) {
                 descend3df.Z = this->m_CamTarget.Z;
             }
@@ -85,10 +91,13 @@ void Engine::drawAxisLines()
                 descendSidewaysForward3df.Z = this->m_CamTarget.Z;
             }
             m_Driver->setMaterial(descenderMaterialVert);
-            m_Driver->draw3DLine(vector3df(), descend3df, descenderMaterialVert.EmissiveColor);
+            m_Driver->draw3DLine(vector3df(), descend3df,
+                                 descenderMaterialVert.EmissiveColor);
             m_Driver->setMaterial(descenderMaterialHorz);
-            m_Driver->draw3DLine(descend3df, descendSideways3df, descenderMaterialHorz.EmissiveColor);
-            m_Driver->draw3DLine(descendSideways3df, descendSidewaysForward3df, descenderMaterialHorz.EmissiveColor);
+            m_Driver->draw3DLine(descend3df, descendSideways3df,
+                                 descenderMaterialHorz.EmissiveColor);
+            m_Driver->draw3DLine(descendSideways3df, descendSidewaysForward3df,
+                                 descenderMaterialHorz.EmissiveColor);
             f32 arrowDirection = 1.0f;
             vector3df arrowLeft3df(descendSidewaysForward3df);
             vector3df arrowRight3df(descendSidewaysForward3df);
@@ -109,43 +118,63 @@ void Engine::drawAxisLines()
                 arrowRight3df.X -= arrowSize;
                 arrowRight3df.Z += arrowSize * arrowDirection;
             }
-            m_Driver->draw3DLine(descendSidewaysForward3df, arrowLeft3df, descenderMaterialHorz.EmissiveColor);
-            m_Driver->draw3DLine(descendSidewaysForward3df, arrowRight3df, descenderMaterialHorz.EmissiveColor);
-            // position2d<s32> targetPos2d = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(this->m_CamTarget);
+            m_Driver->draw3DLine(descendSidewaysForward3df, arrowLeft3df,
+                                 descenderMaterialHorz.EmissiveColor);
+            m_Driver->draw3DLine(descendSidewaysForward3df, arrowRight3df,
+                                 descenderMaterialHorz.EmissiveColor);
+            // position2d<s32> targetPos2d = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(
+            //     this->m_CamTarget
+            // );
             // dimension2d<u32> textSize;
             // if (m_AxisFont != nullptr) {
             //     textSize = m_AxisFont->getDimension(L"target");
-            //     m_AxisFont->draw(L"target", rect<s32>(targetPos2d, textSize), descenderMaterial.EmissiveColor, true, true);
+            //     m_AxisFont->draw(L"target", rect<s32>(targetPos2d, textSize),
+            //                      descenderMaterial.EmissiveColor, true,
+            //                      true);
             // }
         }
-        enableAxisWidget = this->m_UserInterface->viewMenu->isItemChecked(this->m_UserInterface->viewAxisWidgetIdx);
+        enableAxisWidget = this->m_UserInterface->viewMenu->isItemChecked(
+            this->m_UserInterface->viewAxisWidgetIdx
+        );
     }
 
 
     if (enableAxisWidget) {
         m_Driver->setMaterial(xMaterial);
-        m_Driver->draw3DLine(vector3df(), vector3df(axisLength, 0, 0), SColor(255, 255, 0, 0));
-        position2d<s32> textPos = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(vector3df(axisLength + axisLength*.1f, 0, 0));
+        m_Driver->draw3DLine(vector3df(), vector3df(axisLength, 0, 0),
+                             SColor(255, 255, 0, 0));
+        position2d<s32> textPos = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(
+            vector3df(axisLength + axisLength*.1f, 0, 0)
+        );
         dimension2d<u32> textSize;
         if (m_AxisFont != nullptr) {
             textSize = m_AxisFont->getDimension(L"X+");
-            m_AxisFont->draw(L"X+", rect<s32>(textPos, textSize), SColor(255, 255, 0, 0), true, true);
+            m_AxisFont->draw(L"X+", rect<s32>(textPos, textSize),
+                             SColor(255, 255, 0, 0), true, true);
         }
 
         m_Driver->setMaterial(yMaterial);
-        m_Driver->draw3DLine(vector3df(), vector3df(0, axisLength, 0), SColor(255, 0, 255, 0));
-        textPos = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(vector3df(0, axisLength + axisLength*.1f, 0));
+        m_Driver->draw3DLine(vector3df(), vector3df(0, axisLength, 0),
+                             SColor(255, 0, 255, 0));
+        textPos = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(
+            vector3df(0, axisLength + axisLength*.1f, 0)
+        );
         if (m_AxisFont != nullptr) {
             textSize = m_AxisFont->getDimension(L"Y+");
-            m_AxisFont->draw(L"Y+", rect<s32>(textPos, textSize), SColor(255, 0, 255, 0), true, true);
+            m_AxisFont->draw(L"Y+", rect<s32>(textPos, textSize),
+                             SColor(255, 0, 255, 0), true, true);
         }
 
         m_Driver->setMaterial(zMaterial);
-        m_Driver->draw3DLine(vector3df(), vector3df(0, 0, axisLength), SColor(255, 0, 0, 255));
-        textPos = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(vector3df(0, 0, axisLength + axisLength*.1f));
+        m_Driver->draw3DLine(vector3df(), vector3df(0, 0, axisLength),
+                             SColor(255, 0, 0, 255));
+        textPos = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(
+            vector3df(0, 0, axisLength + axisLength*.1f)
+        );
         if (m_AxisFont != nullptr) {
             textSize = m_AxisFont->getDimension(L"Z+");
-            m_AxisFont->draw(L"Z+", rect<s32>(textPos, textSize), SColor(255, 0, 0, 255), true, true);
+            m_AxisFont->draw(L"Z+", rect<s32>(textPos, textSize),
+                             SColor(255, 0, 0, 255), true, true);
         }
         //delete xMaterial;
         //delete yMaterial;
@@ -156,16 +185,20 @@ void Engine::drawAxisLines()
 void Engine::drawBackground()
 {
     dimension2d<u32> screenSize = m_Driver->getScreenSize();
-    m_Driver->draw2DRectangle(rect<s32>(0, 0, static_cast<s32>(screenSize.Width), static_cast<s32>(screenSize.Height)),
+    m_Driver->draw2DRectangle(
+        rect<s32>(0, 0, static_cast<s32>(screenSize.Width),
+                  static_cast<s32>(screenSize.Height)),
         SColor(255, 128, 128, 255),
         SColor(255, 128, 128, 255),
         SColor(255, 224, 224, 255),
-        SColor(255, 224, 224, 255));
+        SColor(255, 224, 224, 255)
+    );
 }
 
 void Engine::checkResize()
 {
-    if ((m_WindowSize.Width != m_Driver->getScreenSize().Width) || (m_WindowSize.Height != m_Driver->getScreenSize().Height)) {
+    if ((m_WindowSize.Width != m_Driver->getScreenSize().Width)
+            || (m_WindowSize.Height != m_Driver->getScreenSize().Height)) {
         m_WindowSize.Width = m_Driver->getScreenSize().Width;
         m_WindowSize.Height = m_Driver->getScreenSize().Height;
 
@@ -214,9 +247,11 @@ Engine::Engine()
     this->textureExtensions.push_back(L"jpg");
     this->textureExtensions.push_back(L"bmp");
 #if WIN32
-    m_Device = createDevice(EDT_DIRECT3D9, dimension2d<u32>(1024, 768), 32, false, false, false, nullptr);
+    m_Device = createDevice(EDT_DIRECT3D9, dimension2d<u32>(1024, 768), 32,
+                            false, false, false, nullptr);
 #else
-    m_Device = createDevice(EDT_OPENGL, dimension2d<u32>(1024, 768), 32, false, false, false, nullptr);
+    m_Device = createDevice(EDT_OPENGL, dimension2d<u32>(1024, 768), 32,
+                            false, false, false, nullptr);
 #endif
     m_Device->setResizable(true);
 
@@ -227,7 +262,8 @@ Engine::Engine()
     m_Scene = m_Device->getSceneManager();
 
     wstringstream windowTitle;
-    windowTitle << L"b3view (Blitz3D/Irrlicht Viewer) [" << m_Driver->getName() << L"]";
+    windowTitle << L"b3view (Blitz3D/Irrlicht Viewer) [" << m_Driver->getName()
+                << L"]";
     m_Device->setWindowCaption(windowTitle.str().c_str());
 
     setupScene();
@@ -242,7 +278,8 @@ Engine::Engine()
 
     // Load font for displaying Axis names
     m_AxisFontFace = new CGUITTFace();
-    // NOTE: m_FontPath is modified y UserInterface constructor above if font was missing
+    // NOTE: m_FontPath is modified y UserInterface constructor above if font
+    // was missing
     if (m_AxisFontFace->load(m_FontPath.c_str())) {
         m_AxisFont = new CGUITTFont(m_UserInterface->getGUIEnvironment());
         m_AxisFont->attach(m_AxisFontFace, 14);
@@ -286,7 +323,7 @@ void Engine::loadMesh(const wstring& fileName)
 
     irr::scene::IAnimatedMesh* mesh = m_Scene->getMesh(fileName.c_str());
     if (mesh != nullptr) {
-        m_Device->setWindowCaption(( wstring(L"b3view - ") + fileName).c_str());
+        m_Device->setWindowCaption((wstring(L"b3view - ") + fileName).c_str());
         m_LoadedMesh = m_Scene->addAnimatedMeshSceneNode(mesh);
         Utility::dumpMeshInfoToConsole(m_LoadedMesh);
         if (Utility::toLower(Utility::extensionOf(fileName)) == L"3ds") {
@@ -295,7 +332,9 @@ void Engine::loadMesh(const wstring& fileName)
             m_View->setZUp(false);
         }
         if (m_LoadedMesh != nullptr) {
-            this->m_UserInterface->playbackFPSEditBox->setText(Utility::toWstring(m_LoadedMesh->getAnimationSpeed()).c_str());
+            this->m_UserInterface->playbackFPSEditBox->setText(
+                Utility::toWstring(m_LoadedMesh->getAnimationSpeed()).c_str()
+            );
             ICameraSceneNode* camera = this->m_Scene->getActiveCamera();
             aabbox3d<f32> box = m_LoadedMesh->getTransformedBoundingBox();
             //vector3d<float> extents = box.getExtent();
@@ -331,12 +370,16 @@ void Engine::loadMesh(const wstring& fileName)
                         m_CamPos.Y = m_CamPos.Y * scale;
                         m_CamPos.Z = m_CamPos.Z * scale;
                         oldCamPos = m_CamPos;
-                        m_View->setCameraDistance(m_CamPos.getDistanceFrom(m_CamTarget));
+                        m_View->setCameraDistance(
+                            m_CamPos.getDistanceFrom(m_CamTarget)
+                        );
                         camera->setPosition(m_CamPos);
                     }
                 }
             }
-            m_LoadedMesh->setMaterialType(video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF);
+            m_LoadedMesh->setMaterialType(
+                video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF
+            );
             // EMT_TRANSPARENT_ALPHA_CHANNEL: constant transparency
         }
     }
@@ -369,12 +412,15 @@ bool Engine::loadTexture(const wstring& fileName)
             ret = true;
         }
         this->m_PrevTexturePath = fileName;
-        this->m_UserInterface->texturePathEditBox->setText(this->m_PrevTexturePath.c_str());
+        this->m_UserInterface->texturePathEditBox->setText(
+            this->m_PrevTexturePath.c_str()
+        );
     }
     return ret;
 }
 
-void Engine::setMeshDisplayMode(bool wireframe, bool lighting, bool textureInterpolation)
+void Engine::setMeshDisplayMode(bool wireframe, bool lighting,
+                                bool textureInterpolation)
 {
     if (m_LoadedMesh != nullptr) {
         for (u32 materialIndex = 0; materialIndex < m_LoadedMesh->getMaterialCount(); materialIndex++) {
@@ -384,30 +430,50 @@ void Engine::setMeshDisplayMode(bool wireframe, bool lighting, bool textureInter
             // Set Lighting
             if (!lighting) {
                 m_LoadedMesh->getMaterial(materialIndex).Lighting = false;
-                m_LoadedMesh->getMaterial(materialIndex).EmissiveColor = SColor(255, 255, 255, 255);
+                m_LoadedMesh->getMaterial(materialIndex).EmissiveColor = SColor(
+                    255,
+                    255,
+                    255,
+                    255
+                );
             } else {
                 m_LoadedMesh->getMaterial(materialIndex).Lighting = true;
-                m_LoadedMesh->getMaterial(materialIndex).EmissiveColor = SColor(255, 0, 0, 0);
+                m_LoadedMesh->getMaterial(materialIndex).EmissiveColor = SColor(
+                    255,
+                    0,
+                    0,
+                    0
+                );
             }
-            // m_LoadedMesh->setMaterialType(video::EMT_TRANSPARENT_ALPHA_CHANNEL); //already done on load
-            // m_LoadedMesh->setMaterialFlag(video::E_ALPHA_SOURCE, true);  // requires EMT_ONETEXTURE
+            // m_LoadedMesh->setMaterialType(
+            //     video::EMT_TRANSPARENT_ALPHA_CHANNEL
+            // ); //already done on load
+            // // requires EMT_ONETEXTURE:
+            // m_LoadedMesh->setMaterialFlag(video::E_ALPHA_SOURCE, true);
             if (textureInterpolation) {
                 m_LoadedMesh->setMaterialFlag(video::EMF_BILINEAR_FILTER, true);
-                m_LoadedMesh->setMaterialFlag(video::EMF_TRILINEAR_FILTER, true);
+                m_LoadedMesh->setMaterialFlag(video::EMF_TRILINEAR_FILTER,
+                                              true);
             } else {
-                m_LoadedMesh->setMaterialFlag(video::EMF_BILINEAR_FILTER, false);
-                m_LoadedMesh->setMaterialFlag(video::EMF_TRILINEAR_FILTER, false);
+                m_LoadedMesh->setMaterialFlag(video::EMF_BILINEAR_FILTER,
+                                              false);
+                m_LoadedMesh->setMaterialFlag(video::EMF_TRILINEAR_FILTER,
+                                              false);
                 //m_LoadedMesh->setMaterialFlag(video::E_ALPHA_SOURCE, true);
 
                 // below doesn't work for some reason:
-                // video::SMaterial mat = m_LoadedMesh->getMaterial(materialIndex);
+                // video::SMaterial mat = m_LoadedMesh->getMaterial(
+                //     materialIndex
+                // );
                 // mat.UseMipMaps = false;
                 // mat.setFlag(video::EMF_BILINEAR_FILTER, false);
                 // mat.setFlag(video::EMF_TRILINEAR_FILTER, false);
 
                 // below would require patching Irrlicht:
                 // GLint filteringMipMaps = GL_NEAREST_MIPMAP_NEAREST
-                // // above is used by glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filteringMipMaps);
+                // // above is used by glTexParameteri(GL_TEXTURE_2D,
+                // //                                  GL_TEXTURE_MIN_FILTER,
+                // //                                  filteringMipMaps);
             }
         }
     } else
@@ -461,9 +527,12 @@ void Engine::setAnimationFPS(u32 animationFPS)
 {
     if (this->m_LoadedMesh != nullptr) {
         if (animationFPS > 0) this->isPlaying = true;
-        // Do NOT call playAnimation, otherwise infinite recursion occurs (it calls setAnimationFPS).
+        // Do NOT call playAnimation, otherwise infinite recursion occurs
+        // (it calls setAnimationFPS).
         this->m_LoadedMesh->setAnimationSpeed(animationFPS);
-        this->m_UserInterface->playbackFPSEditBox->setText(Utility::toWstring(this->m_LoadedMesh->getAnimationSpeed()).c_str());
+        this->m_UserInterface->playbackFPSEditBox->setText(
+            Utility::toWstring(this->m_LoadedMesh->getAnimationSpeed()).c_str()
+        );
     }
 }
 
@@ -471,8 +540,10 @@ void Engine::incrementAnimationFPS(irr::f32 by)
 {
     if (this->m_LoadedMesh != nullptr) {
         if (by < 0) {
-            if (this->m_LoadedMesh->getAnimationSpeed() + by >= 0.999999f) // don't use this->animationFPS(), because its unsigned!
-                this->setAnimationFPS(this->m_LoadedMesh->getAnimationSpeed() + by);
+            if (this->m_LoadedMesh->getAnimationSpeed() + by >= 0.999999f)
+                // don't use this->animationFPS() above--its unsigned!
+                this->setAnimationFPS(this->m_LoadedMesh->getAnimationSpeed()
+                                      + by);
             else
                 this->setAnimationFPS(1);
         }
@@ -514,7 +585,9 @@ void Engine::run()
         if (this->m_LoadedMesh != nullptr) {
             if (isPlaying) {
                 this->m_LoadedMesh->setLoopMode(true);
-                this->m_UserInterface->playbackSetFrameEditBox->setText(Utility::toWstring(this->m_LoadedMesh->getFrameNr()).c_str());
+                this->m_UserInterface->playbackSetFrameEditBox->setText(
+                    Utility::toWstring(this->m_LoadedMesh->getFrameNr()).c_str()
+                );
             } else {
                 this->m_LoadedMesh->setLoopMode(false);
             }

@@ -20,7 +20,8 @@ EventHandler::~EventHandler()
     delete m_EventReceivers;
 }
 
-bool EventHandler::addEventReceiver(EventReceiverType type, IEventReceiver* receiver)
+bool EventHandler::addEventReceiver(EventReceiverType type,
+                                    IEventReceiver* receiver)
 {
     m_EventReceivers->insert(make_pair(type, receiver));
     return true;
