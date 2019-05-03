@@ -12,6 +12,7 @@ enum UserInterfaceElements {
     UIE_LOADFILEDIALOG              = 1100,
     // UIE_LOADBUTTON                  = 1101,
     UIE_LOADTEXTUREDIALOG           = 1200,
+    UIE_SAVEFILEDIALOG              = 1300,
 
     UIE_VIEWMENU                    = 2000,
 
@@ -33,6 +34,7 @@ enum UserInterfaceCommands {
     UIC_FILE_OPEN_TEXTURE           = 1002,
     UIC_FILE_NEXT_TEXTURE           = 1003,
     UIC_FILE_PREVIOUS_TEXTURE       = 1004,
+    UIC_FILE_EXPORT                 = 1005,
     UIC_VIEW_WIREFRAME              = 2001,
     UIC_VIEW_LIGHTING               = 2002,
     UIC_VIEW_AXIS_WIDGET            = 2003,
@@ -54,6 +56,7 @@ private:
 
     void setupUserInterface();
     void displayLoadFileDialog();
+    void displaySaveFileDialog();
     void displayLoadTextureDialog();
     void handleMenuItemPressed(irr::gui::IGUIContextMenu* menu);
 

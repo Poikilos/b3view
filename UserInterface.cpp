@@ -39,6 +39,7 @@ void UserInterface::setupUserInterface()
     fileMenu->addItem(L"Change Texture", UIC_FILE_OPEN_TEXTURE);
     fileMenu->addItem(L"Previous Texture    Shift F3", UIC_FILE_PREVIOUS_TEXTURE);
     fileMenu->addItem(L"Next Texture        F3", UIC_FILE_NEXT_TEXTURE);
+    fileMenu->addItem(L"Export", UIC_FILE_EXPORT);
     fileMenu->addItem(L"Quit", UIC_FILE_QUIT);
 
     // View Menu
@@ -225,6 +226,13 @@ void UserInterface::displayLoadFileDialog()
                              true, nullptr, UIE_LOADFILEDIALOG);
 }
 
+void UserInterface::displaySaveFileDialog()
+{
+    m_Gui->addFileOpenDialog(L"Select where to save export.dae",
+                             true, nullptr, UIE_SAVEFILEDIALOG);
+    // NOTE: if restoreCWD is false (default), cwd changes.
+}
+
 void UserInterface::displayLoadTextureDialog()
 {
     m_Gui->addFileOpenDialog(L"Select file to load",
@@ -240,6 +248,13 @@ void UserInterface::handleMenuItemPressed(IGUIContextMenu* menu)
         switch (id) {
         case UIC_FILE_OPEN:
             displayLoadFileDialog();
+            break;
+
+        case UIC_FILE_EXPORT:
+            if (this->m_Engine->m_LoadedMesh != nullptr) {
+                // this->m_Engine->m_LoadedMesh->getName();
+                displaySaveFileDialog();
+            }
             break;
 
         case UIC_FILE_OPEN_TEXTURE:
@@ -504,6 +519,12 @@ bool UserInterface::OnEvent(const SEvent& event)
             if (ge->EventType == EGET_FILE_SELECTED) {
                 IGUIFileOpenDialog* fileOpenDialog = static_cast<IGUIFileOpenDialog*>(ge->Caller);
                 m_Engine->loadMesh(fileOpenDialog->getFileName());
+            }
+            break;
+        case UIE_SAVEFILEDIALOG:
+            if (ge->EventType == EGET_FILE_SELECTED) {
+                IGUIFileOpenDialog* fileOpenDialog = static_cast<IGUIFileOpenDialog*>(ge->Caller);
+                m_Engine->saveMesh(fileOpenDialog->getDirectoryName());
             }
             break;
 

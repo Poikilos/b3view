@@ -389,6 +389,25 @@ void Engine::reloadMesh()
     }
 }
 
+void Engine::saveMesh(const io::path path)
+{
+    // see also https://bitbucket.org/mzeilfelder/irr-playground-micha/src/default/obj_readwrite.cpp (saves scene::EMWT_OBJ)
+    scene::ISceneManager* smgr = m_Device->getSceneManager();
+    scene::IMeshWriter* meshWriter = smgr->createMeshWriter(scene::EMWT_COLLADA);
+    //this->m_FileName = "";
+    io::path fileName = "export.dae";
+    //io::path filePath = path + fileName;
+    io::path filePath = fileName;
+    io::IWriteFile* meshFile = m_Device->getFileSystem()->createAndWriteFile(filePath);
+    if (!meshWriter->writeMesh(meshFile, m_LoadedMesh->getMesh())) {
+        debug() << "saving failed" << endl;
+    }
+    else
+        debug() << "saving ok" << endl;
+    meshFile->drop();
+    meshWriter->drop();
+}
+
 void Engine::reloadTexture()
 {
     if (this->m_PrevTexturePath.length() > 0) {
