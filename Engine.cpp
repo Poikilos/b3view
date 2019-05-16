@@ -310,8 +310,9 @@ vector3df Engine::camTarget()
     return m_CamTarget;
 }
 
-void Engine::loadMesh(const wstring& fileName)
+bool Engine::loadMesh(const wstring& fileName)
 {
+    bool ret = false;
     this->m_PreviousPath = fileName; // even if bad, set this
         // to allow F5 to reload
 
@@ -329,6 +330,7 @@ void Engine::loadMesh(const wstring& fileName)
             m_View->setZUp(false);
         }
         if (m_LoadedMesh != nullptr) {
+            ret = true;
             this->m_UserInterface->playbackFPSEditBox->setText(
                 Utility::toWstring(m_LoadedMesh->getAnimationSpeed()).c_str()
             );
@@ -380,32 +382,73 @@ void Engine::loadMesh(const wstring& fileName)
             // EMT_TRANSPARENT_ALPHA_CHANNEL: constant transparency
         }
     }
+    return ret;
 }
 
-void Engine::reloadMesh()
+bool Engine::reloadMesh()
 {
+    bool ret = false;
     if (this->m_PreviousPath.length() > 0) {
-        loadMesh(this->m_PreviousPath);
+        ret = loadMesh(this->m_PreviousPath);
     }
+    return ret;
 }
 
-void Engine::saveMesh(const io::path path)
+std::wstring Engine::saveMesh(const io::path path, const std::string& nameOrBlank, const std::string& extension)
 {
+    wstring ret = L"";
     // see also https://bitbucket.org/mzeilfelder/irr-playground-micha/src/default/obj_readwrite.cpp (saves scene::EMWT_OBJ)
     scene::ISceneManager* smgr = m_Device->getSceneManager();
-    scene::IMeshWriter* meshWriter = smgr->createMeshWriter(scene::EMWT_COLLADA);
+    scene::IMeshWriter* meshWriter = nullptr;
     //this->m_FileName = "";
-    io::path fileName = "export.dae";
-    //io::path filePath = path + fileName;
-    io::path filePath = fileName;
-    io::IWriteFile* meshFile = m_Device->getFileSystem()->createAndWriteFile(filePath);
-    if (!meshWriter->writeMesh(meshFile, m_LoadedMesh->getMesh())) {
-        debug() << "saving failed" << endl;
+    io::path fileName = io::path();
+    std::string beginning = "export-";
+    if (nameOrBlank.length() > 0) {
+        beginning = nameOrBlank + "-";
     }
-    else
-        debug() << "saving ok" << endl;
-    meshFile->drop();
-    meshWriter->drop();
+    std::string partial = beginning + Utility::dateTimeNowPathString();
+    if (extension == "dae") {
+        fileName = (partial + ".dae").c_str();
+        meshWriter = smgr->createMeshWriter(scene::EMWT_COLLADA);
+    }
+    else if (extension == "obj") {
+        fileName = (partial + ".obj").c_str();
+        meshWriter = smgr->createMeshWriter(scene::EMWT_OBJ);
+    }
+    else if (extension == "irrmesh") {
+        fileName = (partial + ".irrmesh").c_str();
+        meshWriter = smgr->createMeshWriter(scene::EMWT_IRR_MESH);
+    }
+    else if (extension == "stl") {
+        fileName = (partial + ".stl").c_str();
+        meshWriter = smgr->createMeshWriter(scene::EMWT_STL);
+    }
+    if (meshWriter != nullptr) {
+        //io::path filePath = path + fileName;
+        io::path filePath = path + "/" + fileName;
+        io::IWriteFile* meshFile = m_Device->getFileSystem()->createAndWriteFile(filePath);
+        if (!meshWriter->writeMesh(meshFile, m_LoadedMesh->getMesh())) {
+            debug() << "saving failed" << endl;
+        }
+        else {
+            debug() << "saving ok" << endl;
+            ret = Utility::toWstring(filePath.c_str());
+        }
+        meshFile->drop();
+        meshWriter->drop();
+    }
+    else if (extension == "irr") {
+        fileName = (partial + ".irr").c_str();
+        io::path filePath = path + "/" + fileName;
+        if (!smgr->saveScene(filePath)) {
+            debug() << "saving failed" << endl;
+        }
+        else {
+            debug() << "saving ok" << endl;
+            ret = Utility::toWstring(filePath.c_str());
+        }
+    }
+    return ret;
 }
 
 void Engine::reloadTexture()

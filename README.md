@@ -20,6 +20,9 @@ Website: [poikilos.org](https://poikilos.org)
 * hotkeys to cycle through textures and reload model OR texture
   (see [Usage](#Usage) below).
 * see also CHANGELOG.md
+* export feature: COLLADA (non-Blender), IRR (Irrlicht Scene including
+  animations), IRRMESH (Static Irrlicht Mesh), OBJ (Wavefront), STL
+  (stereolithography)
 
 ## Compile
 (the original version of this section is from

@@ -39,7 +39,11 @@ void UserInterface::setupUserInterface()
     fileMenu->addItem(L"Change Texture", UIC_FILE_OPEN_TEXTURE);
     fileMenu->addItem(L"Previous Texture    Shift F3", UIC_FILE_PREVIOUS_TEXTURE);
     fileMenu->addItem(L"Next Texture        F3", UIC_FILE_NEXT_TEXTURE);
-    fileMenu->addItem(L"Export", UIC_FILE_EXPORT);
+    fileMenu->addItem(L"Export DAE (non-Blender COLLADA)", UIC_FILE_EXPORT_DAE);
+    fileMenu->addItem(L"Export IRR (Irrlicht Scene)", UIC_FILE_EXPORT_IRR);
+    fileMenu->addItem(L"Export IRRMESH (Static Irrlicht Mesh)", UIC_FILE_EXPORT_IRRMESH);
+    fileMenu->addItem(L"Export OBJ (Wavefront)", UIC_FILE_EXPORT_OBJ);
+    fileMenu->addItem(L"Export STL (stereolithography)", UIC_FILE_EXPORT_STL);
     fileMenu->addItem(L"Quit", UIC_FILE_QUIT);
 
     // View Menu
@@ -250,23 +254,54 @@ void UserInterface::handleMenuItemPressed(IGUIContextMenu* menu)
             displayLoadFileDialog();
             break;
 
-        case UIC_FILE_EXPORT:
-            if (this->m_Engine->m_LoadedMesh != nullptr) {
-                // this->m_Engine->m_LoadedMesh->getName();
-                displaySaveFileDialog();
-            }
+        case UIC_FILE_EXPORT_DAE:
+            exportMeshToHome("dae");
+            break;
+
+        case UIC_FILE_EXPORT_IRR:
+            exportMeshToHome("irr");
+            break;
+
+        case UIC_FILE_EXPORT_IRRMESH:
+            exportMeshToHome("irrmesh");
+            break;
+
+        case UIC_FILE_EXPORT_OBJ:
+            exportMeshToHome("obj");
+            break;
+
+        case UIC_FILE_EXPORT_STL:
+            exportMeshToHome("stl");
             break;
 
         case UIC_FILE_OPEN_TEXTURE:
-            displayLoadTextureDialog();
+            if (m_Engine->m_LoadedMesh != nullptr) {
+                displayLoadTextureDialog();
+            }
+            else {
+                this->m_Engine->m_Device->getGUIEnvironment()->addMessageBox(
+                            L"Change Texture", L"You must load a model before a texture.");
+            }
             break;
 
         case UIC_FILE_PREVIOUS_TEXTURE:
-            loadNextTexture(-1);
+            if (m_Engine->m_LoadedMesh != nullptr) {
+                loadNextTexture(-1);
+            }
+            else {
+                this->m_Engine->m_Device->getGUIEnvironment()->addMessageBox(
+                            L"Change Texture", L"You must load a model before a texture.");
+            }
             break;
 
         case UIC_FILE_NEXT_TEXTURE:
-            loadNextTexture(1);
+            if (m_Engine->m_LoadedMesh != nullptr) {
+                loadNextTexture(1);
+            }
+            else {
+                this->m_Engine->m_Device->getGUIEnvironment()->addMessageBox(
+                            L"Change Texture", L"You must load a model before a texture.");
+            }
             break;
 
         case UIC_FILE_QUIT:
@@ -490,6 +525,43 @@ bool UserInterface::loadNextTexture(int direction)
     return ret;
 }
 
+void UserInterface::exportMeshToHome(std::string extension)
+{
+    if (this->m_Engine->m_LoadedMesh != nullptr) {
+        // this->m_Engine->m_LoadedMesh->getName();
+        // displaySaveFileDialog();
+        irr::io::path where = irr::io::path();
+        if (const char* env_p = std::getenv("HOME")) {
+            // std::cout << "Your PATH is: " << env_p << '\n';
+            where = irr::io::path(env_p);
+            std::cout << "Your PATH is: " << where.c_str() << '\n';
+        }
+        else if (const char* env_p = std::getenv("USERPROFILE")) {
+            // std::cout << "Your PATH is: " << env_p << '\n';
+            where = irr::io::path(env_p);
+            std::cout << "Your PATH is: " << where.c_str() << '\n';
+        }
+        std::string name = "";
+        if (m_Engine->m_PreviousPath.length() > 0) {
+            name = Utility::toString(Utility::withoutExtension(Utility::basename(m_Engine->m_PreviousPath)));
+        }
+        wstring result = m_Engine->saveMesh(where, name, extension);
+        std::wstring caption = L"Export Failed";
+        std::wstring msg = L"The format or home variable is unwriteable";
+        if (result.length() > 0) {
+            caption = L"Export Finished";
+            msg = L"Saved " + result;
+        }
+        std::cout << "Exported as: " << Utility::toString(result) << '\n';
+        this->m_Engine->m_Device->getGUIEnvironment()->addMessageBox(
+                    caption.c_str(), msg.c_str());
+    }
+    else {
+        this->m_Engine->m_Device->getGUIEnvironment()->addMessageBox(
+                    L"Export", L"There is nothing to export.");
+    }
+}
+
 // IEventReceiver
 bool UserInterface::OnEvent(const SEvent& event)
 {
@@ -518,13 +590,33 @@ bool UserInterface::OnEvent(const SEvent& event)
         case UIE_LOADFILEDIALOG:
             if (ge->EventType == EGET_FILE_SELECTED) {
                 IGUIFileOpenDialog* fileOpenDialog = static_cast<IGUIFileOpenDialog*>(ge->Caller);
-                m_Engine->loadMesh(fileOpenDialog->getFileName());
+                wstring path = fileOpenDialog->getFileName();
+                bool result = false;
+                wstring extension = Utility::extensionOf(path);
+                if (Utility::toLower(Utility::toString(extension)) == "irr") {
+                    scene::ISceneManager* smgr = m_Engine->m_Device->getSceneManager();
+                    result = smgr->loadScene(fileOpenDialog->getFileName());
+                }
+                else {
+                    result = m_Engine->loadMesh(fileOpenDialog->getFileName());
+                }
+                if (!result) {
+                    this->m_Engine->m_Device->getGUIEnvironment()->addMessageBox(
+                                L"Load Mesh", L"The model is inaccessible or not in a compatible format.");
+                }
             }
             break;
         case UIE_SAVEFILEDIALOG:
             if (ge->EventType == EGET_FILE_SELECTED) {
-                IGUIFileOpenDialog* fileOpenDialog = static_cast<IGUIFileOpenDialog*>(ge->Caller);
-                m_Engine->saveMesh(fileOpenDialog->getDirectoryName());
+                if (m_Engine->m_LoadedMesh != nullptr) {
+                    IGUIFileOpenDialog* fileOpenDialog = static_cast<IGUIFileOpenDialog*>(ge->Caller);
+                    ///fileOpenDialog->getFileName()
+                    m_Engine->saveMesh(fileOpenDialog->getDirectoryName(), "", "dae");
+                }
+                else {
+                    this->m_Engine->m_Device->getGUIEnvironment()->addMessageBox(
+                                L"Export", L"There is nothing to save.");
+                }
             }
             break;
 
@@ -599,8 +691,18 @@ bool UserInterface::OnEvent(const SEvent& event)
                         || m_Engine->KeyIsDown[irr::KEY_RSHIFT]) {
                     m_Engine->reloadTexture();
                 }
-                else
-                    m_Engine->reloadMesh();
+                else {
+                    if (m_Engine->m_PreviousPath.length() > 0) {
+                        bool result = m_Engine->reloadMesh();
+                        if (!result) {
+                            this->m_Engine->m_Device->getGUIEnvironment()->addMessageBox(
+                                        L"Reload Mesh", L"The model is inaccessible or not in a compatible format.");
+                        }
+                    }
+                    else {
+                        debug() << "  - No mesh is loaded." << endl;
+                    }
+                }
             } else if (event.KeyInput.Key == irr::KEY_F3) {
                 if (m_Engine->KeyIsDown[irr::KEY_LSHIFT]
                         || m_Engine->KeyIsDown[irr::KEY_RSHIFT]) {

@@ -231,6 +231,26 @@ wstring Utility::toWstring(const std::string& str)
     return ret;
 }
 
+std::string Utility::dateTimePathString(const time_t& rawtime)
+{
+    // see http://www.cplusplus.com/reference/ctime/strftime/
+    std::string ret = "";
+    struct tm * timeinfo;
+    char buffer[80];
+    timeinfo = localtime (&rawtime);
+    strftime (buffer,80,"%F_%H%M%S",timeinfo);
+    // %F is same as %Y-%m-%d (zero-padded)
+    ret.assign(buffer);
+    return ret;
+}
+
+std::string Utility::dateTimeNowPathString()
+{
+    time_t rawtime;
+    time (&rawtime);
+    return dateTimePathString(rawtime);
+}
+
 irr::f32 Utility::toF32(wstring val)
 {
     std::wstringstream ss(val);

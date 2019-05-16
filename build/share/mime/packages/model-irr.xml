@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+    <mime-type type="model/irr">
+        <comment>Irrlicht Mesh</comment>
+        <icon name="model-irr"/>
+        <glob-deleteall/>
+        <glob pattern="*.irr"/>
+    </mime-type>
+</mime-info>

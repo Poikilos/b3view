@@ -4,6 +4,8 @@
 #include "extlib/CGUITTFont.h"
 #include <irrlicht/irrlicht.h>
 
+#include <string>
+
 // Forward declaration of class Engine
 class Engine;
 
@@ -34,7 +36,11 @@ enum UserInterfaceCommands {
     UIC_FILE_OPEN_TEXTURE           = 1002,
     UIC_FILE_NEXT_TEXTURE           = 1003,
     UIC_FILE_PREVIOUS_TEXTURE       = 1004,
-    UIC_FILE_EXPORT                 = 1005,
+    UIC_FILE_EXPORT_DAE             = 1005,
+    UIC_FILE_EXPORT_IRR             = 1006,
+    UIC_FILE_EXPORT_IRRMESH         = 1007,
+    UIC_FILE_EXPORT_OBJ             = 1008,
+    UIC_FILE_EXPORT_STL             = 1009,
     UIC_VIEW_WIREFRAME              = 2001,
     UIC_VIEW_LIGHTING               = 2002,
     UIC_VIEW_AXIS_WIDGET            = 2003,
@@ -93,6 +99,7 @@ public:
     irr::gui::IGUIEnvironment* getGUIEnvironment() const;
     void drawStatusLine() const;
     bool loadNextTexture(int direction);
+    void exportMeshToHome(std::string extension);
 
     // IEventReceiver
     virtual bool OnEvent(const irr::SEvent& event);

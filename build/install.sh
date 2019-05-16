@@ -16,8 +16,6 @@ icons_root=$PREFIX/share/pixmaps
 applications_path=$PREFIX/share/applications
 
 mimes_path="share/mime/packages"
-mime_name=model-b3d.xml
-mime_path="$mimes_path/$mime_name"
 USER_MIMETYPES_DB_PATH=$HOME/.local/share/mime
 #USER_MIMETYPES_PATH="$USER_MIMETYPES_DB_PATH/packages"
 SYSTEM_MIMETYPES_DB_PATH=/usr/share/mime
@@ -114,36 +112,36 @@ if [ ! -d "$MIMETYPES_DB_PATH/packages" ]; then
     mkdir "$MIMETYPES_DB_PATH/packages"
 fi
 update_mime_enable=false
-if [ ! -f "$mime_path" ]; then
-    echo "ERROR: Stopped installing mime types since missing $mime_path"
-    exit 1
-fi
-try_dest="$MIMETYPES_DB_PATH/packages/$mime_name"
-if diff -q $mime_path $try_dest; then
-    echo "* (You already have an identical $try_dest)"
-else
-    cp -f "$mime_path" "$MIMETYPES_DB_PATH/packages/"
-    if [ -f "$try_dest" ]; then
-	echo "* Successfully copied '$try_dest'"
-	update_mime_enable=true
+#if [ ! -f "$mime_path" ]; then
+    #echo "ERROR: Stopped installing mime types since missing $mime_path"
+    #exit 1
+#fi
+
+install_mime() {
+    mime_name=$1
+    mime_path="$mimes_path/$mime_name"
+    if [ ! -f "$mime_path" ]; then
+        echo "ERROR: Stopped installing mime types since missing $mime_path"
+        exit 1
     fi
-fi
-mime_name=model-x.xml
-mime_path="$mimes_path/$mime_name"
-if [ ! -f "$mime_path" ]; then
-    echo "ERROR: Stopped installing mime types since missing $mime_path"
-    exit 1
-fi
-try_dest="$MIMETYPES_DB_PATH/packages/$mime_name"
-if diff -q $mime_path $try_dest; then
-    echo "* (You already have an identical $try_dest)"
-else
-    cp -f "$mime_path" "$MIMETYPES_DB_PATH/packages/"
-    if [ -f "$try_dest" ]; then
-	echo "* Successfully copied '$try_dest'"
-	update_mime_enable=true
+    try_dest="$MIMETYPES_DB_PATH/packages/$mime_name"
+    if diff -q $mime_path $try_dest; then
+        echo "(You already have an identical $try_dest)"
+    else
+        cp -f "$mime_path" "$MIMETYPES_DB_PATH/packages/"
+        if [ -f "$MIMETYPES_DB_PATH/packages/$mime_name" ]; then
+        echo "Successfully copied '$MIMETYPES_DB_PATH/packages/$mime_name'"
+        # rm -f "$MIMETYPES_DB_PATH/packages/$mime_name"
+        update_mime_enable=true
+        fi
     fi
-fi
+}
+
+install_mime model-b3d.xml
+install_mime model-x.xml
+install_mime model-ms3d.xml
+install_mime model-irr.xml
+install_mime model-irrmesh.xml
 
 # Since OBJ Mime type is broken on linux (detected as TGIF obj/sym
 # hyperlinked vector graphics format unrelated to Wavefront OBJ
@@ -169,23 +167,6 @@ try_dest="$MIMETYPES_DB_PATH/packages/$mime_name"
     fi
 #fi
 
-mime_name=model-ms3d.xml
-mime_path="$mimes_path/$mime_name"
-if [ ! -f "$mime_path" ]; then
-    echo "ERROR: Stopped installing mime types since missing $mime_path"
-    exit 1
-fi
-try_dest="$MIMETYPES_DB_PATH/packages/$mime_name"
-if diff -q $mime_path $try_dest; then
-    echo "(You already have an identical $try_dest)"
-else
-    cp -f "$mime_path" "$MIMETYPES_DB_PATH/packages/"
-    if [ -f "$MIMETYPES_DB_PATH/packages/$mime_name" ]; then
-	echo "Successfully copied '$MIMETYPES_DB_PATH/packages/$mime_name'"
-	# rm -f "$MIMETYPES_DB_PATH/packages/$mime_name"
-	update_mime_enable=true
-    fi
-fi
 
 if [ "@$update_mime_enable" = "@true" ]; then
     echo "Updating mime type database '$MIMETYPES_DB_PATH'..."

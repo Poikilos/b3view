@@ -1,9 +1,10 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include <string>
-
 #include <irrlicht/irrlicht.h>
+
+#include <ctime>
+#include <string>
 
 class Utility {
 public:
@@ -23,6 +24,8 @@ public:
     static std::wstring toWstring(irr::f32 val);
     static std::wstring toWstring(int val);
     static std::wstring toWstring(const std::string& str);
+    static std::string dateTimePathString(const time_t& rawtime);
+    static std::string dateTimeNowPathString();
     static irr::f32 toF32(std::wstring val);
     static irr::f32 distance(const irr::core::vector3df& start, const irr::core::vector3df& end);
     // compiler doesn't like template function when class is not a template--instantiate immediately

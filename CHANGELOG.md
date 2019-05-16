@@ -1,5 +1,14 @@
 # Changelog
 
+## [git] - 2019-05-16
+(poikilos)
+### Added
+* export COLLADA (non-Blender), IRR, IRRMESH, OBJ, STL
+* show dialog box if operation can't be performed
+  - improve error reporting in called methods
+* add irr mimetype (Irrlicht Scene, including animations)
+* add irrlicht mimetype (static/non-animated Irrlicht mesh)
+
 ## [git] - 2019-04-19
 (poikilos)
 ### Added
