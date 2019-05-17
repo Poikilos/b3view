@@ -6,7 +6,8 @@
 * export COLLADA (non-Blender), IRR, IRRMESH, OBJ, STL
 * show dialog box if operation can't be performed
   - improve error reporting in called methods
-* add irr mimetype (Irrlicht Scene, including animations)
+* add irr mimetype (Irrlicht Scene, mesh file references and settings
+  only)
 * add irrlicht mimetype (static/non-animated Irrlicht mesh)
 
 ## [git] - 2019-04-19

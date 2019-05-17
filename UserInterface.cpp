@@ -40,7 +40,7 @@ void UserInterface::setupUserInterface()
     fileMenu->addItem(L"Previous Texture    Shift F3", UIC_FILE_PREVIOUS_TEXTURE);
     fileMenu->addItem(L"Next Texture        F3", UIC_FILE_NEXT_TEXTURE);
     fileMenu->addItem(L"Export DAE (non-Blender COLLADA)", UIC_FILE_EXPORT_DAE);
-    fileMenu->addItem(L"Export IRR (Irrlicht Scene)", UIC_FILE_EXPORT_IRR);
+    fileMenu->addItem(L"Export IRR (Irrlicht Scene settings and mesh paths only)", UIC_FILE_EXPORT_IRR);
     fileMenu->addItem(L"Export IRRMESH (Static Irrlicht Mesh)", UIC_FILE_EXPORT_IRRMESH);
     fileMenu->addItem(L"Export OBJ (Wavefront)", UIC_FILE_EXPORT_OBJ);
     fileMenu->addItem(L"Export STL (stereolithography)", UIC_FILE_EXPORT_STL);
