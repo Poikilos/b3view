@@ -1,4 +1,10 @@
 # Changelog
+## [git] - 2019-05-16
+(poikilos)
+### Changed
+* improve minetest texture detection (alternate conventions)
+* turn off interpolation if loadNextTexture detects minetest directory
+  structure (../textures/<texture filename based on model name>)
 
 ## [git] - 2019-05-16
 (poikilos)

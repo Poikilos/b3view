@@ -23,6 +23,9 @@ Website: [poikilos.org](https://poikilos.org)
 * export feature: COLLADA (non-Blender), IRR (Irrlicht Scene settings
   and mesh file paths only), IRRMESH (Static Irrlicht Mesh), OBJ
   (Wavefront), STL (stereolithography)
+* Turn off interpolation if loadNextTexture (F3) detects minetest
+  directory structure
+  (../textures/<texture filename based on model name>)
 
 ## Compile
 (the original version of this section is from

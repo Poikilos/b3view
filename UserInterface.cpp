@@ -453,29 +453,55 @@ bool UserInterface::loadNextTexture(int direction)
                 if (fs::is_directory(fs::status(path))) {
                     if (this->m_Engine->m_PrevTexturePath.length() == 0) {
                         if (this->m_Engine->m_PreviousPath.length() > 0) {
-                            tryPath = texturesPath + dirSeparator
-                                      + Utility::withoutExtension(
-                                            Utility::basename(
-                                                this->m_Engine->m_PreviousPath
-                                            )
-                                        )
-                                      + L".png";
-                            tryPath = Utility::toWstring(Utility::toString(tryPath));
-                            if (!Utility::isFile(tryPath)) {
-                                tryPath = texturesPath + dirSeparator
-                                          + Utility::withoutExtension(
-                                                Utility::basename(
-                                                    this->m_Engine->m_PreviousPath
-                                                )
-                                            )
-                                          + L".jpg";
-                                tryPath = Utility::toWstring(
-                                              Utility::toString(tryPath)
-                                          );
-                                if (Utility::isFile(tryPath)) {
-                                    nextPath = tryPath;
-                                    found = true;
-                                    force = true;
+                            vector<wstring> dotExtensions;
+                            dotExtensions.push_back(L".png");
+                            dotExtensions.push_back(L".jpg");
+                            wstring foundPath;
+                            wstring partial = Utility::withoutExtension(
+                                Utility::basename(
+                                    this->m_Engine->m_PreviousPath
+                                )
+                            );
+                            vector<wstring> names;
+                            names.push_back(partial+L"_mesh");
+                            names.push_back(partial+L"1");
+                            names.push_back(partial);
+
+                            for(auto name : names) {
+                                for(auto extension : dotExtensions) {
+                                    tryPath = texturesPath + dirSeparator
+                                              + name
+                                              + extension;
+                                    // tryPath = Utility::toWstring(Utility::toString(tryPath));
+                                    if (Utility::isFile(tryPath)) {
+                                        foundPath = tryPath;
+                                        break;
+                                    }
+                                    //else
+                                    //debug() << "  - no '" << Utility::toString(tryPath) << "'" << endl;
+                                }
+                                if (foundPath.length() > 0) {
+                                    break;
+                                }
+                            }
+                            if (foundPath.length() > 0) {
+                                nextPath = foundPath;
+                                found = true;
+                                force = true;
+                                m_TextureInterpolation = viewMenu->isItemChecked(
+                                    viewTextureInterpolationIdx
+                                );
+                                if (m_TextureInterpolation) {
+                                    m_TextureInterpolation = false;
+                                    m_Engine->setMeshDisplayMode(
+                                        m_WireframeDisplay,
+                                        m_Lighting,
+                                        m_TextureInterpolation
+                                    );
+                                    viewMenu->setItemChecked(
+                                        viewTextureInterpolationIdx,
+                                        m_TextureInterpolation
+                                    );
                                 }
                             } else {
                                 nextPath = tryPath;
