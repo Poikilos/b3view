@@ -464,8 +464,11 @@ bool UserInterface::loadNextTexture(int direction)
                             );
                             vector<wstring> names;
                             names.push_back(partial+L"_mesh");
-                            names.push_back(partial+L"1");
                             names.push_back(partial);
+                            names.push_back(partial+L"1");
+                            names.push_back(partial+L"_child");
+                            names.push_back(partial+L"_female");
+                            names.push_back(partial+L"_male");
 
                             for(auto name : names) {
                                 for(auto extension : dotExtensions) {
