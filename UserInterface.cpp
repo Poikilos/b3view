@@ -31,6 +31,7 @@ void UserInterface::setupUserInterface()
     // Menu
     menu = m_Gui->addMenu();
     menu->addItem(L"File", UIE_FILEMENU, true, true);
+    menu->addItem(L"Playback", UIE_PLAYBACKMENU, true, true);
     menu->addItem(L"View", UIE_VIEWMENU, true, true);
 
     // File Menu
@@ -46,8 +47,23 @@ void UserInterface::setupUserInterface()
     fileMenu->addItem(L"Export STL (stereolithography)", UIC_FILE_EXPORT_STL);
     fileMenu->addItem(L"Quit", UIC_FILE_QUIT);
 
+    // Playback Menu
+    playbackMenu = menu->getSubMenu(1);
+    playbackMenu->addItem(L"Previous Frame            Left",
+                      UIC_PLAYBACK_PREVIOUS, true, false,
+                      false, false);
+    playbackMenu->addItem(L"Next Frame                Right",
+                      UIC_PLAYBACK_NEXT, true, false,
+                      false, false);
+    playbackMenu->addItem(L"Slower               Ctrl Left",
+                      UIC_PLAYBACK_SLOWER, true, false,
+                      false, false);
+    playbackMenu->addItem(L"Faster               Ctrl Right",
+                      UIC_PLAYBACK_FASTER, true, false,
+                      false, false);
+
     // View Menu
-    viewMenu = menu->getSubMenu(1);
+    viewMenu = menu->getSubMenu(2);
     viewWireframeIdx = viewMenu->addItem(L"Wireframe",
                                          UIC_VIEW_WIREFRAME, true,
                                          false, this->m_WireframeDisplay, true);
@@ -71,12 +87,6 @@ void UserInterface::setupUserInterface()
     viewZUpIdx = viewMenu->addItem(L"Z Up",
                                    UIC_VIEW_Z_UP, true, false,
                                    false, true);
-    viewMenu->addItem(L"Slower               Ctrl Left",
-                      UIC_VIEW_SLOWER, true, false,
-                      false, false);
-    viewMenu->addItem(L"Faster               Ctrl Right",
-                      UIC_VIEW_FASTER, true, false,
-                      false, false);
 
     // Playback Control Window
     dimension2d<u32> windowSize = m_Engine->m_Driver->getScreenSize();
@@ -243,6 +253,24 @@ void UserInterface::displayLoadTextureDialog()
                              true, nullptr, UIE_LOADTEXTUREDIALOG);
 }
 
+void UserInterface::incrementFrame(f32 frameCount, bool enableRound)
+{
+    if (this->m_Engine->m_LoadedMesh != nullptr) {
+        if (this->m_Engine->isPlaying)
+            this->m_Engine->toggleAnimation();
+        this->m_Engine->m_LoadedMesh->setCurrentFrame(
+            enableRound
+            ? (round(this->m_Engine->m_LoadedMesh->getFrameNr()) + frameCount)
+            : (round(this->m_Engine->m_LoadedMesh->getFrameNr()) + frameCount)
+        );
+        this->playbackSetFrameEditBox->setText(
+            Utility::toWstring(
+                this->m_Engine->m_LoadedMesh->getFrameNr()
+            ).c_str()
+        );
+    }
+}
+
 void UserInterface::handleMenuItemPressed(IGUIContextMenu* menu)
 {
     s32 selected = menu->getSelectedItem();
@@ -306,6 +334,26 @@ void UserInterface::handleMenuItemPressed(IGUIContextMenu* menu)
 
         case UIC_FILE_QUIT:
             m_Engine->m_RunEngine = false;
+            break;
+
+        case UIC_PLAYBACK_PREVIOUS:
+            this->incrementFrame(-1.0f, true);
+            break;
+
+        case UIC_PLAYBACK_NEXT:
+            this->incrementFrame(1.0f, true);
+            break;
+
+        case UIC_PLAYBACK_SLOWER:
+            //if (ge->EventType == EGET_BUTTON_CLICKED) {
+            this->m_Engine->incrementAnimationFPS(-5);
+            //}
+            break;
+
+        case UIC_PLAYBACK_FASTER:
+            //if (ge->EventType == EGET_BUTTON_CLICKED) {
+            this->m_Engine->incrementAnimationFPS(5);
+            //}
             break;
 
         case UIC_VIEW_WIREFRAME:
@@ -611,6 +659,7 @@ bool UserInterface::OnEvent(const SEvent& event)
         const SEvent::SGUIEvent* ge = &(event.GUIEvent);
         switch (ge->Caller->getID()) {
         case UIE_FILEMENU:
+        case UIE_PLAYBACKMENU:
         case UIE_VIEWMENU:
             // call handler for all menu related actions
             handleMenuItemPressed(static_cast<IGUIContextMenu*>(ge->Caller));
@@ -673,6 +722,7 @@ bool UserInterface::OnEvent(const SEvent& event)
                 this->m_Engine->incrementAnimationFPS(-5);
             }
             break;
+
         case UIE_PLAYBACKSETFRAMEEDITBOX:
             if (ge->EventType == EGET_EDITBOX_ENTER) {
                 if (this->m_Engine->m_LoadedMesh != nullptr) {
@@ -763,43 +813,19 @@ bool UserInterface::OnEvent(const SEvent& event)
                         || m_Engine->KeyIsDown[irr::KEY_RCONTROL]) {
                     m_Engine->incrementAnimationFPS(5);
                 }
-                else
-                    handled = false;
+                else {
+                    incrementFrame(1.0f, true);
+                }
             } else if (event.KeyInput.Key == irr::KEY_LEFT) {
                 if (m_Engine->KeyIsDown[irr::KEY_LCONTROL]
                         || m_Engine->KeyIsDown[irr::KEY_RCONTROL]) {
                     m_Engine->incrementAnimationFPS(-5);
                 }
-                else
-                    handled = false;
+                else {
+                    incrementFrame(-1.0f, true);
+                }
             } else if (event.KeyInput.Char == L' ') {
                 m_Engine->toggleAnimation();
-            } else if (event.KeyInput.Key == irr::KEY_LEFT) {
-                if (this->m_Engine->m_LoadedMesh != nullptr) {
-                    if (m_Engine->isPlaying)
-                        m_Engine->toggleAnimation();
-                    this->m_Engine->m_LoadedMesh->setCurrentFrame(
-                        round(this->m_Engine->m_LoadedMesh->getFrameNr()) - 1
-                    );
-                    this->playbackSetFrameEditBox->setText(
-                        Utility::toWstring(
-                            this->m_Engine->m_LoadedMesh->getFrameNr()
-                        ).c_str()
-                    );
-                }
-            } else if (event.KeyInput.Key == irr::KEY_RIGHT) {
-                if (this->m_Engine->m_LoadedMesh != nullptr) {
-                    if (m_Engine->isPlaying)
-                        m_Engine->toggleAnimation();
-                    this->m_Engine->m_LoadedMesh->setCurrentFrame(
-                        round(this->m_Engine->m_LoadedMesh->getFrameNr()) + 1
-                    );
-                    this->playbackSetFrameEditBox->setText(
-                        Utility::toWstring(
-                            this->m_Engine->m_LoadedMesh->getFrameNr()
-                        ).c_str()
-                    );
-                }
             }
             else
                 handled = false;

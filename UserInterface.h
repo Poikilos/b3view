@@ -16,18 +16,20 @@ enum UserInterfaceElements {
     UIE_LOADTEXTUREDIALOG           = 1200,
     UIE_SAVEFILEDIALOG              = 1300,
 
-    UIE_VIEWMENU                    = 2000,
+    UIE_PLAYBACKMENU                = 2000,
 
-    UIE_PLAYBACKWINDOW              = 3000,
-    UIE_PLAYBACKSTARTSTOPBUTTON     = 3001,
-    UIE_PLAYBACKSETFRAMEEDITBOX     = 3002,
-    UIE_PLAYBACKINCREASEBUTTON      = 3003,
-    UIE_PLAYBACKDECREASEBUTTON      = 3004,
-    UIE_FPSEDITBOX                  = 3005,
-    UIE_TEXTUREPATHSTATICTEXT       = 3006,
-    UIE_TEXTUREPATHEDITBOX          = 3007,
-    UIE_AXISSIZESTATICTEXT          = 3008,
-    UIE_AXISSIZEEDITBOX             = 3009
+    UIE_VIEWMENU                    = 3000,
+
+    UIE_PLAYBACKWINDOW              = 10000,
+    UIE_PLAYBACKSTARTSTOPBUTTON     = 10001,
+    UIE_PLAYBACKSETFRAMEEDITBOX     = 10002,
+    UIE_PLAYBACKINCREASEBUTTON      = 10003,
+    UIE_PLAYBACKDECREASEBUTTON      = 10004,
+    UIE_FPSEDITBOX                  = 10005,
+    UIE_TEXTUREPATHSTATICTEXT       = 10006,
+    UIE_TEXTUREPATHEDITBOX          = 10007,
+    UIE_AXISSIZESTATICTEXT          = 10008,
+    UIE_AXISSIZEEDITBOX             = 10009
 };
 
 enum UserInterfaceCommands {
@@ -41,15 +43,17 @@ enum UserInterfaceCommands {
     UIC_FILE_EXPORT_IRRMESH         = 1007,
     UIC_FILE_EXPORT_OBJ             = 1008,
     UIC_FILE_EXPORT_STL             = 1009,
-    UIC_VIEW_WIREFRAME              = 2001,
-    UIC_VIEW_LIGHTING               = 2002,
-    UIC_VIEW_AXIS_WIDGET            = 2003,
-    UIC_VIEW_TARGET                 = 2004,
-    UIC_VIEW_TEXTURE_INTERPOLATION  = 2005,
-    UIC_VIEW_Y_UP                   = 2006,
-    UIC_VIEW_Z_UP                   = 2007,
-    UIC_VIEW_SLOWER                 = 2008,
-    UIC_VIEW_FASTER                 = 2009
+    UIC_PLAYBACK_PREVIOUS           = 2001,
+    UIC_PLAYBACK_NEXT               = 2002,
+    UIC_PLAYBACK_SLOWER             = 2003,
+    UIC_PLAYBACK_FASTER             = 2004,
+    UIC_VIEW_WIREFRAME              = 3001,
+    UIC_VIEW_LIGHTING               = 3002,
+    UIC_VIEW_AXIS_WIDGET            = 3003,
+    UIC_VIEW_TARGET                 = 3004,
+    UIC_VIEW_TEXTURE_INTERPOLATION  = 3005,
+    UIC_VIEW_Y_UP                   = 3006,
+    UIC_VIEW_Z_UP                   = 3007
 };
 
 class UserInterface : public irr::IEventReceiver {
@@ -64,6 +68,7 @@ private:
     void displayLoadFileDialog();
     void displaySaveFileDialog();
     void displayLoadTextureDialog();
+    void incrementFrame(irr::f32 frameCount, bool enableRound);
     void handleMenuItemPressed(irr::gui::IGUIContextMenu* menu);
 
     bool m_WireframeDisplay;
@@ -74,6 +79,7 @@ private:
 public:
     irr::gui::IGUIContextMenu* menu;
     irr::gui::IGUIContextMenu* fileMenu;
+    irr::gui::IGUIContextMenu* playbackMenu;
     irr::gui::IGUIContextMenu* viewMenu;
     irr::gui::IGUIButton* playbackStartStopButton;
     irr::gui::IGUIEditBox* playbackSetFrameEditBox;

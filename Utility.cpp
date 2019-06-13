@@ -276,6 +276,11 @@ bool Utility::isFile(const std::wstring& name)
     }
 }
 
+std::string Utility::toString(int val)
+{
+    return std::to_string(val);
+}
+
 std::string Utility::toString(irr::f32 val)
 {
     return std::to_string(val);

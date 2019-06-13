@@ -17,6 +17,7 @@ public:
     static std::wstring delimiter(const std::wstring& path);
     static bool isFile(const std::string& name);
     static bool isFile(const std::wstring& name);
+    static std::string toString(int val);
     static std::string toString(irr::f32 val);
     static std::string toString(const std::wstring& name);
     static std::string toLower(const std::string& s);

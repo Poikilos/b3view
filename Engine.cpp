@@ -404,7 +404,7 @@ std::wstring Engine::saveMesh(const io::path path, const std::string& nameOrBlan
     io::path fileName = io::path();
     std::string beginning = "export-";
     if (nameOrBlank.length() > 0) {
-        beginning = nameOrBlank + "-";
+        beginning = nameOrBlank + "#" + Utility::toString(static_cast<int>(round(m_LoadedMesh->getFrameNr()))) + "-";
     }
     std::string partial = beginning + Utility::dateTimeNowPathString();
     if (extension == "dae") {
