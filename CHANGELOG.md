@@ -1,6 +1,15 @@
 # Changelog
 ## [git] - 2019-05-16
 (poikilos)
+### Added
+* playback menu
+  - Move framerate controls to playback menu.
+* fix frame-by-frame hotkeys
+  - move code to new incrementFrame method
+
+# Changelog
+## [git] - 2019-05-16
+(poikilos)
 ### Changed
 * improve minetest texture detection (alternate conventions)
 * turn off interpolation if loadNextTexture detects minetest directory

@@ -123,28 +123,31 @@ only applies to Visual Studio users.)
   file. However, the program is much easier to use if you associate the
   format with b3view (see "Installation" above) so you can just double-
   click the file to open b3view automatically.
-* `Ctrl left` / `Ctrl right` (arrow keys) to change animation frame rate
-  in increments of 5 fps, click "Faster" or "Slower," or use `-` key or
+* `left` / `right` (arrow keys): Go frame by frame (Pauses if playing).
+* `Ctrl left` / `Ctrl right` (arrow keys): Change animation frame rate
+  in increments of 5 fps--click "Faster" or "Slower," or use `-` key or
   `+`/`=` key. By default, the scene refreshes at 60fps and the
   animation runs as 30 fps (Irrlicht does interpolation automatically).
-  Edit the frame rate manually using the input box under "Faster" and
-  "Slower."
-* `F3` / `Shift F3`: cycle through textures in `../textures` using `F3`
+  - Edit the frame rate manually using the input box under "Faster" and
+    "Slower."
+* `F3` / `Shift F3`: Cycle through textures in `../textures` using `F3`
   key (`Shift` to go backward) such as for Minetest mods, where model
-  must be in `modname/models/` and texture must be in `modname/textures/`.
+  must be in `modname/models/` and texture must be in
+  `modname/textures/`.
   - If `"../textures/" + basename(modelName) + ".png"` or `".jpg"` is
-    present, pressing `t` for the first time will load it.
+    present, pressing `F3` for the first time will load it.
   - If `../textures` doesn't exist relative to the model file's
     directory, the model file's own directory will be used.
 * `Ctrl i`: toggle texture interpolation (shortcut for View, Texture
   Interpolation)
 * `F5`: Reload last model file
-* `Shift F5`: Reload last texture file (may not be working due to caching,
-  but does try to load different file if texture edit box changed).
+* `Shift F5`: Reload last texture file (may not be working due to
+  caching, but does try to load different file if texture edit box
+  changed).
 * drag with middle button: rotate view
 * drag with middle button while holding shift key: pan up and down
-* View, choose "Up" axis: change camera "up" axis to Z or Y (Y is default;
-  automatically changed to Z when 3ds file is loaded)
+* View, choose "Up" axis: change camera "up" axis to Z or Y (Y is
+  default; automatically changed to Z when 3ds file is loaded)
 
 ## Known Issues
 * Warn on missing texture.
