@@ -1,4 +1,14 @@
 #!/bin/bash
+
+customDie() {
+    echo
+    echo "ERROR:"
+    echo "$1"
+    echo
+    echo
+    exit 1
+}
+
 echo
 echo
 if [ -z "$PREFIX" ]; then PREFIX=/usr/local; fi
@@ -6,7 +16,8 @@ dest_bin_dir="$PREFIX/bin"
 dest_share_dir="$PREFIX/share"
 project_unix_name=b3view
 dest_name=$project_unix_name
-src_path="$project_unix_name"
+src_name="$project_unix_name"
+src_path="$src_name"
 try_dest_bin="$dest_bin_dir/$dest_name"
 icon_name="b3view.png"
 icon_src_path="icons/$icon_name"
@@ -22,17 +33,25 @@ SYSTEM_MIMETYPES_DB_PATH=/usr/share/mime
 #SYSTEM_MIMETYPES_PATH=$SYSTEM_MIMETYPES_DB_PATH/packages
 MIMETYPES_DB_PATH=$SYSTEM_MIMETYPES_DB_PATH
 
-
+try_build_path="../../build-$project_unix_name-Desktop-Release/build/"
+try_src_path="$try_build_path/$src_name"
 if [ ! -f $src_path ]; then
-    echo "ERROR: Nothing done since missing $src_path"
-    sleep 4
-    exit 1
+    echo "Checking for $src_path...NOT FOUND"
+    if [ -f "$try_src_path" ]; then
+        echo "Checking for $src_name in $try_build_path...FOUND"
+        src_path="$try_src_path"
+    else
+        echo "Checking for $src_name in $try_build_path...NOT FOUND"
+    fi
+fi
+if [ ! -f $src_path ]; then
+    customDie "(Nothing done) missing $src_name (You must build first, such as using Qt Creator)."
+else
+    echo "Checking for $src_path...FOUND"
 fi
 
 if [ -d "$try_dest_bin" ]; then
-    echo "ERROR: nothing done since '$try_dest_bin' is a directory (should be deleted or a binary file of old version)"
-    sleep 4
-    exit 2
+    customDie "(Nothing done) '$try_dest_bin' is a directory (should be deleted or a binary file of old version)"
 fi
 
 PROFILE_ENABLE=false
@@ -40,7 +59,7 @@ if [ -f "$try_dest_bin" ]; then
     rm -f "$try_dest_bin"
     if [ -f "$try_dest_bin" ]; then
         echo "WARNING: can't remove old $try_dest_bin, so"
-	PROFILE_ENABLE=true
+        PROFILE_ENABLE=true
     fi
 fi
 
