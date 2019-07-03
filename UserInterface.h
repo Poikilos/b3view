@@ -70,10 +70,8 @@ private:
     void displayLoadTextureDialog();
     void incrementFrame(irr::f32 frameCount, bool enableRound);
     void handleMenuItemPressed(irr::gui::IGUIContextMenu* menu);
+    void updateSettingsDisplay();
 
-    bool m_WireframeDisplay;
-    bool m_Lighting;
-    bool m_TextureInterpolation;
     irr::gui::IGUIWindow* playbackWindow;
     irr::core::dimension2d<irr::u32> m_WindowSize; // previous size
 public:

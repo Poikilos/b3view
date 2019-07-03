@@ -80,6 +80,7 @@ std::wstring Utility::parentOfPath(const wstring& path)
     return ret;
 }
 
+/// Filename without path (may still have extension)
 wstring Utility::basename(const wstring& path)
 {
     std::wstring ret = path;
@@ -89,6 +90,64 @@ wstring Utility::basename(const wstring& path)
     }
     if (lastSlashPos != std::wstring::npos) {
         ret = path.substr(lastSlashPos + 1);
+    }
+    return ret;
+}
+
+/// Get any substring to the right of the first delimiter.
+/// allIfNotFound: Return whole string on no delimiter, vs empty string.
+wstring Utility::rightOf(const wstring& path, const wstring& delimiter, bool allIfNotFound)
+{
+    std::wstring ret = allIfNotFound ? path : L"";
+    std::wstring::size_type lastPos = path.find(delimiter);
+    if (lastPos != std::wstring::npos) {
+        ret = path.substr(lastPos + 1);
+    }
+    return ret;
+}
+
+/// Get any substring to the right of the last delimiter.
+/// allIfNotFound: Return whole string on no delimiter, vs empty string.
+wstring Utility::rightOfLast(const wstring& path, const wstring& delimiter, bool allIfNotFound)
+{
+    std::wstring ret = allIfNotFound ? path : L"";
+    std::wstring::size_type lastPos = path.find_last_of(delimiter);
+    if (lastPos != std::wstring::npos) {
+        ret = path.substr(lastPos + 1);
+    }
+    return ret;
+}
+
+/// Get any substring to the left of the first delimiter.
+/// allIfNotFound: Return whole string on no delimiter, vs empty string.
+wstring Utility::leftOf(const wstring& path, const wstring& delimiter, bool allIfNotFound)
+{
+    std::wstring ret = allIfNotFound ? path : L"";
+    std::wstring::size_type lastPos = path.find(delimiter);
+    if (lastPos != std::wstring::npos) {
+        ret = path.substr(0, lastPos);
+    }
+    return ret;
+}
+
+bool Utility::endsWith(const std::wstring& haystack, const std::wstring& needle) {
+    bool found = false;
+    if (haystack.length() >= needle.length()) {
+        if (haystack.substr(haystack.length()-needle.length())==needle) {
+            found = true;
+        }
+    }
+    return found;
+}
+
+/// Get any substring to the left of the last delimiter.
+/// allIfNotFound: Return whole string on no delimiter, vs empty string.
+wstring Utility::leftOfLast(const wstring& path, const wstring& delimiter, bool allIfNotFound)
+{
+    std::wstring ret = allIfNotFound ? path : L"";
+    std::wstring::size_type lastPos = path.find_last_of(delimiter);
+    if (lastPos != std::wstring::npos) {
+        ret = path.substr(0, lastPos);
     }
     return ret;
 }

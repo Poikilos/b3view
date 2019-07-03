@@ -22,6 +22,49 @@ using namespace irr::gui;
    PRIVATE METHODS
    /////////////////////////////////////////////////////////////////////// */
 
+bool Engine::getEnableWireframe() const
+{
+    return m_EnableWireframe;
+}
+
+bool Engine::getEnableLighting() const
+{
+    return m_EnableLighting;
+}
+
+bool Engine::getEnableTextureInterpolation() const
+{
+    return m_EnableTextureInterpolation;
+}
+
+void Engine::setEnableWireframe(bool EnableWireframe)
+{
+    if (this->m_EnableWireframe != EnableWireframe) {
+        this->setMeshDisplayMode(EnableWireframe, this->m_EnableLighting,
+                                 this->m_EnableTextureInterpolation);
+    }
+}
+
+void Engine::setEnableLighting(bool EnableLighting)
+{
+    if (this->m_EnableLighting != EnableLighting) {
+        this->setMeshDisplayMode(this->m_EnableWireframe, EnableLighting,
+                                 this->m_EnableTextureInterpolation);
+    }
+}
+
+void Engine::setEnableTextureInterpolation(bool EnableTextureInterpolation)
+{
+    if (this->m_EnableTextureInterpolation != EnableTextureInterpolation)
+        debug() << "setEnableTextureInterpolation(..., setEnableTextureInterpolation:"
+                << (EnableTextureInterpolation?"true":"false") << ")" << endl;
+
+    if (this->m_EnableTextureInterpolation != EnableTextureInterpolation) {
+        this->setMeshDisplayMode(this->m_EnableWireframe, this->m_EnableLighting,
+                                 EnableTextureInterpolation);
+    }
+}
+
 void Engine::setupScene()
 {
     // Setup Light
@@ -237,6 +280,9 @@ Engine::Engine()
         keyState[i] = 0;
     LMouseState = 0;
     RMouseState = 0;
+    this->m_EnableWireframe = false;
+    this->m_EnableLighting = false;
+    this->m_EnableTextureInterpolation = true;
     this->axisLength = 10;
     this->worldFPS = 60;
     this->prevFPS = 30;
@@ -382,6 +428,8 @@ bool Engine::loadMesh(const wstring& fileName)
             // EMT_TRANSPARENT_ALPHA_CHANNEL: constant transparency
         }
     }
+    this->setMeshDisplayMode(this->m_EnableWireframe, this->m_EnableLighting,
+                             this->m_EnableTextureInterpolation);
     return ret;
 }
 
@@ -400,7 +448,7 @@ std::wstring Engine::saveMesh(const io::path path, const std::string& nameOrBlan
     // see also https://bitbucket.org/mzeilfelder/irr-playground-micha/src/default/obj_readwrite.cpp (saves scene::EMWT_OBJ)
     scene::ISceneManager* smgr = m_Device->getSceneManager();
     scene::IMeshWriter* meshWriter = nullptr;
-    //this->m_FileName = "";
+    // this->m_FileName = "";
     io::path fileName = io::path();
     std::string beginning = "export-";
     if (nameOrBlank.length() > 0) {
@@ -424,7 +472,7 @@ std::wstring Engine::saveMesh(const io::path path, const std::string& nameOrBlan
         meshWriter = smgr->createMeshWriter(scene::EMWT_STL);
     }
     if (meshWriter != nullptr) {
-        //io::path filePath = path + fileName;
+        // io::path filePath = path + fileName;
         io::path filePath = path + "/" + fileName;
         io::IWriteFile* meshFile = m_Device->getFileSystem()->createAndWriteFile(filePath);
         if (!meshWriter->writeMesh(meshFile, m_LoadedMesh->getMesh())) {
@@ -481,6 +529,9 @@ bool Engine::loadTexture(const wstring& fileName)
 void Engine::setMeshDisplayMode(bool wireframe, bool lighting,
                                 bool textureInterpolation)
 {
+    this->m_EnableWireframe = wireframe;
+    this->m_EnableLighting = lighting;
+    this->m_EnableTextureInterpolation = textureInterpolation;
     if (m_LoadedMesh != nullptr) {
         for (u32 materialIndex = 0; materialIndex < m_LoadedMesh->getMaterialCount(); materialIndex++) {
             // Set Wireframe display
@@ -506,7 +557,7 @@ void Engine::setMeshDisplayMode(bool wireframe, bool lighting,
             }
             // m_LoadedMesh->setMaterialType(
             //     video::EMT_TRANSPARENT_ALPHA_CHANNEL
-            // ); //already done on load
+            // ); // already done on load
             // // requires EMT_ONETEXTURE:
             // m_LoadedMesh->setMaterialFlag(video::E_ALPHA_SOURCE, true);
             if (textureInterpolation) {

@@ -12,6 +12,11 @@ public:
     static void dumpMeshInfoToConsole(irr::scene::IAnimatedMeshSceneNode* node);
     static std::wstring parentOfPath(const std::wstring& path);
     static std::wstring basename(const std::wstring& path);
+    static std::wstring leftOf(const std::wstring& path, const std::wstring& delimiter, bool allIfNotFound);
+    static std::wstring leftOfLast(const std::wstring& path, const std::wstring& delimiter, bool allIfNotFound);
+    static std::wstring rightOf(const std::wstring& path, const std::wstring& delimiter, bool allIfNotFound);
+    static std::wstring rightOfLast(const std::wstring& path, const std::wstring& delimiter, bool allIfNotFound);
+    static bool endsWith(const std::wstring& haystack, const std::wstring& needle);
     static std::wstring withoutExtension(const std::wstring& path);
     static std::wstring extensionOf(const std::wstring& path);
     static std::wstring delimiter(const std::wstring& path);

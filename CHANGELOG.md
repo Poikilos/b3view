@@ -1,4 +1,12 @@
 # Changelog
+## [git] - 2019-07-03
+(poikilos)
+### Changes
+* Move display mode booleans to engine.
+* Add more string utilities.
+* Do fuzzy search against actual texture names if can't find theoretical
+  ones.
+
 ## [git] - 2019-05-16
 (poikilos)
 ### Added

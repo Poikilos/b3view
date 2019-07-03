@@ -49,6 +49,5 @@ bool EventHandler::OnEvent(const SEvent& event)
                 iter->second->OnEvent(event);
         }
     }
-
     return false;
 }

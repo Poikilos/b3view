@@ -66,10 +66,10 @@ void UserInterface::setupUserInterface()
     viewMenu = menu->getSubMenu(2);
     viewWireframeIdx = viewMenu->addItem(L"Wireframe",
                                          UIC_VIEW_WIREFRAME, true,
-                                         false, this->m_WireframeDisplay, true);
+                                         false, this->m_Engine->getEnableWireframe(), true);
     viewLightingIdx = viewMenu->addItem(L"Lighting",
                                         UIC_VIEW_LIGHTING, true,
-                                        false, this->m_Lighting, true);
+                                        false, this->m_Engine->getEnableLighting(), true);
     viewAxisWidgetIdx = viewMenu->addItem(L"Origin Axis Widget",
                                           UIC_VIEW_AXIS_WIDGET, true, false,
                                           true, true);
@@ -79,7 +79,7 @@ void UserInterface::setupUserInterface()
 
     viewTextureInterpolationIdx = viewMenu->addItem(L"Texture Interpolation  Ctrl i",
                                                     UIC_VIEW_TEXTURE_INTERPOLATION, true, false,
-                                                    this->m_TextureInterpolation, true);
+                                                    this->m_Engine->getEnableTextureInterpolation(), true);
 
     viewYUpIdx = viewMenu->addItem(L"Y Up",
                                    UIC_VIEW_Y_UP, true, false,
@@ -356,18 +356,6 @@ void UserInterface::handleMenuItemPressed(IGUIContextMenu* menu)
             //}
             break;
 
-        case UIC_VIEW_WIREFRAME:
-            m_WireframeDisplay = viewMenu->isItemChecked(viewWireframeIdx);
-            m_Engine->setMeshDisplayMode(m_WireframeDisplay, m_Lighting,
-                                         m_TextureInterpolation);
-            break;
-
-        case UIC_VIEW_LIGHTING:
-            m_Lighting = viewMenu->isItemChecked(viewLightingIdx);
-            m_Engine->setMeshDisplayMode(m_WireframeDisplay, m_Lighting,
-                                         m_TextureInterpolation);
-            break;
-
         case UIC_VIEW_TARGET:
             //
             break;
@@ -382,15 +370,53 @@ void UserInterface::handleMenuItemPressed(IGUIContextMenu* menu)
             viewMenu->setItemChecked(viewYUpIdx, false);
             break;
 
-        case UIC_VIEW_TEXTURE_INTERPOLATION:
-            m_TextureInterpolation = viewMenu->isItemChecked(
-                viewTextureInterpolationIdx
+        case UIC_VIEW_WIREFRAME:
+            m_Engine->setEnableWireframe(
+                !m_Engine->getEnableWireframe()
             );
-            m_Engine->setMeshDisplayMode(m_WireframeDisplay, m_Lighting,
-                                         m_TextureInterpolation);
+            viewMenu->setItemChecked(
+                viewWireframeIdx,
+                m_Engine->getEnableWireframe()
+            );
+            break;
+
+        case UIC_VIEW_LIGHTING:
+            m_Engine->setEnableLighting(
+                !m_Engine->getEnableLighting()
+            );
+            viewMenu->setItemChecked(
+                viewLightingIdx,
+                m_Engine->getEnableLighting()
+            );
+            break;
+
+        case UIC_VIEW_TEXTURE_INTERPOLATION:
+            m_Engine->setEnableTextureInterpolation(
+                !m_Engine->getEnableTextureInterpolation()
+            );
+            viewMenu->setItemChecked(
+                viewTextureInterpolationIdx,
+                m_Engine->getEnableTextureInterpolation()
+            );
             break;
         }
     }
+}
+
+void UserInterface::updateSettingsDisplay()
+{
+    viewMenu->setItemChecked(
+        viewWireframeIdx,
+        m_Engine->getEnableWireframe()
+    );
+    viewMenu->setItemChecked(
+        viewLightingIdx,
+        m_Engine->getEnableLighting()
+    );
+    viewMenu->setItemChecked(
+        viewTextureInterpolationIdx,
+        m_Engine->getEnableTextureInterpolation()
+    );
 }
 
 void UserInterface::snapWidgets()
@@ -430,10 +456,6 @@ UserInterface::UserInterface(Engine* engine)
 
     m_Engine = engine;
     m_Gui = engine->getGUIEnvironment();
-
-    m_WireframeDisplay = false;
-    m_Lighting = true;
-    m_TextureInterpolation = true;
     playbackWindow = nullptr;
 
     setupUserInterface();
@@ -463,6 +485,21 @@ bool UserInterface::loadNextTexture(int direction)
         std::wstring lastName = Utility::basename(
             this->m_Engine->m_PreviousPath
         );
+        vector<wstring> dotExtensions;
+        dotExtensions.push_back(L".png");
+        dotExtensions.push_back(L".jpg");
+        wstring foundPath;
+        wstring partial;
+        partial = Utility::withoutExtension(lastName);
+        vector<wstring> names;
+        names.push_back(partial+L"_mesh");
+        names.push_back(partial);
+        names.push_back(partial+L"1");
+        names.push_back(partial+L"2");
+        names.push_back(partial+L"_child");
+        names.push_back(partial+L"_female");
+        names.push_back(partial+L"_male");
+
         std::wstring lastDirPath = Utility::parentOfPath(
             this->m_Engine->m_PreviousPath
         );
@@ -500,66 +537,39 @@ bool UserInterface::loadNextTexture(int direction)
                 wstring tryPath;
                 if (fs::is_directory(fs::status(path))) {
                     if (this->m_Engine->m_PrevTexturePath.length() == 0) {
-                        if (this->m_Engine->m_PreviousPath.length() > 0) {
-                            vector<wstring> dotExtensions;
-                            dotExtensions.push_back(L".png");
-                            dotExtensions.push_back(L".jpg");
-                            wstring foundPath;
-                            wstring partial = Utility::withoutExtension(
-                                Utility::basename(
-                                    this->m_Engine->m_PreviousPath
-                                )
-                            );
-                            vector<wstring> names;
-                            names.push_back(partial+L"_mesh");
-                            names.push_back(partial);
-                            names.push_back(partial+L"1");
-                            names.push_back(partial+L"_child");
-                            names.push_back(partial+L"_female");
-                            names.push_back(partial+L"_male");
-
-                            for(auto name : names) {
-                                for(auto extension : dotExtensions) {
-                                    tryPath = texturesPath + dirSeparator
-                                              + name
-                                              + extension;
-                                    // tryPath = Utility::toWstring(Utility::toString(tryPath));
-                                    if (Utility::isFile(tryPath)) {
-                                        foundPath = tryPath;
-                                        break;
-                                    }
-                                    //else
-                                    //debug() << "  - no '" << Utility::toString(tryPath) << "'" << endl;
-                                }
-                                if (foundPath.length() > 0) {
+                        // if (this->m_Engine->m_PreviousPath.length() > 0) {
+                        for(auto name : names) {
+                            for(auto extension : dotExtensions) {
+                                tryPath = texturesPath + dirSeparator
+                                          + name
+                                          + extension;
+                                // tryPath = Utility::toWstring(Utility::toString(tryPath));
+                                if (Utility::isFile(tryPath)) {
+                                    foundPath = tryPath;
                                     break;
                                 }
+                                //else
+                                //debug() << "  - no '" << Utility::toString(tryPath) << "'" << endl;
                             }
                             if (foundPath.length() > 0) {
-                                nextPath = foundPath;
-                                found = true;
-                                force = true;
-                                m_TextureInterpolation = viewMenu->isItemChecked(
-                                    viewTextureInterpolationIdx
-                                );
-                                if (m_TextureInterpolation) {
-                                    m_TextureInterpolation = false;
-                                    m_Engine->setMeshDisplayMode(
-                                        m_WireframeDisplay,
-                                        m_Lighting,
-                                        m_TextureInterpolation
-                                    );
-                                    viewMenu->setItemChecked(
-                                        viewTextureInterpolationIdx,
-                                        m_TextureInterpolation
-                                    );
-                                }
-                            } else {
-                                nextPath = tryPath;
-                                found = true;
-                                force = true;
+                                break;
                             }
                         }
+                        if (foundPath.length() > 0) {
+                            nextPath = foundPath;
+                            found = true;
+                            force = true;
+                            this->m_Engine->setEnableTextureInterpolation(false);
+                            viewMenu->setItemChecked(
+                                viewTextureInterpolationIdx,
+                                this->m_Engine->getEnableTextureInterpolation()
+                            );
+                        } else {
+                            nextPath = tryPath;
+                            found = true;
+                            force = true;
+                        }
+                        //}
                     }
                     for (const auto& itr : fs::directory_iterator(path)) {
                         std::wstring ext = Utility::extensionOf(
@@ -572,6 +582,24 @@ bool UserInterface::loadNextTexture(int direction)
                             // cycle through files (go to next after
                             // m_PrevTexturePath if any previously loaded,
                             // otherwise first)
+                            if (this->m_Engine->m_PrevTexturePath.length() == 0) {
+                                // If matched nothing yet, match regardless of beginning
+                                std::wstring nameNoExt = Utility::withoutExtension(itr.path().filename().wstring());
+                                // std::wstring rightName = Utility::rightOf(nameNoExt, L"_", true);
+                                // std::wstring rightLastName = Utility::rightOfLast(nameNoExt, L"_", true);
+                                // debug() << "itr.path().filename().wstring(): " << itr.path().filename().c_str() << endl;
+                                for(auto name : names) {
+                                    if (Utility::endsWith(nameNoExt, name)) {
+                                        nextPath = itr.path().wstring();
+                                        this->m_Engine->setEnableTextureInterpolation(false);
+                                        viewMenu->setItemChecked(
+                                            viewTextureInterpolationIdx,
+                                            this->m_Engine->getEnableTextureInterpolation()
+                                        );
+                                        break;
+                                    }
+                                }
+                            }
                             if (nextPath.length() == 0)
                                 nextPath = itr.path().wstring();
                             lastPath = itr.path().wstring();
@@ -800,11 +828,14 @@ bool UserInterface::OnEvent(const SEvent& event)
                     //         )
                     //     );
                     // )
-                    m_TextureInterpolation = m_TextureInterpolation ? false : true;
-                    m_Engine->setMeshDisplayMode(m_WireframeDisplay, m_Lighting,
-                                                 m_TextureInterpolation);
-                    viewMenu->setItemChecked(viewTextureInterpolationIdx,
-                                             m_TextureInterpolation);
+
+                    m_Engine->setEnableTextureInterpolation(
+                        !m_Engine->getEnableTextureInterpolation()
+                    );
+                    viewMenu->setItemChecked(
+                        viewTextureInterpolationIdx,
+                        m_Engine->getEnableTextureInterpolation()
+                    );
                 }
                 else
                     handled = false;

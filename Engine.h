@@ -37,6 +37,9 @@ private:
     irr::core::dimension2d<irr::u32> m_WindowSize;
 
     bool m_RunEngine;
+    bool m_EnableWireframe;
+    bool m_EnableLighting;
+    bool m_EnableTextureInterpolation;
 
     EventHandler* m_EventHandler;
     UserInterface* m_UserInterface;
@@ -81,7 +84,7 @@ public:
     std::wstring saveMesh(const irr::io::path path, const std::string& nameOrBlank, const std::string& extension);
     void reloadTexture();
     bool loadTexture(const std::wstring& fileName);
-    void setMeshDisplayMode(bool wireframe = false, bool lighting = true, bool textureInterpolation = true);
+    void setMeshDisplayMode(bool wireframe = false, bool lighting = false, bool textureInterpolation = true);
     bool isAnimating();
     void playAnimation();
     void pauseAnimation();
@@ -90,6 +93,12 @@ public:
     void incrementAnimationFPS(irr::f32 by);
     void setZUp(bool zUp);
     irr::u32 animationFPS();
+    bool getEnableWireframe() const;
+    bool getEnableLighting() const;
+    bool getEnableTextureInterpolation() const;
+    void setEnableWireframe(bool EnableWireframe);
+    void setEnableLighting(bool EnableLighting);
+    void setEnableTextureInterpolation(bool EnableTextureInterpolation);
 };
 
 #endif // ENGINE_H
