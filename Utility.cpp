@@ -101,7 +101,7 @@ wstring Utility::rightOf(const wstring& path, const wstring& delimiter, bool all
     std::wstring ret = allIfNotFound ? path : L"";
     std::wstring::size_type lastPos = path.find(delimiter);
     if (lastPos != std::wstring::npos) {
-        ret = path.substr(lastPos + 1);
+        ret = path.substr(lastPos + delimiter.length());
     }
     return ret;
 }
@@ -113,7 +113,7 @@ wstring Utility::rightOfLast(const wstring& path, const wstring& delimiter, bool
     std::wstring ret = allIfNotFound ? path : L"";
     std::wstring::size_type lastPos = path.find_last_of(delimiter);
     if (lastPos != std::wstring::npos) {
-        ret = path.substr(lastPos + 1);
+        ret = path.substr(lastPos + delimiter.length());
     }
     return ret;
 }
@@ -128,6 +128,16 @@ wstring Utility::leftOf(const wstring& path, const wstring& delimiter, bool allI
         ret = path.substr(0, lastPos);
     }
     return ret;
+}
+
+bool Utility::startsWith(const std::wstring& haystack, const std::wstring& needle) {
+    bool found = false;
+    if (haystack.length() >= needle.length()) {
+        if (haystack.substr(0, needle.length())==needle) {
+            found = true;
+        }
+    }
+    return found;
 }
 
 bool Utility::endsWith(const std::wstring& haystack, const std::wstring& needle) {

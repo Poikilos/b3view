@@ -569,7 +569,7 @@ void Engine::setMeshDisplayMode(bool wireframe, bool lighting,
                                               false);
                 m_LoadedMesh->setMaterialFlag(video::EMF_TRILINEAR_FILTER,
                                               false);
-                //m_LoadedMesh->setMaterialFlag(video::E_ALPHA_SOURCE, true);
+                // m_LoadedMesh->setMaterialFlag(video::E_ALPHA_SOURCE, true);
 
                 // below doesn't work for some reason:
                 // video::SMaterial mat = m_LoadedMesh->getMaterial(

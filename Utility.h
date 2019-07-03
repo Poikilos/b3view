@@ -16,6 +16,7 @@ public:
     static std::wstring leftOfLast(const std::wstring& path, const std::wstring& delimiter, bool allIfNotFound);
     static std::wstring rightOf(const std::wstring& path, const std::wstring& delimiter, bool allIfNotFound);
     static std::wstring rightOfLast(const std::wstring& path, const std::wstring& delimiter, bool allIfNotFound);
+    static bool startsWith(const std::wstring& haystack, const std::wstring& needle);
     static bool endsWith(const std::wstring& haystack, const std::wstring& needle);
     static std::wstring withoutExtension(const std::wstring& path);
     static std::wstring extensionOf(const std::wstring& path);
