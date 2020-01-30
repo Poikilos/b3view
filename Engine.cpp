@@ -5,6 +5,11 @@
 #include "UserInterface.h"
 #include "Utility.h"
 #include "View.h"
+// #include <filesystem>
+// See https://stackoverflow.com/questions/22201663/find-and-move-files-in-c
+#include <cerrno>
+// _chdir (not chdir--see):
+#include <unistd.h>
 
 using std::cout;
 using std::endl;
@@ -450,10 +455,14 @@ std::wstring Engine::saveMesh(const io::path path, const std::string& nameOrBlan
     scene::IMeshWriter* meshWriter = nullptr;
     // this->m_FileName = "";
     io::path fileName = io::path();
+    io::path mtlName = io::path();
     std::string beginning = "export-";
+    std::string mtlTryName = "export.mtl";
     if (nameOrBlank.length() > 0) {
         beginning = nameOrBlank + "#" + Utility::toString(static_cast<int>(round(m_LoadedMesh->getFrameNr()))) + "-";
+        mtlTryName = nameOrBlank + ".mtl";
     }
+    mtlName = mtlTryName.c_str();
     std::string partial = beginning + Utility::dateTimeNowPathString();
     if (extension == "dae") {
         fileName = (partial + ".dae").c_str();
@@ -474,6 +483,12 @@ std::wstring Engine::saveMesh(const io::path path, const std::string& nameOrBlan
     if (meshWriter != nullptr) {
         // io::path filePath = path + fileName;
         io::path filePath = path + "/" + fileName;
+        io::path mtlDestPath = path + "/" + mtlName;
+        // TODO: chdir is deprecated due to not following POSIX naming rules--see
+        // <https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/chdir?redirectedfrom=MSDN&view=vs-2019>.
+        // Therefore, normally use _chdir or _wchdir instead.
+        // However, it is undeclared while using gcc even after including unistd.h.
+        chdir(path.c_str());
         io::IWriteFile* meshFile = m_Device->getFileSystem()->createAndWriteFile(filePath);
         if (!meshWriter->writeMesh(meshFile, m_LoadedMesh->getMesh())) {
             debug() << "saving failed" << endl;
@@ -481,6 +496,37 @@ std::wstring Engine::saveMesh(const io::path path, const std::string& nameOrBlan
         else {
             debug() << "saving ok" << endl;
             ret = Utility::toWstring(filePath.c_str());
+            debug() << "checking for " << mtlTryName << "..." << std::flush;
+            if (Utility::isFile(mtlDestPath.c_str())){
+                debug() << "chdir succeeded, so file is in " << mtlDestPath.c_str() << "." << endl;
+                ret += L";\n" + Utility::toWstring(mtlDestPath.c_str());
+            }
+            else if (Utility::isFile(mtlTryName)) {
+                // NOTE: std::filesystem::rename
+                // requires: C++17 (on gcc 8.0.1, link against -lstdc++fs and #include <filesystem>)
+                // (See https://stackoverflow.com/questions/22201663/find-and-move-files-in-c),
+                // so use std::rename and <cerrno> instead:
+                if (std::rename(mtlTryName.c_str(), mtlDestPath.c_str()) < 0) {
+                    ret += L";\n<unmovable mtl file in current directory:>" + Utility::toWstring(mtlTryName.c_str());
+                    std::cerr << strerror(errno) << std::endl;
+                }
+                else {
+                    ret += L";\n" + Utility::toWstring(mtlDestPath.c_str());
+                    debug() << "moved to " << mtlDestPath.c_str() << "." << endl;
+                }
+//                try {
+//                    std::filesystem::rename(mtlTryName.c_str(), mtlDestPath.c_str())
+//                    ret += L";" + Utility::toWstring(mtlDestPath.c_str());
+//                } catch (std::filesystem::filesystem_error& e) {
+//                    std::cerr << e.what() << '\n';
+//                    ret += L";<unmovable mtl file in current directory:>" + Utility::toWstring(mtlTryName.c_str());
+//                }
+
+            }
+            else {
+                debug() << "not found." << endl;
+                ret += L";\n<unknown mtl file in current directory>";
+            }
         }
         meshFile->drop();
         meshWriter->drop();

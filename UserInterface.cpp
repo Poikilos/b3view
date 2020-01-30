@@ -198,7 +198,6 @@ void UserInterface::setupUserInterface()
     // Set Font for UI Elements
     m_GuiFontFace = new CGUITTFace();
     // irrString defines stringc as string<c8>
-    // if (QFile(fontPath).exists()) {
     if (!Utility::isFile(m_Engine->m_FontPath)) {
         m_Engine->m_FontPath = L"C:\\Windows\\Fonts\\calibrib.ttf";
     }
@@ -709,6 +708,7 @@ void UserInterface::exportMeshToHome(std::string extension)
         if (m_Engine->m_PreviousPath.length() > 0) {
             name = Utility::toString(Utility::withoutExtension(Utility::basename(m_Engine->m_PreviousPath)));
         }
+
         wstring result = m_Engine->saveMesh(where, name, extension);
         std::wstring caption = L"Export Failed";
         std::wstring msg = L"The format or home variable is unwriteable";
