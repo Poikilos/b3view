@@ -27,6 +27,11 @@ Website: [poikilos.org](https://poikilos.org)
   directory structure
   (../textures/<texture filename based on model name>)
 
+## Related Projects:
+- [https://github.com/stujones11/SAM-Viewer](SAM-Viewer): View a
+  minetest player model and see the effect of changing various wield
+  settings that are available in the minetest Lua API.
+
 ## Compile
 (the original version of this section is from
 <https://code.google.com/archive/p/b3view/wikis/BuildingFromSource.wiki>)
