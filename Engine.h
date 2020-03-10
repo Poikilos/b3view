@@ -25,7 +25,6 @@ class Engine {
     friend class View;
 
 private:
-    std::wstring m_NextPath;
     irr::IrrlichtDevice* m_Device;
     irr::video::IVideoDriver* m_Driver;
     irr::scene::ISceneManager* m_Scene;
@@ -51,10 +50,10 @@ private:
     void checkResize();
     irr::gui::IGUIEnvironment* getGUIEnvironment() const;
     irr::s32 getNumberOfVertices();
-    bool isPlaying;
-    irr::u32 worldFPS;
-    irr::u32 prevFPS;
-    std::vector<std::wstring> textureExtensions;
+    bool m_IsPlaying;
+    irr::u32 m_WorldFPS;
+    irr::u32 m_PrevFPS;
+    std::vector<std::wstring> m_TextureExtensions;
     // Making materials in contructor or setupScene causes segfault at
     // `m_Driver->setMaterial(*lineX);` in
     // `Engine::drawAxisLines` for unknown reason:
@@ -69,9 +68,9 @@ private:
     irr::s32 LMouseState, RMouseState;
 
 public:
-    std::wstring m_PreviousPath;
-    std::wstring m_PrevTexturePath;
-    irr::f32 axisLength;
+    std::wstring m_LoadedMeshPath;
+    std::wstring m_LoadedTexturePath;
+    irr::f32 m_AxisLength;
     bool m_zUp;
 
     Engine();

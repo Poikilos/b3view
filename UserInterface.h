@@ -5,6 +5,7 @@
 #include <irrlicht/irrlicht.h>
 
 #include <string>
+#include <vector>
 
 // Forward declaration of class Engine
 class Engine;
@@ -74,6 +75,8 @@ private:
 
     irr::gui::IGUIWindow* playbackWindow;
     irr::core::dimension2d<irr::u32> m_WindowSize; // previous size
+    std::vector<std::wstring> m_AllTextures;
+    std::vector<std::wstring> m_MatchingTextures;
 public:
     irr::gui::IGUIContextMenu* menu;
     irr::gui::IGUIContextMenu* fileMenu;
@@ -104,6 +107,7 @@ public:
     void drawStatusLine() const;
     bool loadNextTexture(int direction);
     void exportMeshToHome(std::string extension);
+    bool OnSelectMesh();
 
     // IEventReceiver
     virtual bool OnEvent(const irr::SEvent& event);

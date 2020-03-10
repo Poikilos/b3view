@@ -9,6 +9,7 @@ bird: [github.com/poikilos/mobs_sky](https://github.com/poikilos/mobs_sky)
 
 Website: [poikilos.org](https://poikilos.org)
 
+
 ## Main Features in poikilos fork
 * stabilized (makes sure font, model or texture loads before using;
   makes sure model is loaded before setting View options)
@@ -23,14 +24,46 @@ Website: [poikilos.org](https://poikilos.org)
 * export feature: COLLADA (non-Blender), IRR (Irrlicht Scene settings
   and mesh file paths only), IRRMESH (Static Irrlicht Mesh), OBJ
   (Wavefront), STL (stereolithography)
-* Turn off interpolation if loadNextTexture (F3) detects minetest
-  directory structure
-  (../textures/<texture filename based on model name>)
+* Turn off interpolation if loadNextTexture (F3) detects the following
+  Minetest-like directory structure and texture naming:
+  "<texture directory>/<texture filename based on model name>" where
+  "<texture directory>" is either `.` (same directory as model)
+  or `../textures` (where model would be in a parallel directory next to
+  textures).
 
-## Related Projects:
+
+## Related Software
 - [https://github.com/stujones11/SAM-Viewer](SAM-Viewer): View a
   minetest player model and see the effect of changing various wield
   settings that are available in the minetest Lua API.
+- Blitz3d: Blitz3d was released
+  [on GitHub](https://github.com/blitz-research/blitz3d) under the
+  zlib/libpng license in 2014!
+- Blitz3D plug-in for [Ultimate Unwrap
+  3D](https://www.unwrap3d.com/u3d/formats.aspx): Ultimate Unwrap 3D is
+  a standalone unwrapping tool ("UV Mapping Software").
+- Milkshape can export B3D and import x without animations.
+- TREEmagik Plus by AlienCodec (the original version is now
+ [free](http://www.aliencodec.com/Aliencodec%C2%A9+-+Software+Developers);
+ superceded by TREEmagik-G2) can export to b3d.
+
+
+## B3D Format
+B3D in this case is the Blitz3D model format.
+- "stores model information in 'chunks;' may contain textures, brushes,
+  vertices, triangles, meshes, bones, or animation data."
+  -<https://fileinfo.com/extension/b3d>
+
+### What it is not
+The B3D format (Blitz3D format) supported by Irrlicht has nothing to do
+with other formats which also have the B3D extension.
+- It is not [.B3D - Maxon Bodypaint 3D texture
+  file](http://http.maxon.net/pub/bp2/docu/bodypaint3d_r2_reference_e.pdf),
+  an internal format that Cinema4D uses to store [multi-layer
+  textures](https://forums.creativecow.net/docs/forums/post.php?forumid=19&postid=236712&univpostid=236712&pview=t&archive=T).
+- It is not ASCII
+  - not [.B3D - Ben's 3D Format](https://www.bcchang.com/research/vr/b3d.php)
+
 
 ## Compile
 (the original version of this section is from
@@ -91,6 +124,7 @@ only applies to Visual Studio users.)
     gnu-free/FreeSansBold.ttf, dejavu/DejaVuSans-Bold.ttf,
     google-droid/DroidSans-Bold.ttf
 
+
 ## Install
 ### Windows
 * If you are not using a release version, compile the program (see
@@ -135,14 +169,17 @@ only applies to Visual Studio users.)
   animation runs as 30 fps (Irrlicht does interpolation automatically).
   - Edit the frame rate manually using the input box under "Faster" and
     "Slower."
-* `F3` / `Shift F3`: Cycle through textures in `../textures` using `F3`
-  key (`Shift` to go backward) such as for Minetest mods, where model
-  must be in `modname/models/` and texture must be in
-  `modname/textures/`.
-  - If `"../textures/" + basename(modelName) + ".png"` or `".jpg"` is
-    present, pressing `F3` for the first time will load it.
-  - If `../textures` doesn't exist relative to the model file's
-    directory, the model file's own directory will be used.
+* `F3` / `Shift F3`: Cycle through textures where the filename contains
+  the model filename (or that without underscores) in the current
+  directory or `../textures`. If there are no matches, use a list of
+  all found textures. The `F3` key goes to the next texture file (hold
+  `Shift` and press`F3` to go backward), but does nothing on the first
+  press if the model had loaded its own texture.
+  - Example: Both automatic loading (when you open a mesh) and manually
+    cycling using F3 works for Minetest mods, where the model should be
+    in `modname/models/` and the texture should be in
+    `modname/textures/` (but occasionally is in the same directory as
+    the model).
 * `Ctrl i`: toggle texture interpolation (shortcut for View, Texture
   Interpolation)
 * `F5`: Reload last model file
@@ -154,6 +191,7 @@ only applies to Visual Studio users.)
 * View, choose "Up" axis: change camera "up" axis to Z or Y (Y is
   default; automatically changed to Z when 3ds file is loaded)
 
+
 ## Known Issues
 * Warn on missing texture.
 * Test and complete install.bat on Windows.
@@ -161,6 +199,7 @@ only applies to Visual Studio users.)
   UserInterface.cpp).
 * (View.cpp) Set pitch correctly for shift & middle mouse button drag.
 * Lighting not correct until you rotate or enable z-Up
+
 
 ## Authors
 * ClearSansRegular.ttf (**Apache 2.0 License**) by Intel
@@ -181,3 +220,19 @@ only applies to Visual Studio users.)
   **GPL v3** as per <https://code.google.com/archive/p/b3view/>
   (see [LICENSE](https://github.com/poikilos/b3view/blob/master/LICENSE)
   file in your favorite text editor).
+
+
+## Developer Notes
+
+### Regression Tests
+
+#### Manipulating mesh on failed load
+- steps to reproduce
+  - File, Open, choose a mesh file such as animal_bat.b3d
+  - File, Open, choose a texture (purposely incorrect input)
+- incorrect behaviors:
+  - manipulating the loaded scene, such as calling remove()
+  - SEGFAULT
+- correct behaviors:
+  - Do nothing to the current scene.
+  - Show a message saying that the format is incorrect.

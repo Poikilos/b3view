@@ -8,6 +8,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <assert.h>
 
 #include "Debug.h"
 
@@ -19,6 +20,21 @@ using namespace std;
 void Utility::dumpVectorToConsole(const vector3df& vector)
 {
     debug() << "X: " << vector.X << " Y: " << vector.Y << " Z: " << vector.Z << endl;
+}
+
+int Utility::getTextureCount(const SMaterial& material) {
+    int count = 0;
+    for (irr::u32 ti = 0; ti < MATERIAL_MAX_TEXTURES; ti++)
+        if (material.getTexture(ti) != nullptr)
+            count++;
+    return count;
+}
+int Utility::getTextureCount(IAnimatedMeshSceneNode* node) {
+    int count = 0;
+    for (irr::u32 matIndex = 0; matIndex < node->getMaterialCount(); matIndex++) {
+        count += getTextureCount(node->getMaterial(matIndex));
+    }
+    return count;
 }
 
 void Utility::dumpMeshInfoToConsole(IAnimatedMeshSceneNode* node)
@@ -55,11 +71,7 @@ void Utility::dumpMeshInfoToConsole(IAnimatedMeshSceneNode* node)
                 << material.Shininess << endl;
 
         // check for # textures
-        int textures = 0;
-        for (irr::u32 ti = 0; ti < MATERIAL_MAX_TEXTURES; ti++)
-            if (material.getTexture(ti) != nullptr)
-                textures++;
-        debug() << "[MESH]:      # of textures       : " << textures << endl;
+        debug() << "[MESH]:      # of textures       : " << Utility::getTextureCount(material) << endl;
     }
 }
 
@@ -140,6 +152,44 @@ bool Utility::startsWith(const std::wstring& haystack, const std::wstring& needl
     return found;
 }
 
+wstring Utility::replaceAll(const wstring &subject, const wstring &from, const wstring &to)
+{
+    size_t i = 0;
+    if (from.length() == 0) {
+        return subject;
+    }
+    wstring result = subject;
+    while (i < result.length()) {
+        if (result.substr(i, from.length()) == from) {
+            result = result.substr(0, i) + to + result.substr(i + from.length());
+            i += to.length();
+        }
+        else {
+            i++;
+        }
+    }
+    return result;
+}
+
+std::string Utility::replaceAll(const std::string &subject, const std::string &from, const std::string &to)
+{
+    size_t i = 0;
+    if (from.length() == 0) {
+        return subject;
+    }
+    std::string result = subject;
+    while (i < result.length()) {
+        if (result.substr(i, from.length()) == from) {
+            result = result.substr(0, i) + to + result.substr(i + from.length());
+            i += to.length();
+        }
+        else {
+            i++;
+        }
+    }
+    return result;
+}
+
 bool Utility::endsWith(const std::wstring& haystack, const std::wstring& needle) {
     bool found = false;
     if (haystack.length() >= needle.length()) {
@@ -148,6 +198,48 @@ bool Utility::endsWith(const std::wstring& haystack, const std::wstring& needle)
         }
     }
     return found;
+}
+
+bool Utility::startsWithAny(const std::wstring& haystack, const std::vector<std::wstring>& needles, bool CI) {
+    return getPrefix(haystack, needles, CI).length() > 0;
+}
+
+bool Utility::endsWithAny(const std::wstring& haystack, const std::vector<std::wstring>& needles, bool CI) {
+    return getSuffix(haystack, needles, CI).length() > 0;
+}
+
+std::wstring Utility::getPrefix(const std::wstring& haystack, const std::vector<std::wstring>& needles, bool CI) {
+    if (CI) {
+        std::wstring haystackLower = Utility::toLower(haystack);
+        for (auto needle : needles) {
+            if (Utility::startsWith(haystackLower, Utility::toLower(needle)))
+                return needle;
+        }
+    }
+    else {
+        for (auto needle : needles) {
+            if (Utility::startsWith(haystack, needle))
+                return needle;
+        }
+    }
+    return L"";
+}
+
+std::wstring Utility::getSuffix(const std::wstring& haystack, const std::vector<std::wstring>& needles, bool CI) {
+    if (CI) {
+        std::wstring haystackLower = Utility::toLower(haystack);
+        for (auto needle : needles) {
+            if (Utility::endsWith(haystackLower, Utility::toLower(needle)))
+                return needle;
+        }
+    }
+    else {
+        for (auto needle : needles) {
+            if (Utility::endsWith(haystack, needle))
+                return needle;
+        }
+    }
+    return L"";
 }
 
 /// Get any substring to the left of the last delimiter.
@@ -362,3 +454,40 @@ std::string Utility::toString(irr::f32 val)
 //     return abs(f2-f1) < .00000001;  // TODO: kEpsilon? (see also
 //     // <https://en.wikipedia.org/wiki/Machine_epsilon#How_to_determine_machine_epsilon>)
 // }
+TestUtility::TestUtility() {
+    std::cerr << "TestUtility..." << std::flush;
+    testReplaceAll(L"***water_dragon***", L"_", L"", L"***waterdragon***");
+    testReplaceAll(L"*water_dragon*", L"*", L"***", L"***water_dragon***");
+
+    testReplaceAll(L"***water_dragon***", L"***", L"", L"water_dragon");
+    testReplaceAll(L"***water_dragon***", L"", L"***", L"***water_dragon***"); // do nothing
+    std::cerr << "OK" << std::endl;
+}
+
+void TestUtility::testReplaceAll(const wstring &subject, const wstring &from, const wstring &to, const wstring &expectedResult)
+{
+    this->assertEqual(Utility::replaceAll(subject, from, to), expectedResult);
+};
+void TestUtility::testReplaceAll(const std::string &subject, const std::string &from, const std::string &to, const std::string &expectedResult)
+{
+    std::string result = Utility::replaceAll(subject, from, to);
+    this->assertEqual(result, expectedResult);
+};
+
+void TestUtility::assertEqual(const wstring& subject, const wstring& expectedResult)
+{
+    if (subject != expectedResult) {
+        cerr << "The test expected \"" << Utility::toString(expectedResult) << "\" but got \"" << Utility::toString(subject) << std::endl;
+    }
+    assert(subject == expectedResult);
+}
+void TestUtility::assertEqual(const std::string subject, const std::string expectedResult)
+{
+    if (subject != expectedResult) {
+        cerr << "The test expected \"" << expectedResult << "\" but got \"" << subject << std::endl;
+    }
+    assert(subject == expectedResult);
+}
+
+
+static TestUtility testutility;

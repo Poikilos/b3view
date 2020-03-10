@@ -185,7 +185,7 @@ void UserInterface::setupUserInterface()
 
     y += size_y + spacing_y;
     axisSizeEditBox = m_Gui->addEditBox(
-        L"",
+        std::to_wstring(this->m_Engine->m_AxisLength).c_str(),
         rect<s32>(vector2d<s32>(spacing_x, y),
                   dimension2d<s32>(size_x, size_y)),
         true,
@@ -255,7 +255,7 @@ void UserInterface::displayLoadTextureDialog()
 void UserInterface::incrementFrame(f32 frameCount, bool enableRound)
 {
     if (this->m_Engine->m_LoadedMesh != nullptr) {
-        if (this->m_Engine->isPlaying)
+        if (this->m_Engine->m_IsPlaying)
             this->m_Engine->toggleAnimation();
         this->m_Engine->m_LoadedMesh->setCurrentFrame(
             enableRound
@@ -475,21 +475,36 @@ void UserInterface::drawStatusLine() const
 {
 }
 
+bool UserInterface::OnSelectMesh() {
+    this->m_MatchingTextures.clear();
+    this->m_AllTextures.clear();
+    return true;
+}
+
+/**
+ * Load the next texture from the list of found textures.
+ * Files are only listed once for speed, so you must reload the
+ * model to trigger another list ("dir") operation (since loading
+ * a mesh calls OnSelectMesh() which clears allTextures and matchingTextures).
+ *
+ * @param direction Specify <0 to choose previous texture, >0 for next, 0 to
+ * reload current texture if any; otherwise, only select a texture if any
+ * matching textures (named like model) are present in . or ../textures.
+ * @return Any texture was loaded (true/false).
+ */
 bool UserInterface::loadNextTexture(int direction)
 {
+    cerr << "Loading texture..." << flush;
     bool ret = false;
-    this->m_Engine->m_NextPath = L"";
     std::wstring basePath = L".";
-    if (this->m_Engine->m_PreviousPath.length() > 0) {
+    if (this->m_Engine->m_LoadedMeshPath.length() > 0) {
         std::wstring prevModelName = Utility::basename(
-            this->m_Engine->m_PreviousPath
+            this->m_Engine->m_LoadedMeshPath
         );
-        //vector<wstring> dotExtensions;
-        //dotExtensions.push_back(L".png");
-        //dotExtensions.push_back(L".jpg");
         wstring foundPath;
         wstring prevModelNoExt;
         prevModelNoExt = Utility::withoutExtension(prevModelName);
+        /*
         vector<wstring> names;
         names.push_back(prevModelNoExt+L"_mesh");
         names.push_back(prevModelNoExt);
@@ -506,185 +521,148 @@ bool UserInterface::loadNextTexture(int direction)
         names.push_back(prevModelNoExt+L"_f");
         names.push_back(prevModelNoExt+L"_male");
         names.push_back(prevModelNoExt+L"_m");
+        */
         vector<wstring> badSuffixes;
         badSuffixes.push_back(L"_inv");
 
         std::wstring lastDirPath = Utility::parentOfPath(
-            this->m_Engine->m_PreviousPath
+            this->m_Engine->m_LoadedMeshPath
         );
         std::wstring parentPath = Utility::parentOfPath(lastDirPath);
         std::wstring dirSeparator = Utility::delimiter(
-            this->m_Engine->m_PreviousPath
+            this->m_Engine->m_LoadedMeshPath
         );
         std::wstring texturesPath = parentPath + dirSeparator + L"textures";
         std::wstring tryTexPath = texturesPath + dirSeparator + prevModelNoExt
                                   + L".png";
-        if (direction == 0 && Utility::isFile(tryTexPath)) {
-            this->m_Engine->m_NextPath = tryTexPath;
-            this->m_Engine->loadTexture(this->m_Engine->m_NextPath);
-        } else {
-            tryTexPath = lastDirPath + dirSeparator
-                         + prevModelNoExt + L".png";
-            if (direction == 0 && Utility::isFile(tryTexPath)) {
-                this->m_Engine->m_NextPath = tryTexPath;
-                ret = this->m_Engine->loadTexture(this->m_Engine->m_NextPath);
-            } else {
-                std::wstring path = texturesPath;
+        vector<wstring> texturePaths;
 
-                if (!fs::is_directory(fs::status(path)))
-                    path = lastDirPath; // cycle in model's directory instead
+        texturePaths.push_back(lastDirPath);
 
-                fs::directory_iterator end_itr; // default yields past-the-end
+        if (fs::is_directory(fs::status(texturesPath))) {
+            texturePaths.push_back(texturesPath);
+        }
+        vector<wstring> dotExts;
+        for (auto ext : this->m_Engine->m_TextureExtensions) {
+            dotExts.push_back(L"." + ext);
+        }
 
-                std::wstring nextPath = L"";
-                std::wstring retroPath = L"";
-                std::wstring lastPath = L"";
-
-                bool found = false;
-                bool force = false;
-                wstring tryPath;
-                if (fs::is_directory(fs::status(path))) {
-                    if (this->m_Engine->m_PrevTexturePath.length() == 0) {
-                        // if (this->m_Engine->m_PreviousPath.length() > 0) {
-                        for (auto name : names) {
-                            for (auto extension : this->m_Engine->textureExtensions) {
-                                tryPath = texturesPath + dirSeparator
-                                          + name + L"." + extension;
-                                // tryPath = Utility::toWstring(Utility::toString(tryPath));
-                                if (Utility::isFile(tryPath)) {
-                                    foundPath = tryPath;
-                                    break;
-                                }
-                                // else
-                                    // debug() << "  - no '"
-                                            // << Utility::toString(tryPath)
-                                            // << "'" << endl;
-                            }
-                            if (foundPath.length() > 0) {
-                                break;
-                            }
-                        }
-                        if (foundPath.length() > 0) {
-                            nextPath = foundPath;
-                            found = true;
-                            force = true;
-                            this->m_Engine->setEnableTextureInterpolation(false);
-                            viewMenu->setItemChecked(
-                                viewTextureInterpolationIdx,
-                                this->m_Engine->getEnableTextureInterpolation()
-                            );
-                        } else {
-                            nextPath = tryPath;
-                            found = true;
-                            force = true;
-                        }
-                        //}
-                    }
-
-                    // Do fuzzy texture name search
-                    // (If found no texture yet, match instead of predict name):
-                    if ((this->m_Engine->m_PrevTexturePath.length() == 0)
-                            && (foundPath.length() == 0)) {
-                        for (const auto& itr : fs::directory_iterator(path)) {
-                            std::wstring ext = Utility::extensionOf(
-                                itr.path().wstring()
-                            ); // no dot!
-                            std::wstring nameNoExt = Utility::withoutExtension(itr.path().filename().wstring());
-                            // std::wstring rightName = Utility::rightOf(nameNoExt, L"_", true);
-                            // std::wstring rightLastName = Utility::rightOfLast(nameNoExt, L"_", true);
-                            // debug() << "itr.path().filename().wstring(): " << itr.path().filename().c_str() << endl;
-                            if (Utility::startsWith(nameNoExt, prevModelNoExt)) {
-                                wstring remainder = Utility::rightOf(nameNoExt, prevModelNoExt, true);
-                                if (std::find(badSuffixes.begin(),
-                                              badSuffixes.end(), remainder)
-                                        == badSuffixes.end()) {
-                                    foundPath = itr.path().wstring();
-                                    nextPath = foundPath;
-                                    found = true;
-                                    force = true;
-                                    break;
-                                }
-                            }
-                            for (auto name : names) {
-                                for (auto extension : this->m_Engine->textureExtensions) {
-                                    wstring tryEnd = name + L"." + extension;
-                                    //if (Utility::endsWith(nameNoExt, name)) {
-                                    if (Utility::endsWith(itr.path().filename().wstring(), tryEnd)) {
-                                        foundPath = itr.path().wstring();
-                                        nextPath = foundPath;
-                                        found = true;
-                                        force = true;
-                                        break;
-                                    }
-                                    else {
-                                        debug() << "!endsWith("
-                                                << Utility::toString(itr.path().filename().wstring())
-                                                << "," << Utility::toString(tryEnd)
-                                                << endl;
-                                        // debug() << "!endsWith("
-                                                // << Utility::toString(nameNoExt)
-                                                // << "," << Utility::toString(name)
-                                                // << endl;
-                                    }
-                                }
-                                if (foundPath.length() > 0) {
-                                    break;
-                                }
-                            }
-                            if (foundPath.length() > 0) {
-                                break;
-                            }
-                        }
-                    }
-                    if (force) {
-                        this->m_Engine->setEnableTextureInterpolation(false);
-                        viewMenu->setItemChecked(
-                            viewTextureInterpolationIdx,
-                            this->m_Engine->getEnableTextureInterpolation()
+        if (this->m_MatchingTextures.size() + this->m_AllTextures.size() < 1) {
+            for (auto path : texturePaths) {
+                for (const auto& itr : fs::directory_iterator(path)) {
+                    if (fs::is_regular_file(itr.status())) {
+                        std::wstring name = itr.path().filename().wstring();
+                        std::wstring suffix = Utility::getSuffix(name, dotExts,
+                                                                 true);
+                        bool isUsable = true;
+                        std::wstring nameNoExt = Utility::withoutExtension(
+                            name
                         );
-                    }
-                    for (const auto& itr : fs::directory_iterator(path)) {
-                        std::wstring ext = Utility::extensionOf(
-                                               itr.path().wstring()
-                                           ); // no dot!
-                        if (!is_directory(itr.status())
-                            && std::find(m_Engine->textureExtensions.begin(),
-                                         m_Engine->textureExtensions.end(), ext)
-                               != m_Engine->textureExtensions.end()) {
-                            // cycle through files (go to next after
-                            // m_PrevTexturePath if any previously loaded,
-                            // otherwise first)
-                            if (nextPath.length() == 0)
-                                nextPath = itr.path().wstring();
-                            lastPath = itr.path().wstring();
-                            if (found && direction > 0) {
-                                if (!force)
-                                    nextPath = itr.path().wstring();
-                                break;
+                        if (Utility::endsWithAny(nameNoExt, badSuffixes, true))
+                            isUsable = false;
+                        if (isUsable && suffix.length() > 0) {
+                            this->m_AllTextures.push_back(
+                                path + dirSeparator + name
+                            );
+                            if (Utility::startsWith(name, prevModelNoExt)) {
+                                this->m_MatchingTextures.push_back(
+                                    path + dirSeparator + name
+                                );
                             }
-                            if (itr.path().wstring()
-                                    == this->m_Engine->m_PrevTexturePath)
-                                found = true;
-                            if (!found)
-                                retroPath = itr.path().wstring();
+                            else if (name.find(prevModelNoExt) != std::wstring::npos) {
+                                this->m_MatchingTextures.push_back(
+                                    path + dirSeparator + name
+                                );
+                            }
+                            else if (name.find(Utility::replaceAll(prevModelNoExt, L"_", L"")) != std::wstring::npos) {
+                                this->m_MatchingTextures.push_back(
+                                    path + dirSeparator + name
+                                );
+                            }
                         }
-                        else debug() << Utility::toString(ext)
-                                     << "is not a valid extension for: "
-                                     << Utility::toString(itr.path().filename().wstring())
-                                     << endl;
-                    }
-                    if (retroPath.length() == 0)
-                        retroPath = lastPath; // previous is last if at start
-                    if (direction < 0)
-                        nextPath = retroPath;
-                    if (nextPath.length() > 0) {
-                        ret = this->m_Engine->loadTexture(nextPath);
                     }
                 }
             }
         }
+        vector<wstring> paths = this->m_MatchingTextures;
+        if (this->m_MatchingTextures.size() < 1) {
+            paths = this->m_AllTextures;
+            debug() << "There were no matching textures."
+                    << " The entire list of " << this->m_AllTextures.size()
+                    << " found textures will be used." << std::endl;
+        }
+        else {
+            // Assume the user wants to view name-matched texture using
+            // the render settings of Minetest.
+            this->m_Engine->setEnableTextureInterpolation(false);
+            viewMenu->setItemChecked(
+                viewTextureInterpolationIdx,
+                this->m_Engine->getEnableTextureInterpolation()
+            );
+        }
+        std::wstring prevTexture = L"";
+        std::wstring nextTexture = L"";
+        std::wstring lastTexture = L"";
+        std::wstring firstTexture = L"";
+        bool found = false;
+        for (auto path : paths) {
+            if (firstTexture.length() == 0)
+                firstTexture = path;
+            lastTexture = path;
+            if (this->m_Engine->m_LoadedTexturePath.length() > 0) {
+                if (path == this->m_Engine->m_LoadedTexturePath) {
+                    found = true;
+                }
+                else if (!found) {
+                    prevTexture = path;
+                }
+                else {
+                    if (nextTexture.length() == 0)
+                        nextTexture = path;
+                }
+            }
+            else {
+                prevTexture = path; // Use the last one as the previous.
+                if (nextTexture.length() == 0)
+                    nextTexture = path;
+            }
+        }
+        if (nextTexture.length() == 0)
+            nextTexture = firstTexture; // The last is current, so next is 1st.
+        if (prevTexture.length() == 0) {
+            if (lastTexture != firstTexture)
+                prevTexture = lastTexture; // Wrap to end.
+            else
+                prevTexture = firstTexture; // Use the only texture.
+        }
+        if (lastTexture.length() > 0) {
+            if (direction < 0) {
+                ret = this->m_Engine->loadTexture(prevTexture);
+            }
+            else if (direction > 0) {
+                ret = this->m_Engine->loadTexture(nextTexture);
+            }
+            else {
+                // If direction is 0 (such as when a model is loaded that has
+                // no texture), only load a preloaded or matching texture.
+                if (this->m_Engine->m_LoadedTexturePath.length() > 0) {
+                    ret = this->m_Engine->loadTexture(
+                        this->m_Engine->m_LoadedTexturePath
+                    );
+                }
+                else if (this->m_MatchingTextures.size() >= 1) {
+                    ret = this->m_Engine->loadTexture(firstTexture);
+                }
+            }
+        }
+        else if (this->m_Engine->m_LoadedTexturePath.length() > 0) {
+            ret = this->m_Engine->loadTexture(
+                this->m_Engine->m_LoadedTexturePath
+            );
+        }
     } else
         debug() << "Can't cycle texture since no file was opened" << endl;
+    cerr << (ret?"OK":"FAILED") << endl;
     return ret;
 }
 
@@ -705,8 +683,8 @@ void UserInterface::exportMeshToHome(std::string extension)
             std::cout << "Your PATH is: " << where.c_str() << '\n';
         }
         std::string name = "";
-        if (m_Engine->m_PreviousPath.length() > 0) {
-            name = Utility::toString(Utility::withoutExtension(Utility::basename(m_Engine->m_PreviousPath)));
+        if (m_Engine->m_LoadedMeshPath.length() > 0) {
+            name = Utility::toString(Utility::withoutExtension(Utility::basename(m_Engine->m_LoadedMeshPath)));
         }
 
         wstring result = m_Engine->saveMesh(where, name, extension);
@@ -837,7 +815,7 @@ bool UserInterface::OnEvent(const SEvent& event)
             break;
         case UIE_AXISSIZEEDITBOX:
             if (ge->EventType == EGET_EDITBOX_ENTER) {
-                this->m_Engine->axisLength = Utility::toF32(
+                this->m_Engine->m_AxisLength = Utility::toF32(
                     this->axisSizeEditBox->getText()
                 );
             }
@@ -858,7 +836,7 @@ bool UserInterface::OnEvent(const SEvent& event)
                     m_Engine->reloadTexture();
                 }
                 else {
-                    if (m_Engine->m_PreviousPath.length() > 0) {
+                    if (m_Engine->m_LoadedMeshPath.length() > 0) {
                         bool result = m_Engine->reloadMesh();
                         if (!result) {
                             this->m_Engine->m_Device->getGUIEnvironment()->addMessageBox(

@@ -89,8 +89,10 @@ void Engine::setupScene()
     // further down.
     ICameraSceneNode* camera = m_Scene->addCameraSceneNode(nullptr, m_CamPos,
                                                            m_CamTarget);
-    camera->setAspectRatio(static_cast<f32>(m_Driver->getScreenSize().Width)
-                           / static_cast<f32>(m_Driver->getScreenSize().Height));
+    camera->setAspectRatio(
+        static_cast<f32>(m_Driver->getScreenSize().Width)
+        / static_cast<f32>(m_Driver->getScreenSize().Height)
+    );
 }
 
 IGUIEnvironment* Engine::getGUIEnvironment() const
@@ -189,10 +191,10 @@ void Engine::drawAxisLines()
 
     if (enableAxisWidget) {
         m_Driver->setMaterial(xMaterial);
-        m_Driver->draw3DLine(vector3df(), vector3df(axisLength, 0, 0),
+        m_Driver->draw3DLine(vector3df(), vector3df(m_AxisLength, 0, 0),
                              SColor(255, 255, 0, 0));
         position2d<s32> textPos = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(
-            vector3df(axisLength + axisLength*.1f, 0, 0)
+            vector3df(m_AxisLength + m_AxisLength*.1f, 0, 0)
         );
         dimension2d<u32> textSize;
         if (m_AxisFont != nullptr) {
@@ -202,10 +204,10 @@ void Engine::drawAxisLines()
         }
 
         m_Driver->setMaterial(yMaterial);
-        m_Driver->draw3DLine(vector3df(), vector3df(0, axisLength, 0),
+        m_Driver->draw3DLine(vector3df(), vector3df(0, m_AxisLength, 0),
                              SColor(255, 0, 255, 0));
         textPos = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(
-            vector3df(0, axisLength + axisLength*.1f, 0)
+            vector3df(0, m_AxisLength + m_AxisLength*.1f, 0)
         );
         if (m_AxisFont != nullptr) {
             textSize = m_AxisFont->getDimension(L"Y+");
@@ -214,10 +216,10 @@ void Engine::drawAxisLines()
         }
 
         m_Driver->setMaterial(zMaterial);
-        m_Driver->draw3DLine(vector3df(), vector3df(0, 0, axisLength),
+        m_Driver->draw3DLine(vector3df(), vector3df(0, 0, m_AxisLength),
                              SColor(255, 0, 0, 255));
         textPos = m_Scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(
-            vector3df(0, 0, axisLength + axisLength*.1f)
+            vector3df(0, 0, m_AxisLength + m_AxisLength*.1f)
         );
         if (m_AxisFont != nullptr) {
             textSize = m_AxisFont->getDimension(L"Z+");
@@ -288,12 +290,12 @@ Engine::Engine()
     this->m_EnableWireframe = false;
     this->m_EnableLighting = false;
     this->m_EnableTextureInterpolation = true;
-    this->axisLength = 10;
-    this->worldFPS = 60;
-    this->prevFPS = 30;
-    this->textureExtensions.push_back(L"png");
-    this->textureExtensions.push_back(L"jpg");
-    this->textureExtensions.push_back(L"bmp");
+    this->m_AxisLength = 10;
+    this->m_WorldFPS = 60;
+    this->m_PrevFPS = 30;
+    this->m_TextureExtensions.push_back(L"png");
+    this->m_TextureExtensions.push_back(L"jpg");
+    this->m_TextureExtensions.push_back(L"bmp");
 #if WIN32
     m_Device = createDevice(EDT_DIRECT3D9, dimension2d<u32>(1024, 768), 32,
                             false, false, false, nullptr);
@@ -364,23 +366,28 @@ vector3df Engine::camTarget()
 bool Engine::loadMesh(const wstring& fileName)
 {
     bool ret = false;
-    this->m_PreviousPath = fileName; // even if bad, set this
-        // to allow F5 to reload
-
-    if (m_LoadedMesh != nullptr)
-        m_LoadedMesh->remove();
 
     irr::scene::IAnimatedMesh* mesh = m_Scene->getMesh(fileName.c_str());
     if (mesh != nullptr) {
+        this->m_LoadedTexturePath = L"";
+        this->m_LoadedMeshPath = fileName; // even if bad, set this
+            // to allow F5 to reload
+
+        if (m_LoadedMesh != nullptr)
+            m_LoadedMesh->remove();
+        this->m_LoadedMesh = nullptr;
+
         m_Device->setWindowCaption((wstring(L"b3view - ") + fileName).c_str());
         m_LoadedMesh = m_Scene->addAnimatedMeshSceneNode(mesh);
         Utility::dumpMeshInfoToConsole(m_LoadedMesh);
+        std::cerr << "Arranging scene..." << std::flush;
         if (Utility::toLower(Utility::extensionOf(fileName)) == L"3ds") {
             m_View->setZUp(true);
         } else {
             m_View->setZUp(false);
         }
         if (m_LoadedMesh != nullptr) {
+            std::cerr << "unloading old mesh..." << std::flush;
             ret = true;
             this->m_UserInterface->playbackFPSEditBox->setText(
                 Utility::toWstring(m_LoadedMesh->getAnimationSpeed()).c_str()
@@ -431,19 +438,38 @@ bool Engine::loadMesh(const wstring& fileName)
                 video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF
             );
             // EMT_TRANSPARENT_ALPHA_CHANNEL: constant transparency
+
         }
+        std::cerr << "setting display mode..." << std::flush;
+        this->setMeshDisplayMode(this->m_EnableWireframe, this->m_EnableLighting,
+                                 this->m_EnableTextureInterpolation);
+        std::cerr << "preparing UI..." << std::flush;
+        if (this->m_UserInterface != nullptr)
+            this->m_UserInterface->OnSelectMesh();
+        std::cerr << "checking for textures..." << std::flush;
+        std::cerr << "OK" << std::endl;
+        if (Utility::getTextureCount(m_LoadedMesh) == 0) {
+            // NOTE: getMaterialCount doesn't work, since there may not
+            // be loaded textures in any material.
+            if (this->m_UserInterface != nullptr) {
+                this->m_UserInterface->loadNextTexture(0);
+            }
+        }
+
     }
-    this->setMeshDisplayMode(this->m_EnableWireframe, this->m_EnableLighting,
-                             this->m_EnableTextureInterpolation);
+    // Don't do anything outside of the mesh != nullptr case that will try to
+    // use mesh!
     return ret;
 }
 
 bool Engine::reloadMesh()
 {
     bool ret = false;
-    if (this->m_PreviousPath.length() > 0) {
-        ret = loadMesh(this->m_PreviousPath);
+    if (this->m_LoadedMeshPath.length() > 0) {
+        ret = loadMesh(this->m_LoadedMeshPath);
     }
+    if (this->m_UserInterface != nullptr)
+        this->m_UserInterface->OnSelectMesh();
     return ret;
 }
 
@@ -547,11 +573,11 @@ std::wstring Engine::saveMesh(const io::path path, const std::string& nameOrBlan
 
 void Engine::reloadTexture()
 {
-    if (this->m_PrevTexturePath.length() > 0) {
+    if (this->m_LoadedTexturePath.length() > 0) {
         if (wcslen(this->m_UserInterface->texturePathEditBox->getText()) == 0)
             loadTexture(this->m_UserInterface->texturePathEditBox->getText());
         else
-            loadTexture(this->m_PrevTexturePath);
+            loadTexture(this->m_LoadedTexturePath);
     }
 }
 
@@ -564,10 +590,14 @@ bool Engine::loadTexture(const wstring& fileName)
             m_LoadedMesh->setMaterialTexture(0, texture);
             ret = true;
         }
-        this->m_PrevTexturePath = fileName;
+        this->m_LoadedTexturePath = fileName;
+        std::cerr << "Setting texture path box to " << Utility::toString(this->m_LoadedTexturePath)  << std::endl;
         this->m_UserInterface->texturePathEditBox->setText(
-            this->m_PrevTexturePath.c_str()
+            this->m_LoadedTexturePath.c_str()
         );
+    }
+    else {
+        std::cerr << "NOT Setting texture path box to " << Utility::toString(this->m_LoadedTexturePath)  << std::endl;
     }
     return ret;
 }
@@ -638,7 +668,7 @@ void Engine::setMeshDisplayMode(bool wireframe, bool lighting,
 
 bool Engine::isAnimating()
 {
-    return this->isPlaying;
+    return this->m_IsPlaying;
 }
 
 void Engine::playAnimation()
@@ -648,24 +678,24 @@ void Engine::playAnimation()
     }
     if (!this->isAnimating()) {
         if (this->m_LoadedMesh != nullptr) {
-            if (this->prevFPS < 1)
-                this->prevFPS = 5;
-            this->m_LoadedMesh->setAnimationSpeed(this->prevFPS);
+            if (this->m_PrevFPS < 1)
+                this->m_PrevFPS = 5;
+            this->m_LoadedMesh->setAnimationSpeed(this->m_PrevFPS);
         }
     }
-    this->isPlaying = true;
+    this->m_IsPlaying = true;
 }
 
 void Engine::pauseAnimation()
 {
     if (this->isAnimating()) {
-        this->prevFPS = animationFPS();
+        this->m_PrevFPS = animationFPS();
         if (this->m_LoadedMesh != nullptr) {
-            this->prevFPS = this->m_LoadedMesh->getAnimationSpeed();
+            this->m_PrevFPS = this->m_LoadedMesh->getAnimationSpeed();
             this->m_LoadedMesh->setAnimationSpeed(0);
         }
     }
-    this->isPlaying = false;
+    this->m_IsPlaying = false;
 }
 
 void Engine::toggleAnimation()
@@ -682,7 +712,7 @@ void Engine::toggleAnimation()
 void Engine::setAnimationFPS(u32 animationFPS)
 {
     if (this->m_LoadedMesh != nullptr) {
-        if (animationFPS > 0) this->isPlaying = true;
+        if (animationFPS > 0) this->m_IsPlaying = true;
         // Do NOT call playAnimation, otherwise infinite recursion occurs
         // (it calls setAnimationFPS).
         this->m_LoadedMesh->setAnimationSpeed(animationFPS);
@@ -728,8 +758,8 @@ u32 Engine::animationFPS()
 void Engine::run()
 {
     u32 timePerFrame = 1000.0f;
-    if (this->worldFPS > 0) {
-        timePerFrame = static_cast<u32>(1000.0f / this->worldFPS);
+    if (this->m_WorldFPS > 0) {
+        timePerFrame = static_cast<u32>(1000.0f / this->m_WorldFPS);
     }
     ITimer* timer = m_Device->getTimer();
 
@@ -739,7 +769,7 @@ void Engine::run()
 
         checkResize();
         if (this->m_LoadedMesh != nullptr) {
-            if (isPlaying) {
+            if (m_IsPlaying) {
                 this->m_LoadedMesh->setLoopMode(true);
                 this->m_UserInterface->playbackSetFrameEditBox->setText(
                     Utility::toWstring(this->m_LoadedMesh->getFrameNr()).c_str()
