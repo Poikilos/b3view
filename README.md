@@ -5,7 +5,7 @@ viewer for B3D, X, OBJ, MS3D, 3DS (or any supported by Irrlicht).
 
 ![screenshot with gull from poikilos mobs_sky fork](https://github.com/poikilos/b3view/raw/master/screenshot.jpg)
 
-bird: [github.com/poikilos/mobs_sky](https://github.com/poikilos/mobs_sky)
+bat: [github.com/poikilos/mobs_sky](https://github.com/poikilos/mobs_sky)
 
 Website: [poikilos.org](https://poikilos.org)
 
