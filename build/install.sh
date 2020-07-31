@@ -44,10 +44,11 @@ if [ ! -f $src_path ]; then
         echo "Checking for $src_name in $try_build_path...NOT FOUND"
     fi
 fi
-if [ ! -f $src_path ]; then
+if [ ! -f "$src_path" ]; then
     customDie "(Nothing done) missing $src_name (You must build first, such as using Qt Creator)."
 else
     echo "Checking for $src_path...FOUND"
+    echo "* current directory: `pwd`"
 fi
 
 if [ -d "$try_dest_bin" ]; then
@@ -62,7 +63,7 @@ if [ -f "$try_dest_bin" ]; then
         PROFILE_ENABLE=true
     fi
 fi
-
+# echo "* using '$src_path'..."
 cp -f "$src_path" "$try_dest_bin"
 
 if [ ! -f "$try_dest_bin" ]; then
