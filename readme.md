@@ -30,6 +30,7 @@ Website: [poikilos.org](https://poikilos.org)
   "<texture directory>" is either `.` (same directory as model)
   or `../textures` (where model would be in a parallel directory next to
   textures).
+* Set the animation loop range (the animation includes the end frame).
 
 
 ## Related Software

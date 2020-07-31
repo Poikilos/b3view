@@ -105,6 +105,44 @@ void UserInterface::setupUserInterface()
     s32 size_x = playbackWindow->getClientRect().getWidth() - 8;
     s32 size_y = 24;
     s32 y = 24;
+
+    playbackStartFrameStaticText = m_Gui->addStaticText(
+        L"Start Frame:",
+        rect<s32>(vector2d<s32>(spacing_x, y),
+                  dimension2d<s32>(size_x, size_y)),
+        true,
+        true,
+        playbackWindow,
+        UIE_PLAYBACKSTARTFRAMESTATICTEXT,
+        false);
+    y += size_y;
+    playbackStartFrameEditBox = m_Gui->addEditBox(
+        L"",
+        rect<s32>(vector2d<s32>(spacing_x, y),
+                  dimension2d<s32>(size_x, size_y)),
+        true,
+        playbackWindow,
+        UIE_PLAYBACKSTARTFRAMEEDITBOX);
+    y += size_y + spacing_y;
+    playbackEndFrameStaticText = m_Gui->addStaticText(
+        L"End Frame:",
+        rect<s32>(vector2d<s32>(spacing_x, y),
+                  dimension2d<s32>(size_x, size_y)),
+        true,
+        true,
+        playbackWindow,
+        UIE_PLAYBACKENDFRAMESTATICTEXT,
+        false);
+    y += size_y;
+    playbackEndFrameEditBox = m_Gui->addEditBox(
+        L"",
+        rect<s32>(vector2d<s32>(spacing_x, y),
+                  dimension2d<s32>(size_x, size_y)),
+        true,
+        playbackWindow,
+        UIE_PLAYBACKENDFRAMEEDITBOX);
+    y += size_y + spacing_y;
+
     playbackStartStopButton = m_Gui->addButton(
         rect<s32>(vector2d<s32>(spacing_x, y),
                   dimension2d<s32>(size_x, size_y)),
@@ -481,6 +519,21 @@ bool UserInterface::OnSelectMesh() {
     return true;
 }
 
+void UserInterface::setPlaybackText(s32 id, const wchar_t* text)
+{
+    switch (id) {
+    case (UIE_PLAYBACKSTARTFRAMEEDITBOX):
+        this->playbackStartFrameEditBox->setText(text);
+        break;
+    case (UIE_PLAYBACKENDFRAMEEDITBOX):
+        this->playbackEndFrameEditBox->setText(text);
+        break;
+    default:
+        std::cerr << "ERROR: setPlaybackText got a bad id: " << id << std::endl;
+        // break;
+    }
+}
+
 /**
  * Load the next texture from the list of found textures.
  * Files are only listed once for speed, so you must reload the
@@ -793,6 +846,26 @@ bool UserInterface::OnEvent(const SEvent& event)
                 if (this->m_Engine->m_LoadedMesh != nullptr) {
                     this->m_Engine->m_LoadedMesh->setCurrentFrame(
                         Utility::toF32(this->playbackSetFrameEditBox->getText())
+                    );
+                }
+            }
+            break;
+        case UIE_PLAYBACKSTARTFRAMEEDITBOX:
+            if (ge->EventType == EGET_EDITBOX_ENTER) {
+                if (this->m_Engine->m_LoadedMesh != nullptr) {
+                    this->m_Engine->m_LoadedMesh->setFrameLoop(
+                                Utility::toF32(this->playbackStartFrameEditBox->getText()),
+                                Utility::toF32(this->playbackEndFrameEditBox->getText())
+                    );
+                }
+            }
+            break;
+        case UIE_PLAYBACKENDFRAMEEDITBOX:
+            if (ge->EventType == EGET_EDITBOX_ENTER) {
+                if (this->m_Engine->m_LoadedMesh != nullptr) {
+                    this->m_Engine->m_LoadedMesh->setFrameLoop(
+                                Utility::toF32(this->playbackStartFrameEditBox->getText()),
+                                Utility::toF32(this->playbackEndFrameEditBox->getText())
                     );
                 }
             }

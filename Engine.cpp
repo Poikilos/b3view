@@ -455,7 +455,40 @@ bool Engine::loadMesh(const wstring& fileName)
                 this->m_UserInterface->loadNextTexture(0);
             }
         }
-
+        std::cerr << "detecting last frame..." << std::flush;
+        std::wstring prevStartStr;
+        std::wstring prevEndStr;
+        if (this->m_UserInterface->playbackMenu->getItemText(UIE_PLAYBACKSTARTFRAMEEDITBOX) != nullptr)
+            prevStartStr = std::wstring(this->m_UserInterface->playbackMenu->getItemText(UIE_PLAYBACKSTARTFRAMEEDITBOX));
+        if (this->m_UserInterface->playbackMenu->getItemText(UIE_PLAYBACKENDFRAMEEDITBOX) != nullptr)
+            prevEndStr = std::wstring(this->m_UserInterface->playbackMenu->getItemText(UIE_PLAYBACKENDFRAMEEDITBOX));
+        f32 prevStart = -1;
+        f32 prevEnd = -1;
+        if (prevStartStr.length() > 0)
+            prevStart = Utility::toF32(prevStartStr);
+        // std::cerr << prevStart << "..." << std::flush;
+        if (prevEndStr.length() > 0)
+            prevEnd = Utility::toF32(prevEndStr);
+        // std::cerr << prevEnd << "..." << std::flush;
+        f32 endFrameF32 = static_cast<f32>(m_LoadedMesh->getEndFrame());
+        std::cerr << endFrameF32 << "..." << std::flush;
+        if (prevEnd < 0 || prevEnd > endFrameF32) {
+            std::cerr << "showing End Frame..." << std::flush;
+            this->m_UserInterface->setPlaybackText(
+                UIE_PLAYBACKENDFRAMEEDITBOX,
+                Utility::toWstring(endFrameF32).c_str()
+            );
+        }
+        if (prevStart < 0 || prevStart > endFrameF32) {
+            std::cerr << "showing Start Frame..." << std::flush;
+            this->m_UserInterface->setPlaybackText(
+                UIE_PLAYBACKSTARTFRAMEEDITBOX,
+                L"0.0"
+            );
+        }
+        //this->m_UserInterface->playbackMenu->setItemText(UIE_PLAYBACKSTARTFRAMEEDITBOX, );
+        //;
+        std::cerr << "OK" << std::endl;
     }
     // Don't do anything outside of the mesh != nullptr case that will try to
     // use mesh!

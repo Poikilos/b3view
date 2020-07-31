@@ -4,8 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
+## [git] - 2020-07-30
+(Poikilos)
+### Added
+- Allow setting the animation loop.
+
+
 ## [git] - 2020-03-10
-(poikilos)
+(Poikilos)
 ### Added
 - `replaceAll`
 - `TestUtility` ("Utility.cpp" now tests itself, but only one feature
@@ -44,7 +50,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
 ## [git] - 2019-07-03
-(poikilos)
+(Poikilos)
 ### Changes
 - Move the display mode booleans to Engine.
 - Add more string utilities.
@@ -53,7 +59,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
 ## [git] - 2019-05-16
-(poikilos)
+(Poikilos)
 ### Added
 - playback menu
   - Move framerate controls to playback menu.
@@ -62,7 +68,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
 ## [git] - 2019-05-16
-(poikilos)
+(Poikilos)
 ### Changed
 - improve minetest texture detection (alternate conventions)
 - turn off interpolation if loadNextTexture detects minetest directory
@@ -70,7 +76,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
 ## [git] - 2019-05-16
-(poikilos)
+(Poikilos)
 ### Added
 - export COLLADA (non-Blender), IRR, IRRMESH, OBJ, STL
 - show dialog box if operation can't be performed
@@ -81,7 +87,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
 ## [git] - 2019-04-19
-(poikilos)
+(Poikilos)
 ### Added
 - box for axis length (size of the axis widget)
 - box for frame rate
@@ -100,7 +106,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
 ## [git] - 2019-04-08
-(poikilos)
+(Poikilos)
 ### Added
 - snapWidgets (move playbackWindow on resize, not leave past edge)
 
@@ -114,7 +120,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
 ## [git] - 2019-04-08
-(poikilos)
+(Poikilos)
 ### Added
 - toggle texture interpolation (via checkbox and `x` hotkey)
 - INDEX_ variables to store ID of GUI elements
@@ -129,7 +135,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
 ## [git] - 2019-03-09
-(poikilos)
+(Poikilos)
 ### Added
 - completed rotation controls (Blender-like)
 - pan up and down (Blender-like, but only up and down)
@@ -139,7 +145,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
 ## [git] - 2019-03-09
-(poikilos)
+(Poikilos)
 ### Added
 - hotkeys to reload model/texture
 - license (see README.md for licensing history)
@@ -156,13 +162,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
 ## [git] - 2019-03-07
-(poikilos)
+(Poikilos)
 ### Added
 - playback controls
 
 
 ## [git] - 2019-03-06
-(poikilos)
+(Poikilos)
 ### Added
 - created install.sh and install.bat, and added Install and Usage
   to README.md
@@ -184,7 +190,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
 ## [git-94e3b8f] - 2019-03-06
-(poikilos)
+(Poikilos)
 ### Added
 - README.md
 

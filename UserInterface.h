@@ -22,15 +22,19 @@ enum UserInterfaceElements {
     UIE_VIEWMENU                    = 3000,
 
     UIE_PLAYBACKWINDOW              = 10000,
-    UIE_PLAYBACKSTARTSTOPBUTTON     = 10001,
-    UIE_PLAYBACKSETFRAMEEDITBOX     = 10002,
-    UIE_PLAYBACKINCREASEBUTTON      = 10003,
-    UIE_PLAYBACKDECREASEBUTTON      = 10004,
-    UIE_FPSEDITBOX                  = 10005,
-    UIE_TEXTUREPATHSTATICTEXT       = 10006,
-    UIE_TEXTUREPATHEDITBOX          = 10007,
-    UIE_AXISSIZESTATICTEXT          = 10008,
-    UIE_AXISSIZEEDITBOX             = 10009
+    UIE_PLAYBACKSTARTFRAMESTATICTEXT= 10001,
+    UIE_PLAYBACKSTARTFRAMEEDITBOX   = 10002,
+    UIE_PLAYBACKENDFRAMESTATICTEXT  = 10003,
+    UIE_PLAYBACKENDFRAMEEDITBOX     = 10004,
+    UIE_PLAYBACKSTARTSTOPBUTTON     = 10005,
+    UIE_PLAYBACKSETFRAMEEDITBOX     = 10006,
+    UIE_PLAYBACKINCREASEBUTTON      = 10007,
+    UIE_PLAYBACKDECREASEBUTTON      = 10008,
+    UIE_FPSEDITBOX                  = 10009,
+    UIE_TEXTUREPATHSTATICTEXT       = 10010,
+    UIE_TEXTUREPATHEDITBOX          = 10011,
+    UIE_AXISSIZESTATICTEXT          = 10012,
+    UIE_AXISSIZEEDITBOX             = 10013
 };
 
 enum UserInterfaceCommands {
@@ -82,6 +86,10 @@ public:
     irr::gui::IGUIContextMenu* fileMenu;
     irr::gui::IGUIContextMenu* playbackMenu;
     irr::gui::IGUIContextMenu* viewMenu;
+    irr::gui::IGUIStaticText* playbackStartFrameStaticText;
+    irr::gui::IGUIEditBox* playbackStartFrameEditBox;
+    irr::gui::IGUIStaticText* playbackEndFrameStaticText;
+    irr::gui::IGUIEditBox* playbackEndFrameEditBox;
     irr::gui::IGUIButton* playbackStartStopButton;
     irr::gui::IGUIEditBox* playbackSetFrameEditBox;
     irr::gui::IGUIButton* playbackIncreaseButton;
@@ -108,6 +116,7 @@ public:
     bool loadNextTexture(int direction);
     void exportMeshToHome(std::string extension);
     bool OnSelectMesh();
+    void setPlaybackText(irr::s32 id, const wchar_t* str);
 
     // IEventReceiver
     virtual bool OnEvent(const irr::SEvent& event);
