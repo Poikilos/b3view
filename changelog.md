@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [git] - 2021-02-17
+### Added
+- a settings system and related tests
+- more string functions in Utility
+
+### Fixed
+- Add a missing quote in TestUtility output.
+
 
 ## [git] - 2020-07-30
 (Poikilos)

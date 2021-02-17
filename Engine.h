@@ -13,6 +13,7 @@ class View;
 #include "EventHandler.h"
 #include "extlib/CGUITTFont.h"
 #include <irrlicht/irrlicht.h>
+#include "settings.h"
 
 enum SceneItemID {
     SIID_LIGHT = 1,
@@ -66,7 +67,7 @@ private:
     bool KeyIsDown[irr::KEY_KEY_CODES_COUNT];
     irr::s32 keyState[irr::KEY_KEY_CODES_COUNT];
     irr::s32 LMouseState, RMouseState;
-
+    Settings settings;
 public:
     std::wstring m_LoadedMeshPath;
     std::wstring m_LoadedTexturePath;

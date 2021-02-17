@@ -17,6 +17,8 @@ using namespace irr::scene;
 using namespace irr::video;
 using namespace std;
 
+const std::string Utility::WHITESPACE = " \n\r\t\f\v";
+
 void Utility::dumpVectorToConsole(const vector3df& vector)
 {
     debug() << "X: " << vector.X << " Y: " << vector.Y << " Z: " << vector.Z << endl;
@@ -152,6 +154,36 @@ bool Utility::startsWith(const std::wstring& haystack, const std::wstring& needl
     return found;
 }
 
+bool Utility::endsWith(const std::wstring& haystack, const std::wstring& needle) {
+    bool found = false;
+    if (haystack.length() >= needle.length()) {
+        if (haystack.substr(haystack.length()-needle.length())==needle) {
+            found = true;
+        }
+    }
+    return found;
+}
+
+bool Utility::startsWith(const std::string& haystack, const std::string& needle) {
+    bool found = false;
+    if (haystack.length() >= needle.length()) {
+        if (haystack.substr(0, needle.length())==needle) {
+            found = true;
+        }
+    }
+    return found;
+}
+
+bool Utility::endsWith(const std::string& haystack, const std::string& needle) {
+    bool found = false;
+    if (haystack.length() >= needle.length()) {
+        if (haystack.substr(haystack.length()-needle.length())==needle) {
+            found = true;
+        }
+    }
+    return found;
+}
+
 wstring Utility::replaceAll(const wstring &subject, const wstring &from, const wstring &to)
 {
     size_t i = 0;
@@ -188,16 +220,6 @@ std::string Utility::replaceAll(const std::string &subject, const std::string &f
         }
     }
     return result;
-}
-
-bool Utility::endsWith(const std::wstring& haystack, const std::wstring& needle) {
-    bool found = false;
-    if (haystack.length() >= needle.length()) {
-        if (haystack.substr(haystack.length()-needle.length())==needle) {
-            found = true;
-        }
-    }
-    return found;
 }
 
 bool Utility::startsWithAny(const std::wstring& haystack, const std::vector<std::wstring>& needles, bool CI) {
@@ -447,6 +469,23 @@ std::string Utility::toString(irr::f32 val)
     return std::to_string(val);
 }
 
+std::string Utility::ltrim(const std::string& s)
+{
+    size_t start = s.find_first_not_of(Utility::WHITESPACE);
+    return (start == std::string::npos) ? "" : s.substr(start);
+}
+
+std::string Utility::rtrim(const std::string& s)
+{
+    size_t end = s.find_last_not_of(Utility::WHITESPACE);
+    return (end == std::string::npos) ? "" : s.substr(0, end + 1);
+}
+
+std::string Utility::trim(const std::string& s)
+{
+    return rtrim(ltrim(s));
+}
+
 // don't do late instantiation (see header file)
 // template<typename T>
 // bool Utility::equalsApprox(T f1, T f2)
@@ -477,17 +516,17 @@ void TestUtility::testReplaceAll(const std::string &subject, const std::string &
 void TestUtility::assertEqual(const wstring& subject, const wstring& expectedResult)
 {
     if (subject != expectedResult) {
-        cerr << "The test expected \"" << Utility::toString(expectedResult) << "\" but got \"" << Utility::toString(subject) << std::endl;
+        cerr << "The test expected \"" << Utility::toString(expectedResult) << "\" but got \"" << Utility::toString(subject) << "\"" << std::endl;
     }
     assert(subject == expectedResult);
 }
 void TestUtility::assertEqual(const std::string subject, const std::string expectedResult)
 {
     if (subject != expectedResult) {
-        cerr << "The test expected \"" << expectedResult << "\" but got \"" << subject << std::endl;
+        cerr << "The test expected \"" << expectedResult << "\" but got \"" << subject << "\"" << std::endl;
     }
     assert(subject == expectedResult);
 }
 
 
-static TestUtility testutility;
+static TestUtility testutility;  // Run tests (Creating the first instance runs the static constructor).

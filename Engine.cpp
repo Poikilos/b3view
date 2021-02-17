@@ -279,6 +279,7 @@ s32 Engine::getNumberOfVertices()
 
 Engine::Engine()
 {
+    settings.set_int("max_recent", 10);
     // For monitoring single press: see
     // <http://irrlicht.sourceforge.net/forum/viewtopic.php?p=210744>
     for (u32 i = 0; i < KEY_KEY_CODES_COUNT; ++i)

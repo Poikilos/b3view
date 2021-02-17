@@ -9,6 +9,7 @@
 
 class Utility {
 public:
+    static const std::string WHITESPACE;
     static void dumpVectorToConsole(const irr::core::vector3df& vector);
     static int getTextureCount(const irr::video::SMaterial& material);
     static int getTextureCount(irr::scene::IAnimatedMeshSceneNode* node);
@@ -20,9 +21,11 @@ public:
     static std::wstring rightOf(const std::wstring& path, const std::wstring& delimiter, bool allIfNotFound);
     static std::wstring rightOfLast(const std::wstring& path, const std::wstring& delimiter, bool allIfNotFound);
     static bool startsWith(const std::wstring& haystack, const std::wstring& needle);
+    static bool endsWith(const std::wstring& haystack, const std::wstring& needle);
+    static bool startsWith(const std::string& haystack, const std::string& needle);
+    static bool endsWith(const std::string& haystack, const std::string& needle);
     static std::wstring replaceAll(const std::wstring& subject, const std::wstring& from, const std::wstring& to);
     static std::string replaceAll(const std::string& subject, const std::string& from, const std::string& to);
-    static bool endsWith(const std::wstring& haystack, const std::wstring& needle);
     static std::wstring getPrefix(const std::wstring& haystack, const std::vector<std::wstring>& needles, bool CI);
     static std::wstring getSuffix(const std::wstring& haystack, const std::vector<std::wstring>& needles, bool CI);
     static bool startsWithAny(const std::wstring& haystack, const std::vector<std::wstring>& needles, bool CI);
@@ -51,6 +54,10 @@ public:
     {
         return abs(f2 - f1) < .00000001; // TODO: kEpsilon? (see also <https://en.wikipedia.org/wiki/Machine_epsilon#How_to_determine_machine_epsilon>)
     }
+
+    static std::string ltrim(const std::string &s);
+    static std::string rtrim(const std::string &s);
+    static std::string trim(const std::string &s);
 };
 
 class TestUtility {
