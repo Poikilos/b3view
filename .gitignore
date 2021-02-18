@@ -39,3 +39,4 @@ CMakeLists.txt.user
 # dev generated files
 nohup.out
 *.tmp
+err.txt

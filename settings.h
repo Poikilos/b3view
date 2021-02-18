@@ -36,7 +36,7 @@ public:
     bool exists(std::string name);
     void set_ao_and_spacing(std::string assignmentOperator);
     void set_cm_and_spacing(std::string commentMark);
-    bool set_all_auto(std::map<std::string, std::string> table);
+    void set_all_auto(std::map<std::string, std::string> table);
     void set_section(std::string sectionName);
     void set_raw(std::string name, std::string value);
     bool set(std::string name, std::string value);

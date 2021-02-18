@@ -48,6 +48,7 @@ void Settings::clear_types()
 
 bool Settings::load(std::string path)
 {
+    bool readable = false;
     this->section = "";
     this->path = path;
     fstream newfile;
@@ -135,13 +136,16 @@ bool Settings::load(std::string path)
             }
         }
         newfile.close();
+        readable = true;
     }
     this->section = "";
     this->pre = "";
+    return readable;
 }
 
 bool Settings::save(std::string path)
 {
+    bool ok = true;
     this->path = path;
     ofstream myfile;
     myfile.open(path, ios::out); // default is ios_base::out
@@ -171,7 +175,7 @@ bool Settings::save(std::string path)
         }
     }
     myfile.close();
-    return true;
+    return ok;
 }
 
 bool Settings::save()
@@ -179,17 +183,17 @@ bool Settings::save()
     if (this->path.length() == 0) {
         throw std::string("There is no path during save().");
     }
-    this->save(this->path);
+    return this->save(this->path);
 }
 
 string Settings::ao_trimmed()
 {
-    Utility::trim(this->ao_and_spacing);
+    return Utility::trim(this->ao_and_spacing);
 }
 
 string Settings::cm_trimmed()
 {
-    Utility::trim(this->cm_and_spacing);
+    return Utility::trim(this->cm_and_spacing);
 }
 
 bool Settings::check_type(std::string typeStr, std::string name)
@@ -230,7 +234,7 @@ void Settings::set_cm_and_spacing(std::string commentMark)
     this->cm_and_spacing = commentMark;
 }
 
-bool Settings::set_all_auto(std::map<std::string, std::string> table)
+void Settings::set_all_auto(std::map<std::string, std::string> table)
 {
     std::map<std::string, std::string>::iterator it;
     for (it = table.begin(); it != table.end(); it++) {
