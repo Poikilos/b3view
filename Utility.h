@@ -7,6 +7,19 @@
 #include <string>
 #include <vector>
 
+const char path_separator_s =
+#ifdef _WIN32
+                            '\\';
+#else
+                            '/';
+#endif
+const wchar_t path_separator_ws =
+#ifdef _WIN32
+                            L'\\';
+#else
+                            L'/';
+#endif
+
 class Utility {
 public:
     static const std::string WHITESPACE;
@@ -67,6 +80,9 @@ public:
     void assertEqual(const std::string subject, const std::string expectedResult);
     void testReplaceAll(const std::wstring& subject, const std::wstring& from, const std::wstring& to, const std::wstring& expectedResult);
     void testReplaceAll(const std::string& subject, const std::string& from, const std::string& to, const std::string& expectedResult);
+    void testTrim(const std::string& subject, const std::string &expectedResult);
+    void testRTrim(const std::string& subject, const std::string &expectedResult);
+    void testLTrim(const std::string& subject, const std::string &expectedResult);
 };
 
 #endif // UTILS_H

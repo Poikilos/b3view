@@ -79,6 +79,7 @@ public:
 
     irr::core::vector3df camTarget();
     void run();
+    bool loadScene(const std::wstring& fileName);
     bool loadMesh(const std::wstring& fileName);
     bool reloadMesh();
     std::wstring saveMesh(const irr::io::path path, const std::string& nameOrBlank, const std::string& extension);
@@ -99,6 +100,10 @@ public:
     void setEnableWireframe(bool EnableWireframe);
     void setEnableLighting(bool EnableLighting);
     void setEnableTextureInterpolation(bool EnableTextureInterpolation);
+    void addRecent(std::string path);
+    void addRecentPaths(std::vector<std::string> paths);
+    int countRecent();
+    std::vector<std::string> recentPaths();
 };
 
 #endif // ENGINE_H

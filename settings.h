@@ -16,7 +16,7 @@ private:
     std::string ao_and_spacing; // assignment operator
     std::string cm_and_spacing; // comment mark
     std::string pre; // debug prefix such as "filename:lineNumber: " (must end with space for outputinspector)
-    void init(std::string assignmentOperator, std::string commentMark);
+    void init(std::string assignmentOperatorAndSpacing, std::string commentMarkAndSpacing);
     void init_default_symbols();
 
 public:

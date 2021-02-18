@@ -471,18 +471,21 @@ std::string Utility::toString(irr::f32 val)
 
 std::string Utility::ltrim(const std::string& s)
 {
+    // based on https://www.techiedelight.com/trim-string-cpp-remove-leading-trailing-spaces/
     size_t start = s.find_first_not_of(Utility::WHITESPACE);
     return (start == std::string::npos) ? "" : s.substr(start);
 }
 
 std::string Utility::rtrim(const std::string& s)
 {
+    // based on https://www.techiedelight.com/trim-string-cpp-remove-leading-trailing-spaces/
     size_t end = s.find_last_not_of(Utility::WHITESPACE);
     return (end == std::string::npos) ? "" : s.substr(0, end + 1);
 }
 
 std::string Utility::trim(const std::string& s)
 {
+    // based on https://www.techiedelight.com/trim-string-cpp-remove-leading-trailing-spaces/
     return rtrim(ltrim(s));
 }
 
@@ -500,6 +503,14 @@ TestUtility::TestUtility() {
 
     testReplaceAll(L"***water_dragon***", L"***", L"", L"water_dragon");
     testReplaceAll(L"***water_dragon***", L"", L"***", L"***water_dragon***"); // do nothing
+    testLTrim("pear ", "pear");
+    testLTrim(" pear  ", "pear ");
+    testRTrim(" pear  ", " pear");
+    testRTrim("pear ", "pear");
+    testTrim(" pear  ", "pear");
+    testTrim("pear ", "pear");
+    testTrim(" pear", "pear");
+    testTrim("pear ", "pear");
     std::cerr << "OK" << std::endl;
 }
 
@@ -511,7 +522,22 @@ void TestUtility::testReplaceAll(const std::string &subject, const std::string &
 {
     std::string result = Utility::replaceAll(subject, from, to);
     this->assertEqual(result, expectedResult);
-};
+}
+
+void TestUtility::testTrim(const std::string &subject, const std::string &expectedResult)
+{
+    assertEqual(Utility::trim(subject), expectedResult);
+}
+
+void TestUtility::testLTrim(const std::string &subject, const std::string &expectedResult)
+{
+    assertEqual(Utility::ltrim(subject), expectedResult);
+}
+
+void TestUtility::testRTrim(const std::string &subject, const std::string &expectedResult)
+{
+    assertEqual(Utility::rtrim(subject), expectedResult);
+}
 
 void TestUtility::assertEqual(const wstring& subject, const wstring& expectedResult)
 {

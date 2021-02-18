@@ -15,10 +15,10 @@ void Settings::init_default_symbols() {
     this->init(" = ", "# ");
 }
 
-void Settings::init(std::string assignmentOperator, std::string commentMark)
+void Settings::init(std::string assignmentOperatorAndSpacing, std::string commentMarkAndSpacing)
 {
-    this->ao_and_spacing = assignmentOperator;
-    this->cm_and_spacing = commentMark;
+    this->ao_and_spacing = assignmentOperatorAndSpacing;
+    this->cm_and_spacing = commentMarkAndSpacing;
     this->enable_autosave = true;
 }
 
@@ -52,13 +52,13 @@ bool Settings::load(std::string path)
     this->path = path;
     fstream newfile;
     this->pre = "";
-    newfile.open(path,ios::in);
     std::string ao = this->ao_trimmed();
     std::string cm = this->cm_trimmed();
-    if (newfile.is_open()){
+    newfile.open(path, ios::in);
+    if (newfile.is_open()) {
         std::string line;
         int lineN = 0; // Set this to 1 before use.
-        while(getline(newfile, line)) {
+        while (getline(newfile, line)) {
             lineN += 1;
             this->pre = this->path + ":" + std::to_string(lineN) + ": "; // must end with space for outputinspector
             line = Utility::trim(line);

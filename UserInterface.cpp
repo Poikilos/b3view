@@ -37,6 +37,9 @@ void UserInterface::setupUserInterface()
     // File Menu
     fileMenu = menu->getSubMenu(0);
     fileMenu->addItem(L"Open", UIC_FILE_OPEN);
+    this->fileRecentIdx = fileMenu->addItem(L"Open Recent", UIC_FILE_RECENT, true, true);
+    std::vector<std::string> recentPaths = this->m_Engine->recentPaths();
+    this->addRecentPaths(recentPaths);
     fileMenu->addItem(L"Change Texture", UIC_FILE_OPEN_TEXTURE);
     fileMenu->addItem(L"Previous Texture    Shift F3", UIC_FILE_PREVIOUS_TEXTURE);
     fileMenu->addItem(L"Next Texture        F3", UIC_FILE_NEXT_TEXTURE);
@@ -46,6 +49,16 @@ void UserInterface::setupUserInterface()
     fileMenu->addItem(L"Export OBJ (Wavefront)", UIC_FILE_EXPORT_OBJ);
     fileMenu->addItem(L"Export STL (stereolithography)", UIC_FILE_EXPORT_STL);
     fileMenu->addItem(L"Quit", UIC_FILE_QUIT);
+
+    // File, Open Recent submenu
+    this->recentMenu = fileMenu->getSubMenu(this->fileRecentIdx);
+
+    this->recentMenu->addItem(L"Clear Recent", UIC_FILE_RECENT_CLEAR);
+    this->uic_file_recent_first = UIC_FILE_RECENT_CLEAR + 1;
+    this->uic_file_recent_next = this->uic_file_recent_first;
+    this->m_file_recent_first_idx = -1;
+    this->m_file_recent_last_idx = -1;
+
 
     // Playback Menu
     playbackMenu = menu->getSubMenu(1);
@@ -317,6 +330,10 @@ void UserInterface::handleMenuItemPressed(IGUIContextMenu* menu)
         switch (id) {
         case UIC_FILE_OPEN:
             displayLoadFileDialog();
+            break;
+
+        case UIC_FILE_RECENT_CLEAR:
+            clearRecent();
             break;
 
         case UIC_FILE_EXPORT_DAE:
@@ -757,6 +774,62 @@ void UserInterface::exportMeshToHome(std::string extension)
     }
 }
 
+void UserInterface::clearRecent()
+{
+    // for (int idx=this->uic_file_recent_next-1; idx>=this->uic_file_recent_first; idx--) {
+    for (std::vector<u32>::iterator idxIt = this->recentIndices.begin(); idxIt != this->recentIndices.end(); ++idxIt) {
+        this->recentMenu->removeItem(*idxIt);
+    }
+    this->recentIndices.clear();
+    this->uic_file_recent_next = this->uic_file_recent_first;
+    this->m_file_recent_first_idx = -1;
+    this->m_file_recent_last_idx = -1;
+}
+
+void UserInterface::addRecent(std::string path)
+{
+    if (!this->hasRecent(path)) {
+        u32 newI = this->recentMenu->addItem(Utility::toWstring(path).c_str(), this->uic_file_recent_next);
+        IGUIContextMenu* menu = this->recentMenu->getSubMenu(newI);
+        this->recentIndices.push_back(newI);
+        this->uic_file_recent_next += 1;
+        /*
+        if (this->m_file_recent_first_idx < 0) {
+            this->m_file_recent_first_idx = menu->getID(); // SIGSEGV crash
+        }
+        this->m_file_recent_last_idx = menu->getID();
+        */
+        this->m_Engine->addRecent(path);
+    }
+}
+
+void UserInterface::addRecentPaths(std::vector<std::string> paths)
+{
+    for (std::vector<std::string>::iterator it = paths.begin() ; it != paths.end(); ++it) {
+        this->addRecent(*it);
+    }
+}
+
+bool UserInterface::hasRecent(std::string path)
+{
+    for (std::vector<u32>::iterator uiIt = this->recentIndices.begin() ; uiIt != this->recentIndices.end(); ++uiIt) {
+        IGUIContextMenu* menu = this->recentMenu->getSubMenu(*uiIt);
+        if (Utility::toString(menu->getText()) == path) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void UserInterface::openRecent(s32 menuID, std::wstring menuText)
+{
+    IGUIElement* menu = this->recentMenu->getElementFromId(menuID);
+    std::string path = Utility::toString(menu->getText());
+    cerr << "path: " << path << endl;
+    cerr << "menuID: " << menuID << endl;
+    cerr << "menuText: " << Utility::toString(menuText) << endl;
+}
+
 // IEventReceiver
 bool UserInterface::OnEvent(const SEvent& event)
 {
@@ -775,14 +848,14 @@ bool UserInterface::OnEvent(const SEvent& event)
         // debug() << "EET_GUI_EVENT..." << endl;
         handled = true; // set to false below if not handled
         const SEvent::SGUIEvent* ge = &(event.GUIEvent);
-        switch (ge->Caller->getID()) {
+        s32 callerID = ge->Caller->getID();
+        switch (callerID) {
         case UIE_FILEMENU:
         case UIE_PLAYBACKMENU:
         case UIE_VIEWMENU:
             // call handler for all menu related actions
             handleMenuItemPressed(static_cast<IGUIContextMenu*>(ge->Caller));
             break;
-
         case UIE_LOADFILEDIALOG:
             if (ge->EventType == EGET_FILE_SELECTED) {
                 IGUIFileOpenDialog* fileOpenDialog = static_cast<IGUIFileOpenDialog*>(ge->Caller);
@@ -790,12 +863,13 @@ bool UserInterface::OnEvent(const SEvent& event)
                 bool result = false;
                 wstring extension = Utility::extensionOf(path);
                 if (Utility::toLower(Utility::toString(extension)) == "irr") {
-                    scene::ISceneManager* smgr = m_Engine->m_Device->getSceneManager();
-                    result = smgr->loadScene(fileOpenDialog->getFileName());
+                    result = m_Engine->loadScene(fileOpenDialog->getFileName());
                 }
                 else {
                     result = m_Engine->loadMesh(fileOpenDialog->getFileName());
                 }
+                this->addRecent(Utility::toString(path));
+
                 if (!result) {
                     this->m_Engine->m_Device->getGUIEnvironment()->addMessageBox(
                                 L"Load Mesh", L"The model is inaccessible or not in a compatible format.");
@@ -806,7 +880,7 @@ bool UserInterface::OnEvent(const SEvent& event)
             if (ge->EventType == EGET_FILE_SELECTED) {
                 if (m_Engine->m_LoadedMesh != nullptr) {
                     IGUIFileOpenDialog* fileOpenDialog = static_cast<IGUIFileOpenDialog*>(ge->Caller);
-                    ///fileOpenDialog->getFileName()
+                    // fileOpenDialog->getFileName()
                     m_Engine->saveMesh(fileOpenDialog->getDirectoryName(), "", "dae");
                 }
                 else {
@@ -893,10 +967,19 @@ bool UserInterface::OnEvent(const SEvent& event)
                 );
             }
             break;
-
+        case UIE_RECENTMENU:
+            break;
         default:
-            // break;
-            handled = false;
+            // if ((ge->Caller->getID() >= this->m_file_recent_first_idx)
+            //         && (ge->Caller->getID() <= m_file_recent_last_idx)) {
+            if (std::find(this->recentIndices.begin(), this->recentIndices.end(), ge->Caller->getID()) != this->recentIndices.end()) {
+                cerr << "Recent item id: " << callerID << endl;
+                this->openRecent(callerID, ge->Caller->getText());
+            }
+            else {
+                cerr << "Unknown caller id: " << callerID << endl;
+                handled = false;
+            }
         }
     } else if (event.EventType == EET_KEY_INPUT_EVENT) {
         // debug() << "EET_KEY_INPUT_EVENT..." << endl;

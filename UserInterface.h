@@ -12,10 +12,13 @@ class Engine;
 
 enum UserInterfaceElements {
     UIE_FILEMENU                    = 1003,
-    UIE_LOADFILEDIALOG              = 1100,
+    UIE_RECENTMENU                  = 1100, // this whole range (1100-1198) must stay free for generated submenus
+    UIE_RECENTMENU_LAST             = 1198,
+    UIE_RECENTMENU_CLEAR            = 1199,
+    UIE_LOADFILEDIALOG              = 1200,
     // UIE_LOADBUTTON                  = 1101,
-    UIE_LOADTEXTUREDIALOG           = 1200,
-    UIE_SAVEFILEDIALOG              = 1300,
+    UIE_LOADTEXTUREDIALOG           = 1300,
+    UIE_SAVEFILEDIALOG              = 1400,
 
     UIE_PLAYBACKMENU                = 2000,
 
@@ -39,15 +42,17 @@ enum UserInterfaceElements {
 
 enum UserInterfaceCommands {
     UIC_FILE_OPEN                   = 1000,
-    UIC_FILE_QUIT                   = 1001,
-    UIC_FILE_OPEN_TEXTURE           = 1002,
-    UIC_FILE_NEXT_TEXTURE           = 1003,
-    UIC_FILE_PREVIOUS_TEXTURE       = 1004,
-    UIC_FILE_EXPORT_DAE             = 1005,
-    UIC_FILE_EXPORT_IRR             = 1006,
-    UIC_FILE_EXPORT_IRRMESH         = 1007,
-    UIC_FILE_EXPORT_OBJ             = 1008,
-    UIC_FILE_EXPORT_STL             = 1009,
+    UIC_FILE_RECENT                 = 1100, // this whole range (1100-1198) must stay free for generated submenus
+    UIC_FILE_RECENT_CLEAR           = 1199,
+    UIC_FILE_QUIT                   = 1002,
+    UIC_FILE_OPEN_TEXTURE           = 1003,
+    UIC_FILE_NEXT_TEXTURE           = 1004,
+    UIC_FILE_PREVIOUS_TEXTURE       = 1005,
+    UIC_FILE_EXPORT_DAE             = 1006,
+    UIC_FILE_EXPORT_IRR             = 1007,
+    UIC_FILE_EXPORT_IRRMESH         = 1008,
+    UIC_FILE_EXPORT_OBJ             = 1009,
+    UIC_FILE_EXPORT_STL             = 1010,
     UIC_PLAYBACK_PREVIOUS           = 2001,
     UIC_PLAYBACK_NEXT               = 2002,
     UIC_PLAYBACK_SLOWER             = 2003,
@@ -64,6 +69,10 @@ enum UserInterfaceCommands {
 class UserInterface : public irr::IEventReceiver {
 private:
     irr::s32 spacing_y;
+    irr::u32 uic_file_recent_first;
+    irr::u32 uic_file_recent_next;
+    irr::s32 m_file_recent_first_idx;
+    irr::s32 m_file_recent_last_idx;
     Engine* m_Engine;
     irr::gui::IGUIEnvironment* m_Gui;
     irr::gui::CGUITTFont* m_GuiFont;
@@ -84,6 +93,7 @@ private:
 public:
     irr::gui::IGUIContextMenu* menu;
     irr::gui::IGUIContextMenu* fileMenu;
+    irr::gui::IGUIContextMenu* recentMenu;
     irr::gui::IGUIContextMenu* playbackMenu;
     irr::gui::IGUIContextMenu* viewMenu;
     irr::gui::IGUIStaticText* playbackStartFrameStaticText;
@@ -99,6 +109,8 @@ public:
     irr::gui::IGUIEditBox* texturePathEditBox;
     irr::gui::IGUIStaticText* axisSizeStaticText;
     irr::gui::IGUIEditBox* axisSizeEditBox;
+    irr::u32 fileRecentIdx;
+    std::vector<irr::u32> recentIndices;
     irr::u32 viewTextureInterpolationIdx;
     irr::u32 viewWireframeIdx;
     irr::u32 viewAxisWidgetIdx;
@@ -115,6 +127,11 @@ public:
     void drawStatusLine() const;
     bool loadNextTexture(int direction);
     void exportMeshToHome(std::string extension);
+    void clearRecent();
+    void addRecent(std::string path);
+    void addRecentPaths(std::vector<std::string> paths);
+    bool hasRecent(std::string path);
+    void openRecent(irr::s32 menuID, std::wstring menuText);
     bool OnSelectMesh();
     void setPlaybackText(irr::s32 id, const wchar_t* str);
 

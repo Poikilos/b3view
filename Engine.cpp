@@ -1,12 +1,12 @@
 #include <string>
+#include <filesystem>
+// See https://stackoverflow.com/questions/22201663/find-and-move-files-in-c
 
 #include "Engine.h"
 
 #include "UserInterface.h"
 #include "Utility.h"
 #include "View.h"
-// #include <filesystem>
-// See https://stackoverflow.com/questions/22201663/find-and-move-files-in-c
 #include <cerrno>
 // _chdir (not chdir--see):
 #include <unistd.h>
@@ -68,6 +68,47 @@ void Engine::setEnableTextureInterpolation(bool EnableTextureInterpolation)
         this->setMeshDisplayMode(this->m_EnableWireframe, this->m_EnableLighting,
                                  EnableTextureInterpolation);
     }
+}
+
+void Engine::addRecent(std::string path)
+{
+    int count = this->countRecent();
+    std::string name = "recent" + std::to_string(count);
+    this->settings.set(name, path);
+}
+
+void Engine::addRecentPaths(std::vector<std::string> paths)
+{
+    for (std::vector<std::string>::iterator it = paths.begin() ; it != paths.end(); ++it) {
+        this->addRecent(*it);
+    }
+}
+
+int Engine::countRecent()
+{
+    int count = 0;
+    while (this->settings.exists("recent" + std::to_string(count))) {
+        count++;
+    }
+    return count;
+}
+
+std::vector<std::string> Engine::recentPaths()
+{
+    std::vector<std::string> results;
+    int count = 0;
+    while (true) {
+        bool found;
+        std::string value = this->settings.get("recent" + std::to_string(count), found);
+        if (found) {
+            results.push_back(value);
+            count++;
+        }
+        else {
+            break;
+        }
+    }
+    return results;
 }
 
 void Engine::setupScene()
@@ -280,7 +321,29 @@ s32 Engine::getNumberOfVertices()
 Engine::Engine()
 {
     settings.set_int("max_recent", 10);
-    // For monitoring single press: see
+    std::string profile = std::getenv("HOME");
+    std::string appdataParent;
+    std::string appdatas;
+    std::string myAppData;
+    if (profile.length() == 0) {
+        profile = std::getenv("USERPROFILE");
+        appdataParent = profile + path_separator_s + "AppData";
+        appdatas = appdataParent + path_separator_s + "Local";
+    }
+    else {
+        appdataParent = profile;
+        appdatas = appdataParent + path_separator_s + ".config";
+    }
+    if (appdatas.length() > 0) {
+        myAppData = appdatas + path_separator_s + std::string("b3view");
+    }
+    std::string settingsName = "settings.conf";
+    std::string settingsPath = settingsName;
+    if (myAppData.length() > 0) {
+        settingsPath = myAppData + path_separator_s + settingsName;
+    }
+    settings.load(settingsPath);
+    // For monitoring single press: See
     // <http://irrlicht.sourceforge.net/forum/viewtopic.php?p=210744>
     for (u32 i = 0; i < KEY_KEY_CODES_COUNT; ++i)
         KeyIsDown[i] = false;
@@ -826,4 +889,11 @@ void Engine::run()
         if (sleepTime > 0 && sleepTime < timePerFrame)
             m_Device->sleep(sleepTime, false);
     }
+}
+
+bool Engine::loadScene(const std::wstring &fileName)
+{
+    scene::ISceneManager* smgr = this->m_Device->getSceneManager();
+    bool result = smgr->loadScene(fileName.c_str());
+    return result;
 }
