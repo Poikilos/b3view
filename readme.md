@@ -224,16 +224,4 @@ only applies to Visual Studio users.)
 
 
 ## Developer Notes
-
-### Regression Tests
-
-#### Manipulating mesh on failed load
-- steps to reproduce
-  - File, Open, choose a mesh file such as animal_bat.b3d
-  - File, Open, choose a texture (purposely incorrect input)
-- incorrect behaviors:
-  - manipulating the loaded scene, such as calling remove()
-  - SEGFAULT
-- correct behaviors:
-  - Do nothing to the current scene.
-  - Show a message saying that the format is incorrect.
+See contributing.md

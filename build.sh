@@ -2,6 +2,15 @@
 if [ -z "$PREFIX" ]; then
     PREFIX="/usr"
 fi
+if [ -z "$DEBUG" ]; then
+    DEBUG=false
+fi
+OPTION1="-O2"
+OPTION2=""
+if [ "@$DEBUG" = "@true" ]; then
+    OPTION1="-g"
+    #OPTION2="-DQT_QML_DEBUG"
+fi
 #IRR_INCDIR=
 #IRR_LIBDIR=
 FT2_INCDIR=$PREFIX/include/freetype2
@@ -25,28 +34,17 @@ fi
 #^ can't find a pc file
 # gcc -o build/b3view main.cpp Debug.cpp Engine.cpp EventHandler.cpp settings.cpp  UserInterface.cpp  Utility.cpp  View.cpp -I$FT2_INCDIR
 
-# Qmake does the following:
-#g++ -c -pipe -g -w -fPIC -DQT_QML_DEBUG -I../b3view -I. -I/usr/include/freetype2 -I/../lib64/qt5/mkspecs/linux-g++ -o tmp/main.o ../b3view/main.cpp
-#g++ -c -pipe -g -w -fPIC -DQT_QML_DEBUG -I../b3view -I. -I/usr/include/freetype2 -I/../lib64/qt5/mkspecs/linux-g++ -o tmp/Engine.o ../b3view/Engine.cpp
-#g++ -c -pipe -g -w -fPIC -DQT_QML_DEBUG -I../b3view -I. -I/usr/include/freetype2 -I/../lib64/qt5/mkspecs/linux-g++ -o tmp/EventHandler.o ../b3view/EventHandler.cpp
-#g++ -c -pipe -g -w -fPIC -DQT_QML_DEBUG -I../b3view -I. -I/usr/include/freetype2 -I/../lib64/qt5/mkspecs/linux-g++ -o tmp/UserInterface.o ../b3view/UserInterface.cpp
-#g++ -c -pipe -g -w -fPIC -DQT_QML_DEBUG -I../b3view -I. -I/usr/include/freetype2 -I/../lib64/qt5/mkspecs/linux-g++ -o tmp/Debug.o ../b3view/Debug.cpp
-#g++ -c -pipe -g -w -fPIC -DQT_QML_DEBUG -I../b3view -I. -I/usr/include/freetype2 -I/../lib64/qt5/mkspecs/linux-g++ -o tmp/View.o ../b3view/View.cpp
-#g++ -c -pipe -g -w -fPIC -DQT_QML_DEBUG -I../b3view -I. -I/usr/include/freetype2 -I/../lib64/qt5/mkspecs/linux-g++ -o tmp/CGUITTFont.o ../b3view/extlib/CGUITTFont.cpp
-#g++ -c -pipe -g -w -fPIC -DQT_QML_DEBUG -I../b3view -I. -I/usr/include/freetype2 -I/../lib64/qt5/mkspecs/linux-g++ -o tmp/Utility.o ../b3view/Utility.cpp
-#g++ -c -pipe -g -w -fPIC -DQT_QML_DEBUG -I../b3view -I. -I/usr/include/freetype2 -I/../lib64/qt5/mkspecs/linux-g++ -o tmp/settings.o ../b3view/settings.cpp
-#g++  -o build/b3view tmp/main.o tmp/Engine.o tmp/EventHandler.o tmp/UserInterface.o tmp/Debug.o tmp/View.o tmp/CGUITTFont.o tmp/Utility.o tmp/settings.o   -lIrrlicht -lX11 -lGL -lXxf86vm -lXcursor -lstdc++fs -lfreetype
-
-# based on the above (some options are unclear):
-g++ -c -pipe -g -fPIC -I../b3view -I$FT2_INCDIR -o $OBJDIR/main.o ../b3view/main.cpp
-g++ -c -pipe -g -fPIC -I../b3view -I$FT2_INCDIR -o $OBJDIR/Engine.o ../b3view/Engine.cpp
-g++ -c -pipe -g -fPIC -I../b3view -I$FT2_INCDIR -o $OBJDIR/EventHandler.o ../b3view/EventHandler.cpp
-g++ -c -pipe -g -fPIC -I../b3view -I$FT2_INCDIR -o $OBJDIR/UserInterface.o ../b3view/UserInterface.cpp
-g++ -c -pipe -g -fPIC -I../b3view -I$FT2_INCDIR -o $OBJDIR/View.o ../b3view/View.cpp
-g++ -c -pipe -g -fPIC -I../b3view -I$FT2_INCDIR -o $OBJDIR/Debug.o ../b3view/Debug.cpp
-g++ -c -pipe -g -fPIC -I../b3view -I$FT2_INCDIR -o $OBJDIR/CGUITTFont.o ../b3view/extlib/CGUITTFont.cpp
-g++ -c -pipe -g -fPIC -I../b3view -I$FT2_INCDIR -o $OBJDIR/Utility.o ../b3view/Utility.cpp
-g++ -c -pipe -g -fPIC -I../b3view -I$FT2_INCDIR -o $OBJDIR/settings.o ../b3view/settings.cpp
+# based on qtcreator's build after clean (see contributing.md; some options are unclear):
+eche
+g++ -c -pipe $OPTION1 -fPIC -I../b3view -I$FT2_INCDIR -o $OBJDIR/main.o ../b3view/main.cpp
+g++ -c -pipe $OPTION1 -fPIC -I../b3view -I$FT2_INCDIR -o $OBJDIR/Engine.o ../b3view/Engine.cpp
+g++ -c -pipe $OPTION1 -fPIC -I../b3view -I$FT2_INCDIR -o $OBJDIR/EventHandler.o ../b3view/EventHandler.cpp
+g++ -c -pipe $OPTION1 -fPIC -I../b3view -I$FT2_INCDIR -o $OBJDIR/UserInterface.o ../b3view/UserInterface.cpp
+g++ -c -pipe $OPTION1 -fPIC -I../b3view -I$FT2_INCDIR -o $OBJDIR/View.o ../b3view/View.cpp
+g++ -c -pipe $OPTION1 -fPIC -I../b3view -I$FT2_INCDIR -o $OBJDIR/Debug.o ../b3view/Debug.cpp
+g++ -c -pipe $OPTION1 -fPIC -I../b3view -I$FT2_INCDIR -o $OBJDIR/CGUITTFont.o ../b3view/extlib/CGUITTFont.cpp
+g++ -c -pipe $OPTION1 -fPIC -I../b3view -I$FT2_INCDIR -o $OBJDIR/Utility.o ../b3view/Utility.cpp
+g++ -c -pipe $OPTION1 -fPIC -I../b3view -I$FT2_INCDIR -o $OBJDIR/settings.o ../b3view/settings.cpp
 #-w: suppress warning
 # -I.: include the current directory (suppresses errors when using include < instead of include "
 #-pipe: "Use pipes rather than intermediate files."
@@ -69,6 +67,15 @@ fi
 INSTALLED_BIN="$HOME/.local/bin/b3view"
 if [ -f "$INSTALLED_BIN" ]; then
     echo "* updating $INSTALLED_BIN..."
-    rm "$INSTALLED_BIN"
-    cp -f "$OUT_BIN" "$INSTALLED_BIN"
+    ./$OUT_BIN
+    if [ $? -eq 0 ]; then
+        # if no errors occur, install it
+        rm "$INSTALLED_BIN"
+        cp -f "$OUT_BIN" "$INSTALLED_BIN"
+        if [ $? -eq 0 ]; then
+            echo "* installed $INSTALLED_BIN successfully."
+        else
+            echo "* FAILED to install $INSTALLED_BIN."
+        fi
+    fi
 fi

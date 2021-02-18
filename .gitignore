@@ -40,3 +40,4 @@ CMakeLists.txt.user
 nohup.out
 *.tmp
 err.txt
+/build/b3view

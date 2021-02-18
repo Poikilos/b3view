@@ -1,6 +1,6 @@
 #!/bin/sh
 
-customDie() {
+customExit() {
     echo
     echo "ERROR:"
     echo "$1"
@@ -9,10 +9,10 @@ customDie() {
     exit 1
 }
 
-echo "Use the install.sh in build instead. Switching to build/install.sh..."
-DIST_DIR=dist
+DIST_DIR="`realpath dist`"
+BUILD_DIR="build"
 if [ ! -d "$DIST_DIR" ]; then
-    customDie "ERROR: There is no $DIST_DIR directory in `pwd`"
+    customExit "ERROR: There is no $DIST_DIR directory in `pwd`"
 fi
 # chmod +x install.sh
 echo
@@ -23,63 +23,70 @@ dest_share_dir="$PREFIX/share"
 project_unix_name=b3view
 dest_name=$project_unix_name
 src_name="$project_unix_name"
-src_path="$src_name"
-try_dest_bin="$dest_bin_dir/$dest_name"
+src_path="$src_name"  # detected later (dependent on how built)
+dest_bin="$dest_bin_dir/$dest_name"
 icon_name="b3view.png"
-icon_src_path="icons/$icon_name"
+icon_src_path="$DIST_DIR/icons/$icon_name"
 shortcut_name="org.poikilos.b3view.desktop"
-shortcut_src_path="applications/$shortcut_name"
+shortcut_src_path="$DIST_DIR/applications/$shortcut_name"
 icons_root=$PREFIX/share/pixmaps
 applications_path=$PREFIX/share/applications
 
-mimes_path="share/mime/packages"
+mimes_path="$DIST_DIR/share/mime/packages"
 USER_MIMETYPES_DB_PATH=$HOME/.local/share/mime
 #USER_MIMETYPES_PATH="$USER_MIMETYPES_DB_PATH/packages"
 SYSTEM_MIMETYPES_DB_PATH=/usr/share/mime
 #SYSTEM_MIMETYPES_PATH=$SYSTEM_MIMETYPES_DB_PATH/packages
 MIMETYPES_DB_PATH=$SYSTEM_MIMETYPES_DB_PATH
 
-try_build_path="../../build-$project_unix_name-Desktop-Release/build/"
-try_src_path="$try_build_path/$src_name"
-if [ ! -f $src_path ]; then
-    echo "Checking for $src_path...NOT FOUND"
-    if [ -f "$try_src_path" ]; then
-        echo "Checking for $src_name in $try_build_path...FOUND"
-        src_path="$try_src_path"
-    else
-        echo "Checking for $src_name in $try_build_path...NOT FOUND"
+for try_build_path in  "$BUILD_DIR" "../build" "../../build-$project_unix_name-Desktop-Release/build/"
+do
+    try_src_path="$try_build_path/$src_name"
+    if [ ! -f $src_path ]; then
+        echo "Checking for $src_path...NOT FOUND"
+        if [ -f "$try_src_path" ]; then
+            echo "* Checking for $src_name in $try_build_path...FOUND"
+            src_path="$try_src_path"
+            break
+        else
+            echo "* Checking for $src_name in $try_build_path...NOT FOUND"
+        fi
     fi
-fi
+done
 if [ ! -f "$src_path" ]; then
-    customDie "(Nothing done) missing $src_name (You must build first, such as using Qt Creator)."
+    customExit "(Nothing done) missing $src_name (You must build first, such as using build.sh or Qt Creator (Release))."
 else
     echo "Checking for $src_path...FOUND"
     echo "* current directory: `pwd`"
 fi
 
-if [ -d "$try_dest_bin" ]; then
-    customDie "(Nothing done) '$try_dest_bin' is a directory (should be deleted or a binary file of old version)"
+if [ -d "$dest_bin" ]; then
+    customExit "(Nothing done) '$dest_bin' is a directory (should be deleted or a binary file of old version)"
 fi
 
 PROFILE_ENABLE=false
-if [ -f "$try_dest_bin" ]; then
-    rm -f "$try_dest_bin"
-    if [ -f "$try_dest_bin" ]; then
-        echo "WARNING: can't remove old $try_dest_bin, so"
+if [ -f "$dest_bin" ]; then
+    rm -f "$dest_bin"
+    if [ -f "$dest_bin" ]; then
+        echo "WARNING: can't remove old $dest_bin, so"
         PROFILE_ENABLE=true
     fi
 fi
 # echo "* using '$src_path'..."
-cp -f "$src_path" "$try_dest_bin"
+if [ ! -f "$src_path" ]; then
+    customExit "* Error: missing $src_path in `pwd`"
+fi
+cp -f "$src_path" "$dest_bin"
 
-if [ ! -f "$try_dest_bin" ]; then
+if [ ! -f "$dest_bin" ]; then
     PROFILE_ENABLE=true
     prev_dir="$dest_bin_dir"
     echo "WARNING: can't write to $prev_dir, so"
 fi
 if [ "@$PROFILE_ENABLE" = "@true" ]; then
     dest_bin_dir="$HOME/.local/bin"
-    echo "installing to '$dest_bin_dir'."
+    dest_bin="$dest_bin_dir/$src_name"
+    echo "installing as '$dest_bin'."
     echo "Press Ctrl C to cancel..."
     #sleep 1
     #echo "3..."
@@ -89,11 +96,20 @@ if [ "@$PROFILE_ENABLE" = "@true" ]; then
     #echo "1..."
     #sleep 1
 else
-    echo "Successfully installed as '$try_dest_bin'"
+    echo "Successfully installed as '$dest_bin'"
 fi
+
 if [ "@$PROFILE_ENABLE" = "@true" ]; then
     if [ ! -d "$dest_bin_dir" ]; then mkdir "$dest_bin_dir"; fi
-    cp -f $src_path "$dest_bin_dir/"
+    if [ -L "$dest_bin" ]; then
+        realpath="`readlink "$dest_bin"`"
+        echo "* \"$dest_bin\" was a symlink to \"$realpath\""
+        if [ ! -f "$realpath" ]; then
+            echo "  * removing dangling symlink..."
+            rm "$dest_bin"
+        fi
+    fi
+    cp -f $src_path "$dest_bin" || customExit "* copying to $dest_bin_dir/ FAILED"
     icons_root="$HOME/.local/share/icons"
     applications_path="$HOME/.local/share/applications"
     MIMETYPES_DB_PATH="$USER_MIMETYPES_DB_PATH"
@@ -102,10 +118,11 @@ if [ ! -d "$icons_root" ]; then
     mkdir -p "$icons_root"
 fi
 cp -f "$icon_src_path" "$icons_root/"
-if [ -f "$icons_root/$icon_name" ]; then
+if [ $? -eq 0 ]; then
     echo "Successfully copied '$icons_root/$icon_name'"
 else
-    echo "FAILED to install '$icons_root/$icon_name'"
+    echo "FAILED to install '$icons_root/$icon_name' from `pwd`"
+    exit 1
 fi
 
 if [ ! -d "$applications_path" ]; then
