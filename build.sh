@@ -65,3 +65,10 @@ if [ ! -f "$OUT_BIN" ]; then
 else
     echo "Building $OUT_BIN is complete."
 fi
+
+INSTALLED_BIN="$HOME/.local/bin/b3view"
+if [ -f "$INSTALLED_BIN" ]; then
+    echo "* updating $INSTALLED_BIN..."
+    rm "$INSTALLED_BIN"
+    cp -f "$OUT_BIN" "$INSTALLED_BIN"
+fi

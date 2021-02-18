@@ -503,8 +503,8 @@ TestUtility::TestUtility() {
 
     testReplaceAll(L"***water_dragon***", L"***", L"", L"water_dragon");
     testReplaceAll(L"***water_dragon***", L"", L"***", L"***water_dragon***"); // do nothing
-    testLTrim("apple ", "apple");
-    testLTrim(" banana  ", "banana ");
+    testLTrim(" apple", "apple");
+    testLTrim(" banana  ", "banana  ");
     testRTrim(" cantelope  ", " cantelope");
     testRTrim("dragon fruit ", "dragon fruit");
     testTrim(" elderberry  ", "elderberry");
