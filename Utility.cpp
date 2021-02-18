@@ -503,14 +503,14 @@ TestUtility::TestUtility() {
 
     testReplaceAll(L"***water_dragon***", L"***", L"", L"water_dragon");
     testReplaceAll(L"***water_dragon***", L"", L"***", L"***water_dragon***"); // do nothing
-    testLTrim("pear ", "pear");
-    testLTrim(" pear  ", "pear ");
-    testRTrim(" pear  ", " pear");
-    testRTrim("pear ", "pear");
-    testTrim(" pear  ", "pear");
-    testTrim("pear ", "pear");
-    testTrim(" pear", "pear");
-    testTrim("pear ", "pear");
+    testLTrim("apple ", "apple");
+    testLTrim(" banana  ", "banana ");
+    testRTrim(" cantelope  ", " cantelope");
+    testRTrim("dragon fruit ", "dragon fruit");
+    testTrim(" elderberry  ", "elderberry");
+    testTrim("fig ", "fig");
+    testTrim(" grape", "grape");
+    testTrim("horned melon ", "horned melon");
     std::cerr << "OK" << std::endl;
 }
 
