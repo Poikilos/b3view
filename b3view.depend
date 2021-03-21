@@ -1,0 +1,7 @@
+# depslib dependency file v1.0
+1554970747 source:/opt/b3view/Debug.cpp
+	"Debug.h"
+
+1554970753 /opt/b3view/Debug.h
+	<iostream>
+
