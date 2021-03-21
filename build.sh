@@ -3,6 +3,8 @@
 if [ -z "$PREFIX" ]; then
     PREFIX="/usr"
 fi
+mkdir -p $PREFIX || exit 1
+
 if [ -z "$DEBUG" ]; then
     DEBUG=false
 fi
@@ -22,6 +24,7 @@ else
 fi
 #IRR_INCDIR=
 #IRR_LIBDIR=
+# FT2_INCDIR=$PREFIX/include/freetype2
 FT2_INCDIR=$PREFIX/include/freetype2
 OUT_BIN=build/b3view
 #FT2_LIBDIR=
