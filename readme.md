@@ -9,6 +9,8 @@ bat: [github.com/poikilos/mobs_sky](https://github.com/poikilos/mobs_sky)
 
 Website: [poikilos.org](https://poikilos.org)
 
+## Requirements
+* libirrlicht
 
 ## Main Features in poikilos fork
 * stabilized (makes sure font, model or texture loads before using;

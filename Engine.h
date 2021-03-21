@@ -104,6 +104,7 @@ public:
     void addRecentPaths(std::vector<std::string> paths);
     int countRecent();
     std::vector<std::string> recentPaths();
+    bool hasRecent(std::string path);
 };
 
 #endif // ENGINE_H

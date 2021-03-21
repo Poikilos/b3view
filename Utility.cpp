@@ -1,16 +1,29 @@
+#include "Debug.h"
 #include "Utility.h"
+
 #include <algorithm>
 #include <clocale>
 #include <cmath>
 #include <cwctype> // #include <cwtype>
 #include <iostream>
+#include <filesystem>
 #include <locale>
 #include <sstream>
 #include <string>
 #include <vector>
 #include <assert.h>
+#include <sys/stat.h>
+// NOTE: to use filesystem, you must also include the fs library such
+// as via the `-lstdc++fs` linker option -- see b3view.pro
+// #include <filesystem>  // requires C++17
+#include <experimental/filesystem> // requires C++14 such as gcc 8.2.1
 
-#include "Debug.h"
+
+// C++14: namespace filesystem = std::experimental::filesystem;
+// namespace fs = std::filesystem;  // doesn't work (not a namespace in gcc's C++17)
+// using namespace std::filesystem;  // doesn't work (not a namespace in gcc's C++17)
+namespace fs = std::experimental::filesystem;
+// namespace fs = std::filesystem;  // doesn't work (not a namespace in gcc's C++17)
 
 using namespace irr::core;
 using namespace irr::scene;
@@ -459,6 +472,37 @@ bool Utility::isFile(const std::wstring& name)
     }
 }
 
+bool Utility::is_directory(const std::string &path)
+{
+    return fs::is_directory(fs::status(path));
+    /*
+    //pre C++17:
+    struct stat info;
+    if (stat(path, &info) != 0) {
+        // TODO: ^ fails on OSX 10.11 according to a comment on the
+        // accepted answer on
+        // https://stackoverflow.com/questions/18100097/portable-way-to-check-if-directory-exists-windows-linux-c
+    }
+    */
+}
+bool Utility::is_directory(const std::wstring &path)
+{
+    return fs::is_directory(fs::status(path));
+    /*
+    //pre C++17:
+    struct stat info;
+    if (stat(path, &info) != 0) {
+        // TODO: ^ fails on OSX 10.11 according to a comment on the
+        // accepted answer on
+        // https://stackoverflow.com/questions/18100097/portable-way-to-check-if-directory-exists-windows-linux-c
+    }
+    */
+}
+
+void Utility::create_directory(const std::string &path) {
+    fs::create_directory(path);
+}
+
 std::string Utility::toString(int val)
 {
     return std::to_string(val);
@@ -554,5 +598,8 @@ void TestUtility::assertEqual(const std::string subject, const std::string expec
     assert(subject == expectedResult);
 }
 
-
+#ifdef DEBUG
 static TestUtility testutility;  // Run tests (Creating the first instance runs the static constructor).
+#elif QT_DEBUG
+static TestUtility testutility;  // Run tests (Creating the first instance runs the static constructor).
+#endif

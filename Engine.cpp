@@ -72,14 +72,16 @@ void Engine::setEnableTextureInterpolation(bool EnableTextureInterpolation)
 
 void Engine::addRecent(std::string path)
 {
-    int count = this->countRecent();
-    std::string name = "recent" + std::to_string(count);
-    this->settings.set(name, path);
+    if (!this->hasRecent(path)) {
+        int count = this->countRecent();
+        std::string name = "recent" + std::to_string(count);
+        this->settings.set(name, path);
+    }
 }
 
 void Engine::addRecentPaths(std::vector<std::string> paths)
 {
-    for (std::vector<std::string>::iterator it = paths.begin() ; it != paths.end(); ++it) {
+    for (std::vector<std::string>::iterator it = paths.begin(); it != paths.end(); ++it) {
         this->addRecent(*it);
     }
 }
@@ -91,6 +93,24 @@ int Engine::countRecent()
         count++;
     }
     return count;
+}
+
+bool Engine::hasRecent(std::string path) {
+    int count = 0;
+    while (true) {
+        bool found = false;
+        std::string value = this->settings.get("recent" + std::to_string(count), found);
+        if (found) {
+            if (value == path) {
+                break;
+            }
+            count++;
+        }
+        else {
+            break;
+        }
+    }
+    return false;
 }
 
 std::vector<std::string> Engine::recentPaths()
@@ -336,6 +356,9 @@ Engine::Engine()
     }
     if (appdatas.length() > 0) {
         myAppData = appdatas + path_separator_s + std::string("b3view");
+        if (!Utility::is_directory(myAppData)) {
+            Utility::create_directory(myAppData);
+        }
     }
     std::string settingsName = "settings.conf";
     std::string settingsPath = settingsName;

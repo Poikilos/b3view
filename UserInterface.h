@@ -69,7 +69,7 @@ enum UserInterfaceCommands {
 class UserInterface : public irr::IEventReceiver {
 private:
     irr::s32 spacing_y;
-    irr::u32 uic_file_recent_first;
+    static const irr::u32 UIC_FILE_RECENT_FIRST;
     irr::u32 uic_file_recent_next;
     irr::s32 m_file_recent_first_idx;
     irr::s32 m_file_recent_last_idx;
@@ -77,6 +77,7 @@ private:
     irr::gui::IGUIEnvironment* m_Gui;
     irr::gui::CGUITTFont* m_GuiFont;
     irr::gui::CGUITTFace* m_GuiFontFace;
+    bool recent_initialized;
 
     void setupUserInterface();
     void displayLoadFileDialog();
@@ -128,8 +129,8 @@ public:
     bool loadNextTexture(int direction);
     void exportMeshToHome(std::string extension);
     void clearRecent();
-    void addRecent(std::string path);
-    void addRecentPaths(std::vector<std::string> paths);
+    void addRecentMenuItem(std::string path, bool addToEngine);
+    void addRecentMenuItems(std::vector<std::string> paths, bool addToEngine);
     bool hasRecent(std::string path);
     void openRecent(irr::s32 menuID, std::wstring menuText);
     bool OnSelectMesh();

@@ -1,4 +1,8 @@
+#include "Debug.h"
+#include "Engine.h"
+#include "Utility.h"
 #include "UserInterface.h"
+
 #include <algorithm>
 #include <iostream>
 #include <string>
@@ -8,9 +12,6 @@
 // #include <filesystem>  // requires C++17
 #include <experimental/filesystem> // requires C++14 such as gcc 8.2.1
 
-#include "Debug.h"
-#include "Engine.h"
-#include "Utility.h"
 
 using namespace irr;
 using namespace irr::core;
@@ -24,6 +25,9 @@ using namespace std;
 // namespace fs = std::filesystem;  // doesn't work (not a namespace in gcc's C++17)
 // using namespace std::filesystem;  // doesn't work (not a namespace in gcc's C++17)
 namespace fs = std::experimental::filesystem;
+// namespace fs = std::filesystem;  // doesn't work (not a namespace in gcc's C++17)
+
+const u32 UserInterface::UIC_FILE_RECENT_FIRST = UIE_RECENTMENU + 1;
 
 // PRIVATE
 void UserInterface::setupUserInterface()
@@ -39,7 +43,6 @@ void UserInterface::setupUserInterface()
     fileMenu->addItem(L"Open", UIC_FILE_OPEN);
     this->fileRecentIdx = fileMenu->addItem(L"Open Recent", UIC_FILE_RECENT, true, true);
     std::vector<std::string> recentPaths = this->m_Engine->recentPaths();
-    this->addRecentPaths(recentPaths);
     fileMenu->addItem(L"Change Texture", UIC_FILE_OPEN_TEXTURE);
     fileMenu->addItem(L"Previous Texture    Shift F3", UIC_FILE_PREVIOUS_TEXTURE);
     fileMenu->addItem(L"Next Texture        F3", UIC_FILE_NEXT_TEXTURE);
@@ -54,11 +57,12 @@ void UserInterface::setupUserInterface()
     this->recentMenu = fileMenu->getSubMenu(this->fileRecentIdx);
 
     this->recentMenu->addItem(L"Clear Recent", UIC_FILE_RECENT_CLEAR);
-    this->uic_file_recent_first = UIC_FILE_RECENT_CLEAR + 1;
-    this->uic_file_recent_next = this->uic_file_recent_first;
+    this->uic_file_recent_next = UserInterface::UIC_FILE_RECENT_FIRST;
     this->m_file_recent_first_idx = -1;
     this->m_file_recent_last_idx = -1;
 
+    this->recent_initialized = true;
+    this->addRecentMenuItems(recentPaths, false);
 
     // Playback Menu
     playbackMenu = menu->getSubMenu(1);
@@ -503,6 +507,7 @@ void UserInterface::snapWidgets()
 // PUBLIC
 UserInterface::UserInterface(Engine* engine)
 {
+    this->recent_initialized = false;
     viewTextureInterpolationIdx = 0;
     viewWireframeIdx = 0;
     viewLightingIdx = 0;
@@ -776,21 +781,31 @@ void UserInterface::exportMeshToHome(std::string extension)
 
 void UserInterface::clearRecent()
 {
-    // for (int idx=this->uic_file_recent_next-1; idx>=this->uic_file_recent_first; idx--) {
+    // for (int idx=this->uic_file_recent_next-1; idx>=UserInterface::uic_file_recent_first; idx--) {
     for (std::vector<u32>::iterator idxIt = this->recentIndices.begin(); idxIt != this->recentIndices.end(); ++idxIt) {
         this->recentMenu->removeItem(*idxIt);
     }
     this->recentIndices.clear();
-    this->uic_file_recent_next = this->uic_file_recent_first;
+    this->uic_file_recent_next = UserInterface::UIC_FILE_RECENT_FIRST;
     this->m_file_recent_first_idx = -1;
     this->m_file_recent_last_idx = -1;
 }
 
-void UserInterface::addRecent(std::string path)
+void UserInterface::addRecentMenuItem(std::string path, bool addToEngine)
 {
+    if (!this->recent_initialized) {
+        throw std::string("The UI is not ready in addRecent.");
+    }
     if (!this->hasRecent(path)) {
-        u32 newI = this->recentMenu->addItem(Utility::toWstring(path).c_str(), this->uic_file_recent_next);
-        IGUIContextMenu* menu = this->recentMenu->getSubMenu(newI);
+        wstring path_ws = Utility::toWstring(path);
+        if (this->uic_file_recent_next < UserInterface::UIC_FILE_RECENT_FIRST) {
+            throw std::string("this->uic_file_recent_next is "
+                              + std::to_string(this->uic_file_recent_next)
+                              + " but should be equal to or greater than first: "
+                              + std::to_string(this->uic_file_recent_next));
+        }
+        u32 newI = this->recentMenu->addItem(path_ws.c_str(), this->uic_file_recent_next);
+        // IGUIContextMenu* menu = this->recentMenu->getSubMenu(newI);
         this->recentIndices.push_back(newI);
         this->uic_file_recent_next += 1;
         /*
@@ -803,19 +818,32 @@ void UserInterface::addRecent(std::string path)
     }
 }
 
-void UserInterface::addRecentPaths(std::vector<std::string> paths)
+void UserInterface::addRecentMenuItems(std::vector<std::string> paths, bool addToEngine)
 {
+    if (!this->recent_initialized) {
+        throw std::string("The UI is not ready in addRecent.");
+    }
     for (std::vector<std::string>::iterator it = paths.begin() ; it != paths.end(); ++it) {
-        this->addRecent(*it);
+        this->addRecentMenuItem(*it, addToEngine);
     }
 }
 
 bool UserInterface::hasRecent(std::string path)
 {
+    if (!this->recent_initialized) {
+        throw std::string("The UI is not ready in addRecent.");
+    }
     for (std::vector<u32>::iterator uiIt = this->recentIndices.begin() ; uiIt != this->recentIndices.end(); ++uiIt) {
         IGUIContextMenu* menu = this->recentMenu->getSubMenu(*uiIt);
-        if (Utility::toString(menu->getText()) == path) {
-            return true;
+        if (menu != nullptr) {
+            if (Utility::toString(menu->getText()) == path) {
+                return true;
+            }
+        }
+        else {
+            const std::string msg = "There was no menu for " + std::to_string(*uiIt) + " in hasRecent";
+            cerr << msg << endl;
+            throw std::string(msg);
         }
     }
     return false;
@@ -823,6 +851,9 @@ bool UserInterface::hasRecent(std::string path)
 
 void UserInterface::openRecent(s32 menuID, std::wstring menuText)
 {
+    if (!this->recent_initialized) {
+        throw std::string("The UI is not ready in addRecent.");
+    }
     IGUIElement* menu = this->recentMenu->getElementFromId(menuID);
     std::string path = Utility::toString(menu->getText());
     cerr << "path: " << path << endl;
@@ -868,7 +899,7 @@ bool UserInterface::OnEvent(const SEvent& event)
                 else {
                     result = m_Engine->loadMesh(fileOpenDialog->getFileName());
                 }
-                this->addRecent(Utility::toString(path));
+                this->addRecentMenuItem(Utility::toString(path), true);
 
                 if (!result) {
                     this->m_Engine->m_Device->getGUIEnvironment()->addMessageBox(
@@ -968,6 +999,7 @@ bool UserInterface::OnEvent(const SEvent& event)
             }
             break;
         case UIE_RECENTMENU:
+            cerr << "called UIE_RECENTMENU unexpectedly for \"" << ge->Caller->getText() << "\"" << endl;
             break;
         default:
             // if ((ge->Caller->getID() >= this->m_file_recent_first_idx)
@@ -977,7 +1009,8 @@ bool UserInterface::OnEvent(const SEvent& event)
                 this->openRecent(callerID, ge->Caller->getText());
             }
             else {
-                cerr << "Unknown caller id: " << callerID << endl;
+                cerr << "Unknown caller id: " << callerID << " Text:" << ge->Caller->getText() << endl;
+
                 handled = false;
             }
         }

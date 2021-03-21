@@ -1,13 +1,12 @@
+#include "Utility.h"
+// #include "Debug.h"
+#include "settings.h"
+
 #include <fstream>
 #include <iostream>
 #include <vector>
 #include <algorithm> // std::find
-
 #include <assert.h>
-
-#include "settings.h"
-#include "Utility.h"
-// #include "Debug.h"
 
 using namespace std;
 
@@ -76,8 +75,22 @@ bool Settings::load(std::string path)
                 std::string value = Utility::trim(line.substr(signPos+1));
                 std::string::size_type iSz;
                 std::string::size_type fSz;
-                int valueI = std::stoi(value, &iSz);
-                float valueF = std::stof(value, &fSz);
+                int valueI;
+                int valueF;
+                try {
+                    valueI = std::stoi(value, &iSz);
+                }
+                catch (const std::invalid_argument& ex) {
+                    valueI = 0;
+                    iSz = 0;
+                }
+                try {
+                    valueF = std::stof(value, &iSz);
+                }
+                catch (const std::invalid_argument& ex) {
+                    valueF = 0.0f;
+                    fSz = 0;
+                }
                 // ^ radix (3rd param) default is 10 (base-10 number system)
                 cerr << name << std::endl;
                 cerr << "  valueI length: " << iSz << std::endl;
@@ -89,9 +102,8 @@ bool Settings::load(std::string path)
                     typeStr = "int";
                 }
                 else if (iSz > 0) {
-                    cerr << this->pre << "WARNING: The file has a "
-                         << typeStr << " for " << name << ", but "
-                         << this->types[name] << " was expected."
+                    cerr << this->pre << "WARNING: The value \"" << value
+                         << "\" starts with a number but is not a number."
                          << std::endl;
                 }
 
@@ -137,6 +149,7 @@ bool Settings::load(std::string path)
         }
         newfile.close();
         readable = true;
+        cerr << "* load finished reading " << path << " (elements:" << this->table.size() << ")" << endl;
     }
     this->section = "";
     this->pre = "";
@@ -455,4 +468,8 @@ void TestSettings::assert_section_set_on_create()
     }
 }
 
+#ifdef DEBUG
 static TestSettings testsettings;  // Run tests (Creating the first instance runs the static constructor).
+#elif QT_DEBUG
+static TestSettings testsettings;  // Run tests (Creating the first instance runs the static constructor).
+#endif

@@ -37,9 +37,12 @@ LIBS += -lIrrlicht \
     -lXxf86vm \
     -lXcursor
 
+#QMAKE_CXXFLAGS += -std=c++17
+#QMAKE_LFLAGS += -lstdc++fs
 # <experimental/filesystem>:
 LIBS += -lstdc++fs
 
 # Freetype
 INCLUDEPATH += /usr/include/freetype2
 LIBS += -lfreetype
+

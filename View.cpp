@@ -1,8 +1,8 @@
-#include "View.h"
 #include "Engine.h"
-#include <iostream>
-
 #include "Utility.h"
+#include "View.h"
+
+#include <iostream>
 
 using namespace irr;
 using namespace irr::core;
