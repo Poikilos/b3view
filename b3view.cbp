@@ -14,6 +14,7 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add directory="$(freetype)" />
 				</Compiler>
 			</Target>
 			<Target title="Release">
@@ -41,12 +42,30 @@
 			<Add library="Xxf86vm" />
 			<Add directory="$(#irrlicht.lib)/" />
 		</Linker>
+		<Unit filename="Debug.cpp" />
+		<Unit filename="Debug.h" />
+		<Unit filename="Engine.cpp" />
+		<Unit filename="Engine.h" />
+		<Unit filename="EventHandler.cpp" />
+		<Unit filename="EventHandler.h" />
+		<Unit filename="UserInterface.cpp" />
+		<Unit filename="UserInterface.h" />
+		<Unit filename="Utility.cpp" />
+		<Unit filename="Utility.h" />
+		<Unit filename="View.cpp" />
+		<Unit filename="View.h" />
+		<Unit filename="extlib/CGUITTFont.cpp" />
+		<Unit filename="extlib/CGUITTFont.h" />
 		<Unit filename="main.cpp" />
+		<Unit filename="settings.cpp" />
+		<Unit filename="settings.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />
 			<debugger />
-			<lib_finder disable_auto="1" />
+			<lib_finder disable_auto="1">
+				<lib name="freetype2" />
+			</lib_finder>
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>
