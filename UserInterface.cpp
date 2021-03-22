@@ -2,6 +2,8 @@
 #include "Engine.h"
 #include "Utility.h"
 #include "UserInterface.h"
+// class View : public irr::IEventReceiver;  // avoid incomplete type when accessing member of this type from friend class
+#include "View.h"  // avoid incomplete type when accessing member of this type from friend class
 
 #include <algorithm>
 #include <iostream>
@@ -26,6 +28,7 @@ using namespace std;
 // using namespace std::filesystem;  // doesn't work (not a namespace in gcc's C++17)
 namespace fs = std::experimental::filesystem;
 // namespace fs = std::filesystem;  // doesn't work (not a namespace in gcc's C++17)
+
 
 const u32 UserInterface::UIC_FILE_RECENT_FIRST = UIE_RECENTMENU + 1;
 
@@ -469,7 +472,14 @@ bool UserInterface::handleMenuItemPressed(const SEvent::SGUIEvent* ge)
                 this->openRecent(callerID, ge->Caller->getText());
             }
             else {
-                cerr << "Unknown caller id: " << callerID << " Text:" << ge->Caller->getText() << endl;
+                cerr << "Unknown caller id: " << callerID << " Text:" << Utility::toString(ge->Caller->getText()) << endl;
+                if (this->recentIndices.size() < 1) {
+                    cerr << "- recentIndices.size(): " << recentIndices.size() << endl;
+                }
+                // range based for loop requires C++11 or higher:
+                for(irr::u32 i : this->recentIndices) {
+                    cerr << "  - " << i << endl;
+                }
                 handled = false;
             }
 
@@ -898,7 +908,8 @@ void UserInterface::openRecent(s32 menuID, std::wstring menuText)
 // IEventReceiver
 bool UserInterface::OnEvent(const SEvent& event)
 {
-    // Events arriving here should be destined for us
+    // Note EventHandler::OnEvent calls other handlers for
+    // Certain event types (See ERT_3DVIEW there for instance).
     bool handled = false;
     if (event.EventType == EET_USER_EVENT) {
         // debug() << "EET_USER_EVENT..." << endl;
@@ -916,19 +927,6 @@ bool UserInterface::OnEvent(const SEvent& event)
         s32 callerID = ge->Caller->getID();
         switch (ge->EventType) {
             // See http://irrlicht.sourceforge.net/docu/example009.html
-            case EGET_ELEMENT_FOCUSED:
-                break;
-            case EGET_ELEMENT_HOVERED:
-                break;
-            case EGET_ELEMENT_LEFT:
-                break;
-            case EGET_MENU_ITEM_SELECTED:
-                handled = handleMenuItemPressed(ge);
-                break;
-            case EGET_SCROLL_BAR_CHANGED:
-                break;
-            case EGET_COMBO_BOX_CHANGED:
-                break;
             case EGET_BUTTON_CLICKED:
                 switch(callerID) {
                 case UIE_PLAYBACKSTARTSTOPBUTTON:
@@ -946,6 +944,7 @@ bool UserInterface::OnEvent(const SEvent& event)
                     break;
                 }
             case EGET_FILE_SELECTED:
+                this->m_Engine->m_View->m_MouseUser = "";
                 switch(callerID) {
                 case UIE_LOADFILEDIALOG:
                     {
@@ -1047,9 +1046,79 @@ bool UserInterface::OnEvent(const SEvent& event)
                     handled = false;
                     break;
                 }
+            case EGET_MESSAGEBOX_YES:
+                this->m_Engine->m_View->m_MouseUser = "";
+                break;
+            case EGET_MESSAGEBOX_NO:
+                this->m_Engine->m_View->m_MouseUser = "";
+                break;
+            case EGET_MESSAGEBOX_OK:
+                this->m_Engine->m_View->m_MouseUser = "";
+                break;
+            case EGET_MESSAGEBOX_CANCEL:
+                this->m_Engine->m_View->m_MouseUser = "";
+                break;
+            case EGET_FILE_CHOOSE_DIALOG_CANCELLED:
+                // ^ 12 usually
+                this->m_Engine->m_View->m_MouseUser = "";
+                break;
+            case EGET_ELEMENT_FOCUS_LOST:
+                // ^ 0 usually
+                switch (callerID) {
+                case UIE_LOADFILEDIALOG:
+                    this->m_Engine->m_View->m_MouseUser = "";
+                    break;
+                case UIE_SAVEFILEDIALOG:
+                    this->m_Engine->m_View->m_MouseUser = "";
+                    break;
+                default:
+                    break;
+                }
+                debug() << callerID << " lost focus." << std::endl;
+                handled = false;
+                break;
+            case EGET_ELEMENT_FOCUSED:
+                switch (callerID) {
+                case UIE_LOADFILEDIALOG:
+                    this->m_Engine->m_View->m_MouseUser = "UIE_LOADFILEDIALOG";
+                    break;
+                case UIE_SAVEFILEDIALOG:
+                    this->m_Engine->m_View->m_MouseUser = "UIE_SAVEFILEDIALOG";
+                    break;
+                default:
+                    break;
+                }
+                debug() << callerID << " got focus." << std::endl;
+                handled = false;
+                break;
+            case EGET_ELEMENT_HOVERED:
+                debug() << "hovered over " << callerID << "." << std::endl;
+                handled = false;
+                break;
+            case EGET_ELEMENT_LEFT:
+                debug() << "left " << callerID << "." << std::endl;
+                handled = false;
+                break;
+            case EGET_MENU_ITEM_SELECTED:
+                handled = handleMenuItemPressed(ge);
+                break;
+            case EGET_SCROLL_BAR_CHANGED:
+                handled = false;
+                break;
+            case EGET_COMBO_BOX_CHANGED:
+                handled = false;
+                break;
+            case EGET_ELEMENT_CLOSED:
+                debug() << "closed " << callerID << "." << std::endl;
+                handled = false;
+                break;
+            case EGET_DIRECTORY_SELECTED:
+                this->m_Engine->m_View->m_MouseUser = "";
+                handled = false;
+                break;
             default:
                 // EET_MOUSE_INPUT_EVENT EET_KEY_INPUT_EVENT EET_JOYSTICK_INPUT_EVENT
-                cerr <<  "[UserInterface] (verbose message) event.GUIEvent.EventType " << ge->EventType << " (See EGET_*) is not handled (event.EventType is EET_GUI_EVENT)." << std::endl;
+                cerr <<  "[UserInterface] (verbose message) event.GUIEvent.EventType " << ge->EventType << " (See EGET_* in irrlicht/IEventReciever.h) is not handled (event.EventType is EET_GUI_EVENT)." << std::endl;
                 handled = false;
                 break;
         }

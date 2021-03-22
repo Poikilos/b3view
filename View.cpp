@@ -90,7 +90,8 @@ View::View(Engine* engine)
     m_Engine = engine;
     m_LastMousePosition = new vector2d<int>();
     m_RotMouse = false;
-
+    m_Shift = false;
+    this->m_MouseUser = "";
     // m_Pitch = PI;
 
     // Initial camera values: see Engine::setupScene
@@ -171,7 +172,10 @@ bool View::OnEvent(const SEvent& event)
 
     // Handle mouse event
     const SEvent::SMouseInput* mouseEvent = &(event.MouseInput);
-
+    if (this->m_MouseUser != "") {
+        std::cerr << "[View] The mouse is being used by " << this->m_MouseUser << std::endl;
+        return false;
+    }
     if (mouseEvent->Event == EMIE_MMOUSE_PRESSED_DOWN) {
         m_RotMouse = true;
         m_LastMousePosition->X = mouseEvent->X;
@@ -218,7 +222,9 @@ bool View::OnEvent(const SEvent& event)
             m_CameraDistance /= 2;
         }
         setNewCameraPosition();
-        debug() << "m_CamPos: " << m_Engine->m_CamPos.X
+        debug() << "View got the event and used event.MouseInput."
+                // << " event.GUIEvent.Caller: " << callerID // not avail in Irrlicht (Use this->m_MouseUser instead)
+                << ", m_CamPos: " << m_Engine->m_CamPos.X
                 << "," << m_Engine->m_CamPos.Y
                 << " m_CamTarget: " << m_Engine->m_CamTarget.X
                 << "," << m_Engine->m_CamTarget.Y << endl;

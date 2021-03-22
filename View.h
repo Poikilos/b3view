@@ -25,6 +25,7 @@ public:
     void setCameraDistance(float cameraDistance);
     bool zUp();
     bool m_Shift;
+    std::string m_MouseUser;
 
     // IEventReceiver
     virtual bool OnEvent(const irr::SEvent& event);

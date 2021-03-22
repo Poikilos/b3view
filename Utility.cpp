@@ -506,11 +506,15 @@ void Utility::create_directory(const std::string &path) {
 std::string Utility::toString(int val)
 {
     return std::to_string(val);
+    // The only throw is std::bad_alloc according to
+    // <https://en.cppreference.com/w/cpp/string/basic_string/to_string>
 }
 
 std::string Utility::toString(irr::f32 val)
 {
     return std::to_string(val);
+    // The only throw is std::bad_alloc according to
+    // <https://en.cppreference.com/w/cpp/string/basic_string/to_string>
 }
 
 std::string Utility::ltrim(const std::string& s)
