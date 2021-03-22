@@ -3,6 +3,7 @@
 if [ -z "$PREFIX" ]; then
     PREFIX="/usr"
 fi
+REPO_PATH="`pwd`"
 mkdir -p $PREFIX || exit 1
 
 if [ -z "$DEBUG" ]; then
@@ -22,6 +23,7 @@ if [ "@$DEBUG" = "@true" ]; then
 else
     echo "* build:Release"
 fi
+SYSTEM_INCDIR=$PREFIX/include
 #IRR_INCDIR=
 #IRR_LIBDIR=
 # FT2_INCDIR=$PREFIX/include/freetype2
@@ -47,19 +49,19 @@ fi
 # gcc -o build/b3view main.cpp Debug.cpp Engine.cpp EventHandler.cpp settings.cpp  UserInterface.cpp  Utility.cpp  View.cpp -I$FT2_INCDIR
 
 # based on qtcreator's build after clean (see contributing.md; some options are unclear):
-g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I../b3view -I$FT2_INCDIR -o $OBJDIR/main.o ../b3view/main.cpp
+g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/main.o $REPO_PATH/main.cpp
 if [ $? -ne 0 ]; then
     echo "Error: building main failed. Ensure that libirrlicht-dev is installed."
     exit 1
 fi
-g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I../b3view -I$FT2_INCDIR -o $OBJDIR/Engine.o ../b3view/Engine.cpp
-g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I../b3view -I$FT2_INCDIR -o $OBJDIR/EventHandler.o ../b3view/EventHandler.cpp
-g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I../b3view -I$FT2_INCDIR -o $OBJDIR/UserInterface.o ../b3view/UserInterface.cpp
-g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I../b3view -I$FT2_INCDIR -o $OBJDIR/View.o ../b3view/View.cpp
-g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I../b3view -I$FT2_INCDIR -o $OBJDIR/Debug.o ../b3view/Debug.cpp
-g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I../b3view -I$FT2_INCDIR -o $OBJDIR/CGUITTFont.o ../b3view/extlib/CGUITTFont.cpp
-g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I../b3view -I$FT2_INCDIR -o $OBJDIR/Utility.o ../b3view/Utility.cpp
-g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I../b3view -I$FT2_INCDIR -o $OBJDIR/settings.o ../b3view/settings.cpp
+g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/Engine.o $REPO_PATH/Engine.cpp
+g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/EventHandler.o $REPO_PATH/EventHandler.cpp
+g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/UserInterface.o $REPO_PATH/UserInterface.cpp
+g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/View.o $REPO_PATH/View.cpp
+g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/Debug.o $REPO_PATH/Debug.cpp
+g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/CGUITTFont.o $REPO_PATH/extlib/CGUITTFont.cpp
+g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/Utility.o $REPO_PATH/Utility.cpp
+g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/settings.o $REPO_PATH/settings.cpp
 #-w: suppress warning
 # -I.: include the current directory (suppresses errors when using include < instead of include "
 #-pipe: "Use pipes rather than intermediate files."
@@ -101,9 +103,15 @@ if [ -f "$INSTALLED_BIN" ]; then
         fi
     else
         echo "* skipping install since './$OUT_BIN' failed."
-        echo "* try:"
-        echo "  $0 --debug"
-        echo "  # then:"
-        echo "  gdb \"$OUT_BIN\""
+        echo
+        if [ "@$DEBUG" != "@true" ]; then
+            echo "* Build with debugging symbols like:"
+            echo "  $0 --debug"
+            echo "  # then:"
+        fi
+        echo "  # (See ./debug-and-show-tb.sh)"
+        # cat ./debug-and-show-tb.sh
+        # echo "  gdb \"$OUT_BIN\""
     fi
 fi
+echo Done
