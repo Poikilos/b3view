@@ -457,6 +457,9 @@ void UserInterface::handleMenuItemPressed(IGUIContextMenu* menu)
                 m_Engine->getEnableTextureInterpolation()
             );
             break;
+        default:
+            cerr << "[UserInterface::handleMenuItemPressed] Unknown caller id: " << id << endl;
+            break;
         }
     }
 }
@@ -807,7 +810,7 @@ void UserInterface::addRecentMenuItem(std::string path, bool addToEngine)
         u32 newI = this->recentMenu->addItem(path_ws.c_str(), this->uic_file_recent_next);
         // IGUIContextMenu* menu = this->recentMenu->getSubMenu(newI);
         this->recentIndices.push_back(newI);
-        this->uic_file_recent_next += 1;
+        this->uic_file_recent_next++;
         /*
         if (this->m_file_recent_first_idx < 0) {
             this->m_file_recent_first_idx = menu->getID(); // SIGSEGV crash
@@ -828,7 +831,7 @@ void UserInterface::addRecentMenuItems(std::vector<std::string> paths, bool addT
             this->addRecentMenuItem(*it, addToEngine);
         }
         catch (const std::runtime_error& ex) {
-            cerr << ex.what();
+            cerr << ex.what() << std::endl;
             break;
         }
     }
@@ -847,7 +850,16 @@ bool UserInterface::hasRecent(std::string path)
             }
         }
         else {
-            const std::string msg = "There was no menu for " + std::to_string(*uiIt) + " in hasRecent";
+            std::string uiItMsg = std::to_string(*uiIt);
+            // std::string uiItMsg = "<bad uiIt value in recentIndices: ";
+            // try {
+            //     uiItMsg += std::to_string(*uiIt);
+            // }
+            // catch (const std::invalid_argument& ex) {
+            //     uiItMsg += ex.what();
+            // }
+            // uiItMsg += ">";
+            const std::string msg = "There was no menu for " + uiItMsg + " in hasRecent";
             cerr << msg << endl;
             throw std::runtime_error(msg);
         }
@@ -886,8 +898,22 @@ bool UserInterface::OnEvent(const SEvent& event)
         handled = true; // set to false below if not handled
         const SEvent::SGUIEvent* ge = &(event.GUIEvent);
         s32 callerID = ge->Caller->getID();
+        // TODO: switch (ge->EventType) {
+        //     // See http://irrlicht.sourceforge.net/docu/example009.html
+        //    case EGET_MENU_ITEM_SELECTED:
+        //    case EGET_SCROLL_BAR_CHANGED:
+        //    case EGET_COMBO_BOX_CHANGED:
+        //    case EGET_BUTTON_CLICKED:
+        //        switch(callerID) {
+        //            case UIE_PLAYBACKSTARTSTOPBUTTON:
+        //        default:
+        //            cerr <<  "Unknown button clicked: " << callerID << std::endl;
+        //    default:
+        //        cerr <<  "Unknown event.GUIEvent.EventType " << ge->EventType << std::endl;
+        //        break;
         switch (callerID) {
         case UIE_FILEMENU:
+        case UIE_RECENTMENU:
         case UIE_PLAYBACKMENU:
         case UIE_VIEWMENU:
             // call handler for all menu related actions
@@ -911,7 +937,7 @@ bool UserInterface::OnEvent(const SEvent& event)
                         this->addRecentMenuItem(Utility::toString(path), true);
                     }
                     catch (const std::runtime_error& ex) {
-                        cerr << ex.what();
+                        cerr << ex.what() << std::endl;
                         break;
                     }
                 }
@@ -1012,8 +1038,7 @@ bool UserInterface::OnEvent(const SEvent& event)
                 );
             }
             break;
-        case UIE_RECENTMENU:
-            cerr << "called UIE_RECENTMENU unexpectedly for \"" << ge->Caller->getText() << "\"" << endl;
+        case -1:
             break;
         default:
             // if ((ge->Caller->getID() >= this->m_file_recent_first_idx)

@@ -73,28 +73,39 @@ bool Settings::load(std::string path)
             else if (signPos != std::string::npos) {
                 std::string name = Utility::trim(line.substr(0, signPos));
                 std::string value = Utility::trim(line.substr(signPos+1));
+                cerr << "parsing name=\"" << name << "\" value=\"" << value << "\"" << std::endl;
                 std::string::size_type iSz;
                 std::string::size_type fSz;
                 int valueI;
                 int valueF;
+                // See if it is a number (silently degrade to string if not).
                 try {
                     valueI = std::stoi(value, &iSz);
                 }
                 catch (const std::invalid_argument& ex) {
+                    // cerr << "[Settings::load] invalid_argument \"" << value << "\" in stoi: " << ex.what() << std::endl;
                     valueI = 0;
                     iSz = 0;
+                }
+                catch (const std::exception& ex) {
+                    cerr << "[Settings::load] undefined error in stoi: " << ex.what() << std::endl;
                 }
                 try {
                     valueF = std::stof(value, &iSz);
                 }
                 catch (const std::invalid_argument& ex) {
+                    // cerr << "[Settings::load] invalid_argument \"" << value << "\" in stof: " << ex.what() << std::endl;
                     valueF = 0.0f;
                     fSz = 0;
                 }
+                catch (const std::exception& ex) {
+                    cerr << "[Settings::load] undefined error in stof: " << ex.what() << std::endl;
+                }
                 // ^ radix (3rd param) default is 10 (base-10 number system)
-                cerr << name << std::endl;
-                cerr << "  valueI length: " << iSz << std::endl;
-                cerr << "  valueF length: " << fSz << std::endl;
+                // cerr << name << std::endl;
+                // cerr << "  valueI length: " << iSz << std::endl;
+                // cerr << "  valueF length: " << fSz << std::endl;
+                // Silently degrade (Assume the value is supposed to be a string).
                 if (fSz > iSz) {
                     typeStr = "float";
                 }
