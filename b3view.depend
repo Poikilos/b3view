@@ -118,3 +118,122 @@
 	"View.h"
 	<iostream>
 
+1554970747 source:/home/owner/git/b3view/Debug.cpp
+	"Debug.h"
+
+1616415754 /home/owner/git/b3view/Debug.h
+	<iostream>
+
+1613660813 source:/home/owner/git/b3view/EventHandler.cpp
+	"EventHandler.h"
+	"Utility.h"
+	<string.h>
+	<sys/stat.h>
+	<sys/types.h>
+
+1554970974 /home/owner/git/b3view/EventHandler.h
+	<iostream>
+	<map>
+	<utility>
+	"Debug.h"
+	<irrlicht/irrlicht.h>
+
+1613676318 /home/owner/git/b3view/Utility.h
+	<irrlicht/irrlicht.h>
+	<ctime>
+	<string>
+	<vector>
+
+1616417794 source:/home/owner/git/b3view/extlib/CGUITTFont.cpp
+	<assert.h>
+	<iostream>
+	<irrlicht/irrlicht.h>
+	"CGUITTFont.h"
+
+1616368477 /home/owner/git/b3view/extlib/CGUITTFont.h
+	<ft2build.h>
+	<irrlicht/irrlicht.h>
+
+1562175368 source:/home/owner/git/b3view/main.cpp
+	<malloc.h>
+	<stdlib.h>
+	<string.h>
+	"Engine.h"
+	<Windows.h>
+
+1613679774 /home/owner/git/b3view/Engine.h
+	<iostream>
+	<sstream>
+	<string>
+	<vector>
+	"EventHandler.h"
+	"extlib/CGUITTFont.h"
+	<irrlicht/irrlicht.h>
+	"settings.h"
+
+1613661547 /home/owner/git/b3view/settings.h
+	<string>
+	<map>
+	<irrlicht/irrlicht.h>
+
+1616420536 source:/home/owner/git/b3view/settings.cpp
+	"Utility.h"
+	"settings.h"
+	<fstream>
+	<iostream>
+	<vector>
+	<algorithm>
+	<assert.h>
+
+1613676405 source:/home/owner/git/b3view/Utility.cpp
+	"Debug.h"
+	"Utility.h"
+	<algorithm>
+	<clocale>
+	<cmath>
+	<cwctype>
+	<iostream>
+	<filesystem>
+	<locale>
+	<sstream>
+	<string>
+	<vector>
+	<assert.h>
+	<sys/stat.h>
+	<experimental/filesystem>
+
+1613676471 source:/home/owner/git/b3view/View.cpp
+	"Engine.h"
+	"Utility.h"
+	"View.h"
+	<iostream>
+
+1555700256 /home/owner/git/b3view/View.h
+	<irrlicht/irrlicht.h>
+
+1616420911 source:/home/owner/git/b3view/Engine.cpp
+	<string>
+	<filesystem>
+	"Engine.h"
+	"UserInterface.h"
+	"Utility.h"
+	"View.h"
+	<cerrno>
+	<unistd.h>
+
+1613683794 /home/owner/git/b3view/UserInterface.h
+	"extlib/CGUITTFont.h"
+	<irrlicht/irrlicht.h>
+	<string>
+	<vector>
+
+1616419830 source:/home/owner/git/b3view/UserInterface.cpp
+	"Debug.h"
+	"Engine.h"
+	"Utility.h"
+	"UserInterface.h"
+	<algorithm>
+	<iostream>
+	<string>
+	<experimental/filesystem>
+
