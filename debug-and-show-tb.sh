@@ -13,12 +13,16 @@ if [ -f "$ERR_TXT" ]; then
         exit 1
     fi
 fi
-gdb "$MY_EXE" --eval-command=run --eval-command=bt --batch  >& "$ERR_TXT"
+# echo "* Output will not appear here. Check \"$ERR_TXT\" (It will be shown below when the program ends)..."
+# gdb "$MY_EXE" --eval-command=run --eval-command=bt --batch  >& "$ERR_TXT"
+gdb "$MY_EXE" --eval-command=run --eval-command=bt --batch  |& tee "$ERR_TXT"
+# or pipe only stderr: {tmp}>&1 1>&2 2>&$tmp {tmp}>&- | tee "$ERR_TXT"
+# as per https://stackoverflow.com/a/52575213/4541104
 code=$?
 if [ $code -ne 0 ]; then
-    echo "'gdb \"$MY_EXE\" --eval-command=run --eval-command=bt --batch  >& \"$ERR_TXT\"' failed (status=$code)."
+    # echo "'gdb \"$MY_EXE\" --eval-command=run --eval-command=bt --batch  >& \"$ERR_TXT\"' failed (status=$code)."
+    echo "'gdb \"$MY_EXE\" --eval-command=run --eval-command=bt --batch  |& tee \"$ERR_TXT\"' failed (status=$code)."
 else
     echo "The program closed (status=$code)."
 fi
-echo "See \"$ERR_TXT\"."
-cat "$ERR_TXT"
+# cat "$ERR_TXT"
