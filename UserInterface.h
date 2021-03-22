@@ -84,7 +84,7 @@ private:
     void displaySaveFileDialog();
     void displayLoadTextureDialog();
     void incrementFrame(irr::f32 frameCount, bool enableRound);
-    void handleMenuItemPressed(irr::gui::IGUIContextMenu* menu);
+    bool handleMenuItemPressed(const irr::SEvent::SGUIEvent* ge);
     void updateSettingsDisplay();
 
     irr::gui::IGUIWindow* playbackWindow;

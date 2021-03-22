@@ -325,8 +325,12 @@ void UserInterface::incrementFrame(f32 frameCount, bool enableRound)
     }
 }
 
-void UserInterface::handleMenuItemPressed(IGUIContextMenu* menu)
+bool UserInterface::handleMenuItemPressed(const SEvent::SGUIEvent* ge)
 {
+    // ^ formerly ...(IGUIContextMenu* menu): called as ...(static_cast<IGUIContextMenu*>(ge->Caller)); protytyped as ...(irr::gui::IGUIContextMenu* menu)
+    bool handled = true;
+    IGUIContextMenu* menu = static_cast<IGUIContextMenu*>(ge->Caller);
+    s32 callerID = ge->Caller->getID();
     s32 selected = menu->getSelectedItem();
     if (selected > -1) {
         s32 id = menu->getItemCommandId(static_cast<u32>(selected));
@@ -458,10 +462,22 @@ void UserInterface::handleMenuItemPressed(IGUIContextMenu* menu)
             );
             break;
         default:
-            cerr << "[UserInterface::handleMenuItemPressed] Unknown caller id: " << id << endl;
+            // if ((ge->Caller->getID() >= this->m_file_recent_first_idx)
+            //         && (ge->Caller->getID() <= m_file_recent_last_idx)) {
+            if (std::find(this->recentIndices.begin(), this->recentIndices.end(), ge->Caller->getID()) != this->recentIndices.end()) {
+                cerr << "Recent item id: " << callerID << endl;
+                this->openRecent(callerID, ge->Caller->getText());
+            }
+            else {
+                cerr << "Unknown caller id: " << callerID << " Text:" << ge->Caller->getText() << endl;
+                handled = false;
+            }
+
+            // cerr << "[UserInterface::handleMenuItemPressed] Unknown caller id: " << id << endl;
             break;
         }
     }
+    return handled;
 }
 
 void UserInterface::updateSettingsDisplay()
@@ -898,161 +914,147 @@ bool UserInterface::OnEvent(const SEvent& event)
         handled = true; // set to false below if not handled
         const SEvent::SGUIEvent* ge = &(event.GUIEvent);
         s32 callerID = ge->Caller->getID();
-        // TODO: switch (ge->EventType) {
-        //     // See http://irrlicht.sourceforge.net/docu/example009.html
-        //    case EGET_MENU_ITEM_SELECTED:
-        //    case EGET_SCROLL_BAR_CHANGED:
-        //    case EGET_COMBO_BOX_CHANGED:
-        //    case EGET_BUTTON_CLICKED:
-        //        switch(callerID) {
-        //            case UIE_PLAYBACKSTARTSTOPBUTTON:
-        //        default:
-        //            cerr <<  "Unknown button clicked: " << callerID << std::endl;
-        //    default:
-        //        cerr <<  "Unknown event.GUIEvent.EventType " << ge->EventType << std::endl;
-        //        break;
-        switch (callerID) {
-        case UIE_FILEMENU:
-        case UIE_RECENTMENU:
-        case UIE_PLAYBACKMENU:
-        case UIE_VIEWMENU:
-            // call handler for all menu related actions
-            handleMenuItemPressed(static_cast<IGUIContextMenu*>(ge->Caller));
-            break;
-        case UIE_LOADFILEDIALOG:
-            if (ge->EventType == EGET_FILE_SELECTED) {
-                IGUIFileOpenDialog* fileOpenDialog = static_cast<IGUIFileOpenDialog*>(ge->Caller);
-                wstring path = fileOpenDialog->getFileName();
-                bool result = false;
-                wstring extension = Utility::extensionOf(path);
-                if (Utility::toLower(Utility::toString(extension)) == "irr") {
-                    result = m_Engine->loadScene(fileOpenDialog->getFileName());
+        switch (ge->EventType) {
+            // See http://irrlicht.sourceforge.net/docu/example009.html
+            case EGET_ELEMENT_FOCUSED:
+                break;
+            case EGET_ELEMENT_HOVERED:
+                break;
+            case EGET_ELEMENT_LEFT:
+                break;
+            case EGET_MENU_ITEM_SELECTED:
+                handled = handleMenuItemPressed(ge);
+                break;
+            case EGET_SCROLL_BAR_CHANGED:
+                break;
+            case EGET_COMBO_BOX_CHANGED:
+                break;
+            case EGET_BUTTON_CLICKED:
+                switch(callerID) {
+                case UIE_PLAYBACKSTARTSTOPBUTTON:
+                    this->m_Engine->toggleAnimation();
+                    break;
+                case UIE_PLAYBACKINCREASEBUTTON:
+                    this->m_Engine->incrementAnimationFPS(5);
+                    break;
+                case UIE_PLAYBACKDECREASEBUTTON:
+                    this->m_Engine->incrementAnimationFPS(-5);
+                    break;
+                default:
+                    cerr <<  "EGET_BUTTON_CLICKED wasn't expected from ID " << callerID << std::endl;
+                    handled = false;
+                    break;
                 }
-                else {
-                    result = m_Engine->loadMesh(fileOpenDialog->getFileName());
-                }
-                if (result) {
-                    try {
+            case EGET_FILE_SELECTED:
+                switch(callerID) {
+                case UIE_LOADFILEDIALOG:
+                    {
+                        IGUIFileOpenDialog* fileOpenDialog = static_cast<IGUIFileOpenDialog*>(ge->Caller);
+                        wstring path = fileOpenDialog->getFileName();
+                        bool result = false;
+                        wstring extension = Utility::extensionOf(path);
+                        if (Utility::toLower(Utility::toString(extension)) == "irr") {
+                            result = m_Engine->loadScene(fileOpenDialog->getFileName());
+                        }
+                        else {
+                            result = m_Engine->loadMesh(fileOpenDialog->getFileName());
+                        }
+                        if (result) {
+                            try {
 
-                        this->addRecentMenuItem(Utility::toString(path), true);
+                                this->addRecentMenuItem(Utility::toString(path), true);
+                            }
+                            catch (const std::runtime_error& ex) {
+                                cerr << ex.what() << std::endl;
+                                break;
+                            }
+                        }
+                        if (!result) {
+                            this->m_Engine->m_Device->getGUIEnvironment()->addMessageBox(
+                                        L"Load Mesh", L"The model is inaccessible or not in a compatible format.");
+                        }
                     }
-                    catch (const std::runtime_error& ex) {
-                        cerr << ex.what() << std::endl;
-                        break;
+
+                    break;
+                case UIE_SAVEFILEDIALOG:
+                    {
+                        if (m_Engine->m_LoadedMesh != nullptr) {
+                            IGUIFileOpenDialog* fileOpenDialog = static_cast<IGUIFileOpenDialog*>(ge->Caller);
+                            // fileOpenDialog->getFileName()
+                            m_Engine->saveMesh(fileOpenDialog->getDirectoryName(), "", "dae");
+                        }
+                        else {
+                            this->m_Engine->m_Device->getGUIEnvironment()->addMessageBox(
+                                        L"Export", L"There is nothing to save.");
+                        }
                     }
+                    break;
+                case UIE_LOADTEXTUREDIALOG:
+                    {
+                        IGUIFileOpenDialog* fileOpenDialog = static_cast<IGUIFileOpenDialog*>(ge->Caller);
+                        m_Engine->loadTexture(fileOpenDialog->getFileName());
+                    }
+                    break;
+                default:
+                    cerr <<  "EGET_FILE_SELECTED wasn't expected from ID: " << callerID << std::endl;
+                    handled = false;
+                    break;
                 }
-                if (!result) {
-                    this->m_Engine->m_Device->getGUIEnvironment()->addMessageBox(
-                                L"Load Mesh", L"The model is inaccessible or not in a compatible format.");
-                }
-            }
-            break;
-        case UIE_SAVEFILEDIALOG:
-            if (ge->EventType == EGET_FILE_SELECTED) {
-                if (m_Engine->m_LoadedMesh != nullptr) {
-                    IGUIFileOpenDialog* fileOpenDialog = static_cast<IGUIFileOpenDialog*>(ge->Caller);
-                    // fileOpenDialog->getFileName()
-                    m_Engine->saveMesh(fileOpenDialog->getDirectoryName(), "", "dae");
-                }
-                else {
-                    this->m_Engine->m_Device->getGUIEnvironment()->addMessageBox(
-                                L"Export", L"There is nothing to save.");
-                }
-            }
-            break;
-
-        case UIE_LOADTEXTUREDIALOG:
-            if (ge->EventType == EGET_FILE_SELECTED) {
-                IGUIFileOpenDialog* fileOpenDialog = static_cast<IGUIFileOpenDialog*>(ge->Caller);
-                m_Engine->loadTexture(fileOpenDialog->getFileName());
-            }
-            break;
-
-        case UIE_PLAYBACKSTARTSTOPBUTTON:
-            if (ge->EventType == EGET_BUTTON_CLICKED) {
-                this->m_Engine->toggleAnimation();
-            }
-            break;
-
-        case UIE_PLAYBACKINCREASEBUTTON:
-            if (ge->EventType == EGET_BUTTON_CLICKED) {
-                this->m_Engine->incrementAnimationFPS(5);
-            }
-            break;
-
-        case UIE_PLAYBACKDECREASEBUTTON:
-            if (ge->EventType == EGET_BUTTON_CLICKED) {
-                this->m_Engine->incrementAnimationFPS(-5);
-            }
-            break;
-
-        case UIE_PLAYBACKSETFRAMEEDITBOX:
-            if (ge->EventType == EGET_EDITBOX_ENTER) {
-                if (this->m_Engine->m_LoadedMesh != nullptr) {
-                    this->m_Engine->m_LoadedMesh->setCurrentFrame(
-                        Utility::toF32(this->playbackSetFrameEditBox->getText())
+            case EGET_EDITBOX_ENTER:
+                switch (callerID) {
+                case UIE_PLAYBACKSETFRAMEEDITBOX:
+                    if (this->m_Engine->m_LoadedMesh != nullptr) {
+                        this->m_Engine->m_LoadedMesh->setCurrentFrame(
+                            Utility::toF32(this->playbackSetFrameEditBox->getText())
+                        );
+                    }
+                    break;
+                case UIE_PLAYBACKSTARTFRAMEEDITBOX:
+                    if (this->m_Engine->m_LoadedMesh != nullptr) {
+                        this->m_Engine->m_LoadedMesh->setFrameLoop(
+                                    Utility::toF32(this->playbackStartFrameEditBox->getText()),
+                                    Utility::toF32(this->playbackEndFrameEditBox->getText())
+                        );
+                    }
+                    break;
+                case UIE_PLAYBACKENDFRAMEEDITBOX:
+                    if (this->m_Engine->m_LoadedMesh != nullptr) {
+                        this->m_Engine->m_LoadedMesh->setFrameLoop(
+                                    Utility::toF32(this->playbackStartFrameEditBox->getText()),
+                                    Utility::toF32(this->playbackEndFrameEditBox->getText())
+                        );
+                    }
+                    break;
+                case UIE_TEXTUREPATHEDITBOX:
+                    if (this->m_Engine->m_LoadedMesh != nullptr) {
+                        this->m_Engine->loadTexture(texturePathEditBox->getText());
+                    }
+                    break;
+                case UIE_FPSEDITBOX:
+                    if (this->m_Engine->m_LoadedMesh != nullptr) {
+                        this->m_Engine->m_LoadedMesh->setAnimationSpeed(
+                            Utility::toF32(this->playbackFPSEditBox->getText())
+                        );
+                    }
+                    break;
+                case UIE_AXISSIZEEDITBOX:
+                    this->m_Engine->m_AxisLength = Utility::toF32(
+                        this->axisSizeEditBox->getText()
                     );
+                    break;
+                default:
+                    cerr <<  "EGET_EDITBOX_ENTER isn't processed for ID: " << callerID << std::endl;
+                    handled = false;
+                    break;
                 }
-            }
-            break;
-        case UIE_PLAYBACKSTARTFRAMEEDITBOX:
-            if (ge->EventType == EGET_EDITBOX_ENTER) {
-                if (this->m_Engine->m_LoadedMesh != nullptr) {
-                    this->m_Engine->m_LoadedMesh->setFrameLoop(
-                                Utility::toF32(this->playbackStartFrameEditBox->getText()),
-                                Utility::toF32(this->playbackEndFrameEditBox->getText())
-                    );
-                }
-            }
-            break;
-        case UIE_PLAYBACKENDFRAMEEDITBOX:
-            if (ge->EventType == EGET_EDITBOX_ENTER) {
-                if (this->m_Engine->m_LoadedMesh != nullptr) {
-                    this->m_Engine->m_LoadedMesh->setFrameLoop(
-                                Utility::toF32(this->playbackStartFrameEditBox->getText()),
-                                Utility::toF32(this->playbackEndFrameEditBox->getText())
-                    );
-                }
-            }
-            break;
-        case UIE_TEXTUREPATHEDITBOX:
-            if (ge->EventType == EGET_EDITBOX_ENTER) {
-                if (this->m_Engine->m_LoadedMesh != nullptr) {
-                    this->m_Engine->loadTexture(texturePathEditBox->getText());
-                }
-            }
-            break;
-        case UIE_FPSEDITBOX:
-            if (ge->EventType == EGET_EDITBOX_ENTER) {
-                if (this->m_Engine->m_LoadedMesh != nullptr) {
-                    this->m_Engine->m_LoadedMesh->setAnimationSpeed(
-                        Utility::toF32(this->playbackFPSEditBox->getText())
-                    );
-                }
-            }
-            break;
-        case UIE_AXISSIZEEDITBOX:
-            if (ge->EventType == EGET_EDITBOX_ENTER) {
-                this->m_Engine->m_AxisLength = Utility::toF32(
-                    this->axisSizeEditBox->getText()
-                );
-            }
-            break;
-        case -1:
-            break;
-        default:
-            // if ((ge->Caller->getID() >= this->m_file_recent_first_idx)
-            //         && (ge->Caller->getID() <= m_file_recent_last_idx)) {
-            if (std::find(this->recentIndices.begin(), this->recentIndices.end(), ge->Caller->getID()) != this->recentIndices.end()) {
-                cerr << "Recent item id: " << callerID << endl;
-                this->openRecent(callerID, ge->Caller->getText());
-            }
-            else {
-                cerr << "Unknown caller id: " << callerID << " Text:" << ge->Caller->getText() << endl;
-
+            default:
+                // EET_MOUSE_INPUT_EVENT EET_KEY_INPUT_EVENT EET_JOYSTICK_INPUT_EVENT
+                cerr <<  "[UserInterface] (verbose message) event.GUIEvent.EventType " << ge->EventType << " (See EGET_*) is not handled (event.EventType is EET_GUI_EVENT)." << std::endl;
                 handled = false;
-            }
+                break;
         }
+
+
     } else if (event.EventType == EET_KEY_INPUT_EVENT) {
         // debug() << "EET_KEY_INPUT_EVENT..." << endl;
         handled = true; // set to false below if not handled
@@ -1162,6 +1164,8 @@ bool UserInterface::OnEvent(const SEvent& event)
         default:
             handled = false;
         }
+    } else {
+        cerr << "[UserInterface] (verbose message) event.EventType " << event.EventType << " is ignored." << std::endl;
     }
     return handled;
 }
