@@ -72,10 +72,15 @@ void Engine::setEnableTextureInterpolation(bool EnableTextureInterpolation)
 
 void Engine::addRecent(std::string path)
 {
-    if (!this->hasRecent(path)) {
-        int count = this->countRecent();
-        std::string name = "recent" + std::to_string(count);
-        this->settings.set(name, path);
+    try {
+        if (!this->hasRecent(path)) {
+            int count = this->countRecent();
+            std::string name = "recent" + std::to_string(count);
+            this->settings.set(name, path);
+        }
+    }
+    catch (const std::runtime_error& ex) {
+        std::cerr << ex.what();
     }
 }
 

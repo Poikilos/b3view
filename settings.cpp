@@ -194,7 +194,7 @@ bool Settings::save(std::string path)
 bool Settings::save()
 {
     if (this->path.length() == 0) {
-        throw std::string("There is no path during save().");
+        throw std::runtime_error("There is no path during save().");
     }
     return this->save(this->path);
 }

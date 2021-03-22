@@ -11,6 +11,20 @@ Website: [poikilos.org](https://poikilos.org)
 
 ## Requirements
 * libirrlicht
+  (or libirrlicht1.8)
+
+### Development
+
+* libirrlicht-dbg
+  (or libirrlicht1.8-dbg)
+* libfreetype6-dev
+  - In CodeBlocks (once per computer): Settings, Compiler, Search paths, /usr/include/freetype2
+    - Ensure includes do not put freetype2 first (that directory contains freetype and ft2build.h. Also, freetype itself does its includes as freetype not freetype2/freetype).
+
+CodeBlocks says it is looking for boost_filesystem and boost_system, which may be due to Irrlicht.
+* libbost-filesystem-dev
+    - In CodeBlocks (once per computer): Settings, Compiler, Search paths, /usr/include/freetype2
+* libboost-system-dev
 
 ## Main Features in poikilos fork
 * stabilized (makes sure font, model or texture loads before using;

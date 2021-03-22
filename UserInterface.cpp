@@ -794,15 +794,15 @@ void UserInterface::clearRecent()
 void UserInterface::addRecentMenuItem(std::string path, bool addToEngine)
 {
     if (!this->recent_initialized) {
-        throw std::string("The UI is not ready in addRecent.");
+        throw std::runtime_error("The UI is not ready in addRecent.");
     }
     if (!this->hasRecent(path)) {
         wstring path_ws = Utility::toWstring(path);
         if (this->uic_file_recent_next < UserInterface::UIC_FILE_RECENT_FIRST) {
-            throw std::string("this->uic_file_recent_next is "
-                              + std::to_string(this->uic_file_recent_next)
-                              + " but should be equal to or greater than first: "
-                              + std::to_string(this->uic_file_recent_next));
+            throw std::runtime_error("this->uic_file_recent_next is "
+                                     + std::to_string(this->uic_file_recent_next)
+                                     + " but should be equal to or greater than first: "
+                                     + std::to_string(this->uic_file_recent_next));
         }
         u32 newI = this->recentMenu->addItem(path_ws.c_str(), this->uic_file_recent_next);
         // IGUIContextMenu* menu = this->recentMenu->getSubMenu(newI);
@@ -821,17 +821,23 @@ void UserInterface::addRecentMenuItem(std::string path, bool addToEngine)
 void UserInterface::addRecentMenuItems(std::vector<std::string> paths, bool addToEngine)
 {
     if (!this->recent_initialized) {
-        throw std::string("The UI is not ready in addRecent.");
+        throw std::runtime_error("The UI is not ready in addRecent.");
     }
     for (std::vector<std::string>::iterator it = paths.begin() ; it != paths.end(); ++it) {
-        this->addRecentMenuItem(*it, addToEngine);
+        try {
+            this->addRecentMenuItem(*it, addToEngine);
+        }
+        catch (const std::runtime_error& ex) {
+            cerr << ex.what();
+            break;
+        }
     }
 }
 
 bool UserInterface::hasRecent(std::string path)
 {
     if (!this->recent_initialized) {
-        throw std::string("The UI is not ready in addRecent.");
+        throw std::runtime_error("The UI is not ready in addRecent.");
     }
     for (std::vector<u32>::iterator uiIt = this->recentIndices.begin() ; uiIt != this->recentIndices.end(); ++uiIt) {
         IGUIContextMenu* menu = this->recentMenu->getSubMenu(*uiIt);
@@ -843,7 +849,7 @@ bool UserInterface::hasRecent(std::string path)
         else {
             const std::string msg = "There was no menu for " + std::to_string(*uiIt) + " in hasRecent";
             cerr << msg << endl;
-            throw std::string(msg);
+            throw std::runtime_error(msg);
         }
     }
     return false;
@@ -852,7 +858,7 @@ bool UserInterface::hasRecent(std::string path)
 void UserInterface::openRecent(s32 menuID, std::wstring menuText)
 {
     if (!this->recent_initialized) {
-        throw std::string("The UI is not ready in addRecent.");
+        throw std::runtime_error("The UI is not ready in addRecent.");
     }
     IGUIElement* menu = this->recentMenu->getElementFromId(menuID);
     std::string path = Utility::toString(menu->getText());
@@ -899,8 +905,16 @@ bool UserInterface::OnEvent(const SEvent& event)
                 else {
                     result = m_Engine->loadMesh(fileOpenDialog->getFileName());
                 }
-                this->addRecentMenuItem(Utility::toString(path), true);
+                if (result) {
+                    try {
 
+                        this->addRecentMenuItem(Utility::toString(path), true);
+                    }
+                    catch (const std::runtime_error& ex) {
+                        cerr << ex.what();
+                        break;
+                    }
+                }
                 if (!result) {
                     this->m_Engine->m_Device->getGUIEnvironment()->addMessageBox(
                                 L"Load Mesh", L"The model is inaccessible or not in a compatible format.");
