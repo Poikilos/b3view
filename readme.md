@@ -10,13 +10,23 @@ bat: [github.com/poikilos/mobs_sky](https://github.com/poikilos/mobs_sky)
 Website: [poikilos.org](https://poikilos.org)
 
 ## Requirements
-* libirrlicht
-  (or libirrlicht1.8)
+- libirrlicht (such as libirrlicht1.8 and libirrlicht-dev on Debian 10)
+- freetype (such as libfreetype6 and libfreetype6-dev on Debian 10)
+- If using **Code::Blocks**, add the following 2 variables in "Settings," "Global variables":
+  - freetype
+    - base: /usr/include/freetype2
+    - include: /usr/include/freetype2
+    - lib: /usr/lib/x86_64-linux-gnu
+  - irrlicht
+    - base: /usr/include/irrlicht
+    - include: /usr/include/irrlicht
+    - lib: /usr/lib/x86_64-linux-gnu
+
+If not using Code::Blocks, compile using the included `./build.sh` (requires bash or a shell that can handle the `if` syntax).
 
 ### Development
-
-* libirrlicht-dbg
-  (or libirrlicht1.8-dbg)
+* If necessary, set "NOT_ISO_CPP17" flag during compilation to make some special preprocessors in the code change `<filesystem>` to `<experimental/filesystem>`  and `namespace fs = std::filesystem;` to `namespace fs = std::experimental::filesystem;`.
+* libirrlicht-dbg (such as libirrlicht1.8-dbg on Debian 10)
 * libfreetype6-dev
   - In CodeBlocks (once per computer): Settings, Compiler, Search paths, /usr/include/freetype2
     - Ensure includes do not put freetype2 first (that directory contains freetype and ft2build.h. Also, freetype itself does its includes as freetype not freetype2/freetype).
@@ -36,7 +46,7 @@ CodeBlocks says it is looking for boost_filesystem and boost_system, which may b
   Systems--see Compile and Install)
 * hotkeys to cycle through textures and reload model OR texture
   (see [Usage](#Usage) below).
-* see also CHANGELOG.md
+* see also changelog.md
 * export feature: COLLADA (non-Blender), IRR (Irrlicht Scene settings
   and mesh file paths only), IRRMESH (Static Irrlicht Mesh), OBJ
   (Wavefront), STL (stereolithography)

@@ -335,7 +335,7 @@ bool UserInterface::handleMenuItemPressed(const SEvent::SGUIEvent* ge)
     IGUIContextMenu* menu = static_cast<IGUIContextMenu*>(ge->Caller);
     s32 callerID = ge->Caller->getID();
     s32 selected = menu->getSelectedItem();
-    s32 id = menu->getItemCommandId(static_cast<u32>(selected));
+    s32 commandID = menu->getItemCommandId(static_cast<u32>(selected));
     switch (callerID) {
     case UIE_RECENTMENU:
         // if ((ge->Caller->getID() >= this->m_file_recent_first_idx)
@@ -343,12 +343,18 @@ bool UserInterface::handleMenuItemPressed(const SEvent::SGUIEvent* ge)
         // NOTE: ge->Caller->getID() is probably UIE_RECENTMENU now, but that is not to be used directly!
         cerr << "selected " << selected << std::endl;
         if (std::find(this->recentIndices.begin(), this->recentIndices.end(), selected) != this->recentIndices.end()) {
-            cerr << "Recent item id: " << callerID << endl;
+            // cerr << "parent callerID: " << callerID << endl;
+            // ^ commandID is the parent such as 1100 (or whatever UI_RECENTMENU is)
             // ge->Caller->getText()  // Don't do this. Caller is the parent!
-            this->openRecent(callerID, menu->getItemText(selected));
+            // cerr << "  commandID: " << commandID << std::endl;
+            // selectedItemID is a sequential number.
+            // commandID is a menu id specified on create such as starting from 1101
+            // (or from whatever UIC_FILE_RECENT_FIRST is--usually UI_RECENTMENU+1)
+            // std::wstring menuItemText = menu->getItemText(selected);
+            this->openRecent(selected);
         }
         else {
-            cerr << "Unknown item id: " << selected << " Text:" << Utility::toString(menu->getItemText(selected)) << endl;
+            cerr << "Unknown selected id: " << selected << " Text:" << Utility::toString(menu->getItemText(selected)) << endl;
             if (this->recentIndices.size() < 1) {
                 cerr << "- recentIndices.size(): " << recentIndices.size() << endl;
             }
@@ -362,7 +368,7 @@ bool UserInterface::handleMenuItemPressed(const SEvent::SGUIEvent* ge)
             handled = false;
         }
 
-        // cerr << "[UserInterface::handleMenuItemPressed] Unknown caller id: " << id << endl;
+        // cerr << "[UserInterface::handleMenuItemPressed] Unknown caller id: " << callerID << endl;
         break;
     default:
     //if (selected > -1) {
@@ -371,7 +377,7 @@ bool UserInterface::handleMenuItemPressed(const SEvent::SGUIEvent* ge)
              << std::endl;
         cerr << "  - checking command id..."
              << std::endl;
-        switch (id) {
+        switch (commandID) {
         case UIC_FILE_OPEN:
             displayLoadFileDialog();
             break;
@@ -498,7 +504,7 @@ bool UserInterface::handleMenuItemPressed(const SEvent::SGUIEvent* ge)
             );
             break;
         default:
-            cerr << "Unknown command id: " << id << " Text:" << Utility::toString(menu->getItemText(selected)) << endl;
+            cerr << "Unknown command id: " << commandID << " Text:" << Utility::toString(menu->getItemText(selected)) << endl;
             break;
         }
         break;
@@ -914,16 +920,47 @@ bool UserInterface::hasRecent(std::string path)
     return false;
 }
 
-void UserInterface::openRecent(s32 menuID, std::wstring menuText)
+bool UserInterface::openRecent(s32 selectedItemID)
 {
+    bool result = false;
     if (!this->recent_initialized) {
         throw std::runtime_error("The UI is not ready in addRecent.");
     }
-    IGUIElement* menu = this->recentMenu->getElementFromId(menuID);
-    std::string path = Utility::toString(menu->getText());
-    cerr << "path: " << path << endl;
-    cerr << "menuID: " << menuID << endl;
-    cerr << "menuText: " << Utility::toString(menuText) << endl;
+    // IGUIElement* submenu = this->recentMenu->getElementFromId(commandID);
+    // ^ There is no element for menuID (such as 1100) nor for commandID (such as 1)
+    // IGUIElement* submenu = this->recentMenu->getSubMenu(selectedItemID);
+    // ^ There is no submenu for selectedItemID (such as 1)
+    // IGUIElement* submenu = this->recentMenu->getSubMenu(commandID);
+    // ^ There is no submenu for commandID (such as 1101)
+    // IGUIElement* submenu = this->menu->getElementFromId(commandID);
+    // ^ There is no elemend for commandID (such as 1101)
+    // IGUIElement* submenu = this->menu->getElementFromId(selectedItemID);
+    // ^ There is no element for selectedItemID (such as 1)
+    // IGUIElement* submenu = this->menu->getSubMenu(commandID);
+    // ^ There is no submenu for commandID (such as 1101)
+    IGUIElement* submenu = this->menu->getSubMenu(selectedItemID);
+    if (submenu != nullptr) {
+        std::wstring menuText = this->recentMenu->getItemText(selectedItemID);
+        // std::string path = Utility::toString(submenu->getText());
+        // ^ blank
+        std::string path = Utility::toString(menuText); // blank
+        cerr << "path: " << path << endl;
+        cerr << "selectedItemID: " << selectedItemID << endl;
+        cerr << "menuText: " << Utility::toString(menuText) << endl;
+        result = m_Engine->loadMesh(menuText);
+        if (!result) {
+            this->m_Engine->m_Device->getGUIEnvironment()->addMessageBox(
+                        L"Load Mesh", L"The model is inaccessible or not in a compatible format.");
+        }
+    }
+    else {
+        cerr << "[UserInterface::openRecent] Error: There is no submenu for selectedItemID " << selectedItemID << std::endl;
+        // for (auto it : this->recentMenu->getChildren()) {
+        //     cerr << "  - " << it << std::endl;
+        // }
+        // ^ iterates 0 times; ranged for
+    }
+    return result;
 }
 
 // IEventReceiver

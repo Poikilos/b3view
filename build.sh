@@ -91,7 +91,7 @@ g++  -o build/b3view $OBJDIR/main.o $OBJDIR/Engine.o $OBJDIR/EventHandler.o $OBJ
 if [ $? -ne 0 ]; then
     echo "* linking failed."
 else
-    echo "* linking suceeded."
+    echo "* linking succeeded."
 fi
 if [ ! -f "$OUT_BIN" ]; then
     echo "Error: $OUT_BIN couldn't be built."
@@ -112,12 +112,11 @@ if [ "@$RUN_DEBUG" = "@true" ]; then
     fi
 else
     echo "  (add the --run-debug option to run it automatically)"
-    exit 0
 fi
 if [ "@$DEBUG" != "@true" ]; then
     if [ -f "$INSTALLED_BIN" ]; then
         echo "* updating $INSTALLED_BIN..."
-        ./$OUT_BIN
+        ./$OUT_BIN --test-and-quit
         if [ $? -eq 0 ]; then
             # if no errors occur, install it
             rm "$INSTALLED_BIN"
@@ -139,5 +138,8 @@ if [ "@$DEBUG" != "@true" ]; then
             # cat ./debug-and-show-tb.sh
             # echo "  gdb \"$OUT_BIN\""
         fi
+    else
+        echo "* skipping \"$INSTALLED_BIN\" update since it doesn't exist"
     fi
 fi
+echo "Done"

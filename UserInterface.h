@@ -135,7 +135,7 @@ public:
     void addRecentMenuItem(std::string path, bool addToEngine);
     void addRecentMenuItems(std::vector<std::string> paths, bool addToEngine);
     bool hasRecent(std::string path);
-    void openRecent(irr::s32 menuID, std::wstring menuText);
+    bool openRecent(irr::s32 selectedItemID);
     bool OnSelectMesh();
     void setPlaybackText(irr::s32 id, const wchar_t* str);
 

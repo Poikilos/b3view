@@ -3,6 +3,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+
+## [git] - 2021-02-22
+### Added
+- Recent menu item loading (not completely implemented in previous commits).
+
+### Fixed
+- identification of recent menu items
+
+## [git] - 2021-02-21
+### Added
+- codeblocks support
+
+### Fixed
+- paths in shell script
+
+
 ## [git] - 2021-02-17
 ### Added
 - a settings system and related tests
@@ -236,4 +252,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 - .gitignore (a [Qt .gitignore](https://github.com/github/gitignore/blob/master/Qt.gitignore))
-- CHANGELOG.md
+- changelog.md
