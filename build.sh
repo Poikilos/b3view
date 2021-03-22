@@ -9,9 +9,16 @@ mkdir -p $PREFIX || exit 1
 if [ -z "$DEBUG" ]; then
     DEBUG=false
 fi
-if [ "@$1" == "@--debug" ]; then
-    DEBUG=true
-fi
+RUN_DEBUG=false
+for arg in "$@"
+do
+    if [ "@$arg" == "@--debug" ]; then
+        DEBUG=true
+    elif [ "@$arg" == "@--run-debug" ]; then
+        DEBUG=true
+        RUN_DEBUG=true
+    fi
+done
 OPTION1="-O2"
 OPTION2=
 OPTION3=
@@ -50,18 +57,23 @@ fi
 
 # based on qtcreator's build after clean (see contributing.md; some options are unclear):
 g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/main.o $REPO_PATH/main.cpp
-if [ $? -ne 0 ]; then
-    echo "Error: building main failed. Ensure that libirrlicht-dev is installed."
-    exit 1
-fi
+if [ $? -ne 0 ]; then echo "Error: building main failed."; exit 1; fi
 g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/Engine.o $REPO_PATH/Engine.cpp
+if [ $? -ne 0 ]; then echo "Error: building Engine failed."; exit 1; fi
 g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/EventHandler.o $REPO_PATH/EventHandler.cpp
+if [ $? -ne 0 ]; then echo "Error: building EventHandler failed."; exit 1; fi
 g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/UserInterface.o $REPO_PATH/UserInterface.cpp
+if [ $? -ne 0 ]; then echo "Error: building UserInterface failed."; exit 1; fi
 g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/View.o $REPO_PATH/View.cpp
+if [ $? -ne 0 ]; then echo "Error: building View failed."; exit 1; fi
 g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/Debug.o $REPO_PATH/Debug.cpp
+if [ $? -ne 0 ]; then echo "Error: building Debug failed."; exit 1; fi
 g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/CGUITTFont.o $REPO_PATH/extlib/CGUITTFont.cpp
+if [ $? -ne 0 ]; then echo "Error: building CGUITTFont failed."; exit 1; fi
 g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/Utility.o $REPO_PATH/Utility.cpp
+if [ $? -ne 0 ]; then echo "Error: building Utility failed."; exit 1; fi
 g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/settings.o $REPO_PATH/settings.cpp
+if [ $? -ne 0 ]; then echo "Error: building settings failed."; exit 1; fi
 #-w: suppress warning
 # -I.: include the current directory (suppresses errors when using include < instead of include "
 #-pipe: "Use pipes rather than intermediate files."
@@ -89,29 +101,43 @@ else
 fi
 
 INSTALLED_BIN="$HOME/.local/bin/b3view"
-if [ -f "$INSTALLED_BIN" ]; then
-    echo "* updating $INSTALLED_BIN..."
-    ./$OUT_BIN
-    if [ $? -eq 0 ]; then
-        # if no errors occur, install it
-        rm "$INSTALLED_BIN"
-        cp -f "$OUT_BIN" "$INSTALLED_BIN"
-        if [ $? -eq 0 ]; then
-            echo "* installed $INSTALLED_BIN successfully."
-        else
-            echo "* FAILED to install $INSTALLED_BIN."
-        fi
+
+if [ "@$RUN_DEBUG" = "@true" ]; then
+    if [ "@$DEBUG" = "@true" ]; then
+        ./debug-and-show-tb.sh
     else
-        echo "* skipping install since './$OUT_BIN' failed."
-        echo
-        if [ "@$DEBUG" != "@true" ]; then
-            echo "* Build with debugging symbols like:"
-            echo "  $0 --debug"
-            echo "  # then:"
+        echo "Error: you specified the run option but debug mode is not enabled so ./debug-and-show-tb.sh will not work as expected. Try:"
+        echo "  $0 --debug --run-debug"
+        exit 1
+    fi
+else
+    echo "  (add the --run-debug option to run it automatically)"
+    exit 0
+fi
+if [ "@$DEBUG" != "@true" ]; then
+    if [ -f "$INSTALLED_BIN" ]; then
+        echo "* updating $INSTALLED_BIN..."
+        ./$OUT_BIN
+        if [ $? -eq 0 ]; then
+            # if no errors occur, install it
+            rm "$INSTALLED_BIN"
+            cp -f "$OUT_BIN" "$INSTALLED_BIN"
+            if [ $? -eq 0 ]; then
+                echo "* installed $INSTALLED_BIN successfully."
+            else
+                echo "* FAILED to install $INSTALLED_BIN."
+            fi
+        else
+            echo "* skipping install since './$OUT_BIN' failed."
+            echo
+            if [ "@$DEBUG" != "@true" ]; then
+                echo "* Build with debugging symbols like:"
+                echo "  $0 --debug"
+                echo "  # then:"
+            fi
+            echo "  # (See ./debug-and-show-tb.sh)"
+            # cat ./debug-and-show-tb.sh
+            # echo "  gdb \"$OUT_BIN\""
         fi
-        echo "  # (See ./debug-and-show-tb.sh)"
-        # cat ./debug-and-show-tb.sh
-        # echo "  gdb \"$OUT_BIN\""
     fi
 fi
-echo Done
