@@ -42,3 +42,5 @@ nohup.out
 err.txt
 /build/b3view
 /build.sh~
+/bin/Debug/b3view
+/bin/Release/b3view

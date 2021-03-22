@@ -32,6 +32,8 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add library="freetype" />
+					<Add library="stdc++fs" />
 				</Linker>
 			</Target>
 		</Build>
