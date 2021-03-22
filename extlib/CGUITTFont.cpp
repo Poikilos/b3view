@@ -157,10 +157,10 @@ void CGUITTGlyph::cache(u32 idx, bool fontHinting, bool autoHinting)
             memset(texture_data, 0, texture_size.Width * texture_size.Height * sizeof(u32));
             u32 *texp = texture_data;
             bool cflag = (Driver->getDriverType() == video::EDT_DIRECT3D8);
-            for (int i = 0; i < bits.rows; i++)
+            for (unsigned int i = 0; i < bits.rows; i++)
             {
                 u32 *rowp = texp;
-                for (int j = 0; j < bits.width; j++)
+                for (unsigned int j = 0; j < bits.width; j++)
                 {
                     if (*pt)
                     {
@@ -243,10 +243,10 @@ void CGUITTGlyph::cache(u32 idx, bool fontHinting, bool autoHinting)
         u16 *texture_mono_data = new u16[texture_mono_size.Width * texture_mono_size.Height];
         memset(texture_mono_data, 0, texture_mono_size.Width * texture_mono_size.Height * sizeof(u16));
         u16 *texpm = texture_mono_data;
-        for (int y = 0; y < bits.rows; y++)
+        for (unsigned int y = 0; y < bits.rows; y++)
         {
             u16 *rowp = texpm;
-            for (int x = 0; x < bits.width; x++)
+            for (unsigned int x = 0; x < bits.width; x++)
             {
                 if (pt[y * bits.pitch + (x / 8)] & (0x80 >> (x % 8)))
                     *rowp = 0xffff;
