@@ -335,9 +335,42 @@ bool UserInterface::handleMenuItemPressed(const SEvent::SGUIEvent* ge)
     IGUIContextMenu* menu = static_cast<IGUIContextMenu*>(ge->Caller);
     s32 callerID = ge->Caller->getID();
     s32 selected = menu->getSelectedItem();
-    if (selected > -1) {
-        s32 id = menu->getItemCommandId(static_cast<u32>(selected));
+    s32 id = menu->getItemCommandId(static_cast<u32>(selected));
+    switch (callerID) {
+    case UIE_RECENTMENU:
+        // if ((ge->Caller->getID() >= this->m_file_recent_first_idx)
+        //         && (ge->Caller->getID() <= m_file_recent_last_idx)) {
+        // NOTE: ge->Caller->getID() is probably UIE_RECENTMENU now, but that is not to be used directly!
+        cerr << "selected " << selected << std::endl;
+        if (std::find(this->recentIndices.begin(), this->recentIndices.end(), selected) != this->recentIndices.end()) {
+            cerr << "Recent item id: " << callerID << endl;
+            // ge->Caller->getText()  // Don't do this. Caller is the parent!
+            this->openRecent(callerID, menu->getItemText(selected));
+        }
+        else {
+            cerr << "Unknown item id: " << selected << " Text:" << Utility::toString(menu->getItemText(selected)) << endl;
+            if (this->recentIndices.size() < 1) {
+                cerr << "- recentIndices.size(): " << recentIndices.size() << endl;
+            }
+            else {
+                cerr << "  recentIndices: " << recentIndices.size() << endl;
+                // range based for loop requires C++11 or higher:
+                for(irr::u32 i : this->recentIndices) {
+                    cerr << "  - " << i << endl;
+                }
+            }
+            handled = false;
+        }
 
+        // cerr << "[UserInterface::handleMenuItemPressed] Unknown caller id: " << id << endl;
+        break;
+    default:
+    //if (selected > -1) {
+        cerr << "Some other menu was used: " << callerID
+             << " Text:" << Utility::toString(menu->getItemText(selected))
+             << std::endl;
+        cerr << "  - checking command id..."
+             << std::endl;
         switch (id) {
         case UIC_FILE_OPEN:
             displayLoadFileDialog();
@@ -465,27 +498,10 @@ bool UserInterface::handleMenuItemPressed(const SEvent::SGUIEvent* ge)
             );
             break;
         default:
-            // if ((ge->Caller->getID() >= this->m_file_recent_first_idx)
-            //         && (ge->Caller->getID() <= m_file_recent_last_idx)) {
-            if (std::find(this->recentIndices.begin(), this->recentIndices.end(), ge->Caller->getID()) != this->recentIndices.end()) {
-                cerr << "Recent item id: " << callerID << endl;
-                this->openRecent(callerID, ge->Caller->getText());
-            }
-            else {
-                cerr << "Unknown caller id: " << callerID << " Text:" << Utility::toString(ge->Caller->getText()) << endl;
-                if (this->recentIndices.size() < 1) {
-                    cerr << "- recentIndices.size(): " << recentIndices.size() << endl;
-                }
-                // range based for loop requires C++11 or higher:
-                for(irr::u32 i : this->recentIndices) {
-                    cerr << "  - " << i << endl;
-                }
-                handled = false;
-            }
-
-            // cerr << "[UserInterface::handleMenuItemPressed] Unknown caller id: " << id << endl;
+            cerr << "Unknown command id: " << id << " Text:" << Utility::toString(menu->getItemText(selected)) << endl;
             break;
         }
+        break;
     }
     return handled;
 }
@@ -833,8 +849,13 @@ void UserInterface::addRecentMenuItem(std::string path, bool addToEngine)
                                      + " but should be equal to or greater than first: "
                                      + std::to_string(this->uic_file_recent_next));
         }
+        // The first this->uic_file_recent_next is 1101 or whatever
+        // UserInterface::UIC_FILE_RECENT_FIRST (usually UIC_FILE_RECENT+1) is.
         u32 newI = this->recentMenu->addItem(path_ws.c_str(), this->uic_file_recent_next);
         // IGUIContextMenu* menu = this->recentMenu->getSubMenu(newI);
+        // NOTE: Caller would be the parent menu id on click!
+        // newI is a sequential number starting at 1 which becomes the
+        // selected item (See menu->getSelectedItem() in handleMenuItemPressed)
         this->recentIndices.push_back(newI);
         this->uic_file_recent_next++;
         /*

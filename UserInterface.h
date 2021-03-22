@@ -12,8 +12,11 @@ class Engine;
 
 enum UserInterfaceElements {
     UIE_FILEMENU                    = 1003,
-    UIE_RECENTMENU                  = 1100, // this whole range (1100-1198) must stay free for generated submenus
+
+    // This whole range (1100-1198) must stay free for generated submenus:
+    UIE_RECENTMENU                  = 1100,
     UIE_RECENTMENU_LAST             = 1198,
+
     UIE_RECENTMENU_CLEAR            = 1199,
     UIE_LOADFILEDIALOG              = 1200,
     // UIE_LOADBUTTON                  = 1101,
