@@ -16,6 +16,9 @@
 					<Add option="-g" />
 					<Add directory="$(freetype)" />
 				</Compiler>
+				<Linker>
+					<Add library="freetype" />
+				</Linker>
 			</Target>
 			<Target title="Release">
 				<Option output="bin/Release/b3view" prefix_auto="1" extension_auto="1" />
