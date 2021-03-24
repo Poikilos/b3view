@@ -23,5 +23,5 @@ update_file(){
     fi
 }
 
-update_file projects/textures/penguin.png dist/share/b3view/textures/penguin.png
+update_file projects/textures/penguin.png dist/share/b3view/textures/penguin.png mv
 update_file projects/meshes/penguin-lowpoly-poikilos.b3d dist/share/b3view/meshes/penguin-lowpoly-poikilos.b3d mv

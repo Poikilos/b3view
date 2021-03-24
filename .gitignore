@@ -46,3 +46,6 @@ err.txt
 /bin/Release/b3view
 /b3view.layout
 /b3view.depend
+*.blend1
+/projects/meshes/penguin-lowpoly-poikilos-redochanges-messupback.blend
+/projects/meshes/penguin-lowpoly-poikilos-redochanges.blend

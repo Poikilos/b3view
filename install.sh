@@ -22,7 +22,7 @@ if [ -z "$PREFIX" ]; then
     PREFIX=/usr/local
     if [ "@$USER" != "@root" ]; then
         PREFIX="$HOME/.local"
-        echo "* The user is not root, so the prefix became \"$PREFIX\". Specify PREFIX in the environment to override automatically setting it."
+        echo "* The user is not root, so the prefix became \"$PREFIX\". Specify PREFIX in the environment to override the defaults."
     fi
 fi
 dest_bin_dir="$PREFIX/bin"
