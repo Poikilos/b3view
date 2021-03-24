@@ -1,0 +1,7 @@
+The penguin texture is derived from:
+https://commons.wikimedia.org/wiki/File:Manchot_royal_-_King_Penguin.jpg
+Photo copyright (c) Samuel Blanc, CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0>, via Wikimedia Commons
+
+The following image was used for proportions but not included in any form:
+https://commons.wikimedia.org/wiki/File:King_Penguins_at_Salisbury_Plain_(5724038519).jpg
+Photo copyright (c) Liam Quinn from Canada, CC BY-SA 2.0 <https://creativecommons.org/licenses/by-sa/2.0>, via Wikimedia Commons
