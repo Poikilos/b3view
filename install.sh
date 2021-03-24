@@ -17,7 +17,14 @@ fi
 # chmod +x install.sh
 echo
 echo
-if [ -z "$PREFIX" ]; then PREFIX=/usr/local; fi
+# if [ -z "$PREFIX" ]; then PREFIX=$HOME/.local; fi
+if [ -z "$PREFIX" ]; then
+    PREFIX=/usr/local
+    if [ "@$USER" != "@root" ]; then
+        PREFIX="$HOME/.local"
+        echo "* The user is not root, so the prefix became \"$PREFIX\". Specify PREFIX in the environment to override automatically setting it."
+    fi
+fi
 dest_bin_dir="$PREFIX/bin"
 dest_share_dir="$PREFIX/share"
 project_unix_name=b3view
@@ -29,8 +36,24 @@ icon_name="b3view.png"
 icon_src_path="$DIST_DIR/icons/$icon_name"
 shortcut_name="org.poikilos.b3view.desktop"
 shortcut_src_path="$DIST_DIR/applications/$shortcut_name"
-icons_root=$PREFIX/share/pixmaps
-applications_path=$PREFIX/share/applications
+icons_root=$dest_share_dir/pixmaps
+applications_path=$dest_share_dir/applications
+my_share_dir="$dest_share_dir/$project_unix_name"
+
+mkdir -p "$my_share_dir/meshes"
+mkdir -p "$my_share_dir/textures"
+for resource in b3view/textures/penguin.png b3view/meshes/penguin-lowpoly-poikilos.b3d
+do
+    src="dist/share/$resource"
+    dst="$dest_share_dir/$resource"
+    cp "$src" "$dst"
+    if [ $? -ne 0 ]; then
+        echo "Error: 'cp \"$src\" \"$dst\"' failed."
+        exit 1
+    else
+        echo "* installed \"$dst\""
+    fi
+done
 
 mimes_path="$DIST_DIR/share/mime/packages"
 USER_MIMETYPES_DB_PATH=$HOME/.local/share/mime
@@ -127,9 +150,13 @@ fi
 
 if [ ! -d "$applications_path" ]; then
     mkdir -p "$applications_path"
+    if [ $? -ne 0 ]; then
+        echo "Error: 'mkdir -p \"$applications_path\"' failed."
+        exit 1
+    fi
 fi
 
-#if [ "@$PROFILE_ENABLE" = "@true" ]; then
+# if [ "@$PROFILE_ENABLE" = "@true" ]; then
 # always rewrite, since PREFIX may differ
 echo "Rewriting $applications_path/$shortcut_name..."
 if [ -f "$shortcut_src_path" ]; then
@@ -140,9 +167,9 @@ if [ -f "$shortcut_src_path" ]; then
 else
     echo "ERROR: No icon installed since missing '$shortcut_src_path'"
 fi
-#else
-    #cp -f "$shortcut_src_path" "$applications_path/"
-#fi
+# else
+#     cp -f "$shortcut_src_path" "$applications_path/"
+# fi
 
 if [ -f "$applications_path/$shortcut_name" ]; then
     echo "Successfully copied '$applications_path/$shortcut_name'"
@@ -155,10 +182,10 @@ if [ ! -d "$MIMETYPES_DB_PATH/packages" ]; then
     mkdir "$MIMETYPES_DB_PATH/packages"
 fi
 update_mime_enable=false
-#if [ ! -f "$mime_path" ]; then
-    #echo "ERROR: Stopped installing mime types since missing $mime_path"
-    #exit 1
-#fi
+# if [ ! -f "$mime_path" ]; then
+#     echo "ERROR: Stopped installing mime types since missing $mime_path"
+#     exit 1
+# fi
 
 install_mime() {
     mime_name=$1
@@ -168,14 +195,31 @@ install_mime() {
         exit 1
     fi
     try_dest="$MIMETYPES_DB_PATH/packages/$mime_name"
-    if diff -q $mime_path $try_dest; then
-        echo "(You already have an identical $try_dest)"
+    if [ ! -f "$mime_path" ]; then
+        echo "* There is no source mime type at \"$mime_path\" yet."
+    fi
+    DEST_OP=
+    if [ ! -f "$try_dest" ]; then
+        # echo "* There is no destination mime type at \"$try_dest\" yet."
+        DEST_OP=add
     else
+        if diff -q $mime_path $try_dest; then
+            echo "(You already have an identical $try_dest)"
+        else
+            DEST_OP=update
+        fi
+    fi
+    if [ ! -z "$DEST_OP" ]; then
         cp -f "$mime_path" "$MIMETYPES_DB_PATH/packages/"
-        if [ -f "$MIMETYPES_DB_PATH/packages/$mime_name" ]; then
-        echo "Successfully copied '$MIMETYPES_DB_PATH/packages/$mime_name'"
-        # rm -f "$MIMETYPES_DB_PATH/packages/$mime_name"
-        update_mime_enable=true
+        if [ $? -ne 0 ]; then
+            if [ -f "$MIMETYPES_DB_PATH/packages/$mime_name" ]; then
+                echo "WARNING: cp failed the existing '$MIMETYPES_DB_PATH/packages/$mime_name' will be used"
+                # rm -f "$MIMETYPES_DB_PATH/packages/$mime_name"
+                update_mime_enable=true
+            else
+                echo "Error: 'cp -f \"$mime_path\" \"$MIMETYPES_DB_PATH/packages/\"' failed."
+                exit 1
+            fi
         fi
     fi
 }
@@ -193,27 +237,32 @@ install_mime model-irrmesh.xml
 # file as "plain text file" if the xml file below is installed)
 mime_name=model-obj.xml
 mime_path="$mimes_path/$mime_name"
-#if [ ! -f "$mime_path" ]; then
-    #echo "ERROR: Stopped installing mime types since missing $mime_path"
-    #exit 1
-#fi
+# if [ ! -f "$mime_path" ]; then
+#     echo "ERROR: Stopped installing mime types since missing $mime_path"
+#     exit 1
+# fi
 try_dest="$MIMETYPES_DB_PATH/packages/$mime_name"
-#if diff -q $mime_path $try_dest; then
-    #echo "* (You already have an identical $try_dest)"
-#else
-    #cp -f "$mime_path" "$MIMETYPES_DB_PATH/packages/"
+# if diff -q $mime_path $try_dest; then
+#    echo "* (You already have an identical $try_dest)"
+# else
+    # cp -f "$mime_path" "$MIMETYPES_DB_PATH/packages/"
     if [ -f "$MIMETYPES_DB_PATH/packages/$mime_name" ]; then
-	# echo "* Successfully copied '$MIMETYPES_DB_PATH/packages/$mime_name'"
-	echo "* Removing '$MIMETYPES_DB_PATH/packages/$mime_name' (overlaps with system usually)"
-	rm -f "$MIMETYPES_DB_PATH/packages/$mime_name"
-	update_mime_enable=true
+        # echo "* Successfully copied '$MIMETYPES_DB_PATH/packages/$mime_name'"
+        echo "* Removing '$MIMETYPES_DB_PATH/packages/$mime_name' (overlaps with system usually)"
+        rm -f "$MIMETYPES_DB_PATH/packages/$mime_name"
+        update_mime_enable=true
     fi
-#fi
+# fi
 
 
 if [ "@$update_mime_enable" = "@true" ]; then
     echo "Updating mime type database '$MIMETYPES_DB_PATH'..."
     update-mime-database "$MIMETYPES_DB_PATH"  # must contain packages
+    if [ $? -ne 0 ]; then
+        echo "Error: 'update-mime-database \"$MIMETYPES_DB_PATH\"' failed."
+        exit 1
+    fi
+
 fi
 echo "Done."
 
