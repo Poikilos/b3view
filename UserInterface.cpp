@@ -35,6 +35,9 @@ const u32 UserInterface::UIC_FILE_RECENT_FIRST = UIE_RECENTMENU + 1;
 // PRIVATE
 void UserInterface::setupUserInterface()
 {
+    this->recent_initialized = false;
+    this->recentMenu = nullptr;
+
     // Menu
     menu = m_Gui->addMenu();
     menu->addItem(L"File", UIE_FILEMENU, true, true);
@@ -893,7 +896,9 @@ void UserInterface::addRecentMenuItem(std::string path, bool addToEngine)
         }
         this->m_file_recent_last_idx = menu->getID();
         */
-        this->m_Engine->addRecent(path);
+        if (addToEngine) {
+            this->m_Engine->addRecent(path);
+        }
     }
 }
 

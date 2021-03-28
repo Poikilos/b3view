@@ -343,6 +343,7 @@ Engine::Engine()
     this->m_EnableTestAndExit = false;
     settings.set_int("max_recent", 10);
     std::string profile = std::getenv("HOME");
+    // ^ changes to USERPROFILE  below if blank
     std::string appdataParent;
     std::string appdatas;
     std::string myAppData;
