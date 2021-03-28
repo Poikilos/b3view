@@ -33,7 +33,7 @@ If not using Code::Blocks, compile using the included `./build.sh` (requires bas
 
 CodeBlocks says it is looking for boost_filesystem and boost_system, which may be due to Irrlicht.
 * libbost-filesystem-dev
-    - In CodeBlocks (once per computer): Settings, Compiler, Search paths, /usr/include/freetype2
+  - In CodeBlocks (once per computer): Settings, Compiler, Search paths, /usr/include/freetype2
 * libboost-system-dev
 
 ## Main Features in poikilos fork
@@ -107,9 +107,10 @@ with other formats which also have the B3D extension.
 ### Linux
 * To generate a working makefile, edit the .pro file to reflect your
   path settings and run:
-```bash
+  ```bash
 qmake make -f Makefile.Debug
 ```
+
 This will (hopefully) build a binary in the "build" subdirectory.
 See [Troubleshooting](#Troubleshooting) for compiling via GUI.
 
@@ -220,6 +221,7 @@ only applies to Visual Studio users.)
 
 ### Command-line arguments
 - `--test-and-exit`: This option is primarily for test scripts to run the program and see if it is working. It loads "dist/share/b3view/meshes/penguin-lowpoly-poikilos.b3d", loads the next texture, and (may perform other tests and) exits. It only works if the file exists such as if you are running from the repo directory.
+
 
 ## Known Issues
 * Warn on missing texture.

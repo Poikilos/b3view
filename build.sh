@@ -89,7 +89,12 @@ if [ -f "$$OUT_BIN" ]; then
 fi
 g++  -o build/b3view $OBJDIR/main.o $OBJDIR/Engine.o $OBJDIR/EventHandler.o $OBJDIR/UserInterface.o $OBJDIR/Debug.o $OBJDIR/View.o $OBJDIR/CGUITTFont.o $OBJDIR/Utility.o $OBJDIR/settings.o -lIrrlicht -lX11 -lGL -lXxf86vm -lXcursor -lstdc++fs -lfreetype
 if [ $? -ne 0 ]; then
-    echo "* linking failed."
+    cat <<END
+Error: Linking failed. Ensure you have installed:
+- irrlicht-devel and its dependencies: mesa-libGL-devel (requires libglvnd-devel which requires libX11-devel) libXxf86vm-devel
+- libXcursor-devel
+- freetype-devel
+END
 else
     echo "* linking succeeded."
 fi

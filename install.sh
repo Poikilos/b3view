@@ -66,21 +66,21 @@ for try_build_path in  "$BUILD_DIR" "../build" "../../build-$project_unix_name-D
 do
     try_src_path="$try_build_path/$src_name"
     if [ ! -f $src_path ]; then
-        echo "Checking for $src_path...NOT FOUND"
+        echo "* checking for $src_path...NOT FOUND"
         if [ -f "$try_src_path" ]; then
-            echo "* Checking for $src_name in $try_build_path...FOUND"
+            echo "* checking for $src_name in $try_build_path...FOUND"
             src_path="$try_src_path"
             break
         else
-            echo "* Checking for $src_name in $try_build_path...NOT FOUND"
+            echo "* checking for $src_name in $try_build_path...NOT FOUND"
         fi
     fi
 done
 if [ ! -f "$src_path" ]; then
     customExit "(Nothing done) missing $src_name (You must build first, such as using build.sh or Qt Creator (Release))."
 else
-    echo "Checking for $src_path...FOUND"
-    echo "* current directory: `pwd`"
+    echo "* checking for \"$src_path\"...FOUND"
+    echo "* current directory: \"`pwd`\""
 fi
 
 if [ -d "$dest_bin" ]; then
