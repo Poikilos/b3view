@@ -292,12 +292,12 @@ void UserInterface::setupUserInterface()
         m_GuiFont->attach(m_GuiFontFace, 14);
         m_Gui->getSkin()->setFont(m_GuiFont);
     } else {
-        std::wcerr << L"WARNING: Missing '" << m_Engine->m_FontPath << L"'"
+        std::wcerr << L"WARNING: '" << m_Engine->m_FontPath << L"' is missing."
                    << endl;
         delete m_GuiFontFace;
         m_GuiFontFace = nullptr;
         if (m_GuiFont != nullptr) {
-            std::wcerr << L"WARNING: Keeping old font loaded." << endl;
+            std::wcerr << L"  - The old font will remain loaded." << endl;
         }
     }
     // }
@@ -305,7 +305,7 @@ void UserInterface::setupUserInterface()
 
 void UserInterface::displayLoadFileDialog()
 {
-    m_Gui->addFileOpenDialog(L"Select file to load",
+    m_Gui->addFileOpenDialog(L"Select a file to load",
                              true, nullptr, UIE_LOADFILEDIALOG);
 }
 
@@ -318,7 +318,7 @@ void UserInterface::displaySaveFileDialog()
 
 void UserInterface::displayLoadTextureDialog()
 {
-    m_Gui->addFileOpenDialog(L"Select file to load",
+    m_Gui->addFileOpenDialog(L"Select a file to load",
                              true, nullptr, UIE_LOADTEXTUREDIALOG);
 }
 
