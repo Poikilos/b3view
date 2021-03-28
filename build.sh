@@ -116,7 +116,7 @@ fi
 if [ "@$DEBUG" != "@true" ]; then
     if [ -f "$INSTALLED_BIN" ]; then
         echo "* updating $INSTALLED_BIN..."
-        ./$OUT_BIN --test-and-quit
+        ./$OUT_BIN --test-and-exit
         if [ $? -eq 0 ]; then
             # if no errors occur, install it
             rm "$INSTALLED_BIN"

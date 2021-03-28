@@ -340,6 +340,7 @@ s32 Engine::getNumberOfVertices()
 
 Engine::Engine()
 {
+    this->m_EnableTestAndExit = false;
     settings.set_int("max_recent", 10);
     std::string profile = std::getenv("HOME");
     std::string appdataParent;
@@ -580,6 +581,19 @@ bool Engine::loadMesh(const wstring& fileName)
     // Don't do anything outside of the mesh != nullptr case that will try to
     // use mesh!
     return ret;
+}
+
+bool Engine::pushOption(const std::wstring& optionStr)
+{
+    if (optionStr == L"--test-and-exit") {
+        this->m_EnableTestAndExit = true;
+        std::cerr << "* using option --test-and-exit" << std::endl;
+    }
+    else {
+        std::cerr << "The option is not valid: " << Utility::toString(optionStr) << std::endl;
+        return false;
+    }
+    return true;
 }
 
 bool Engine::reloadMesh()
@@ -885,6 +899,20 @@ void Engine::run()
 
     // Run the Device with fps frames/sec
     while (m_Device->run() && m_RunEngine) {
+        if (this->m_EnableTestAndExit) {
+            std::cerr << "* running tests..." << std::endl;
+            this->m_EnableTestAndExit = false;
+            std::cerr << "* loading test model..." << std::endl;
+            if (!this->loadMesh(L"dist/share/b3view/meshes/penguin-lowpoly-poikilos.b3d")) {
+                throw "loading dist/share/b3view/meshes/penguin-lowpoly-poikilos.b3d failed.";
+            }
+            std::cerr << "* loading test model's next texture..." << std::endl;
+            if (!this->m_UserInterface->loadNextTexture(1)) {
+                throw "loading the next texture for dist/share/b3view/meshes/penguin-lowpoly-poikilos.b3d failed.";
+            }
+            this->m_RunEngine = false;
+            // Don't break yet. Test the main event loop tooo.
+        }
         u32 startTime = timer->getRealTime();
 
         checkResize();

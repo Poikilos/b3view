@@ -40,6 +40,7 @@ private:
     bool m_EnableWireframe;
     bool m_EnableLighting;
     bool m_EnableTextureInterpolation;
+    bool m_EnableTestAndExit;
 
     EventHandler* m_EventHandler;
     UserInterface* m_UserInterface;
@@ -81,6 +82,7 @@ public:
     void run();
     bool loadScene(const std::wstring& fileName);
     bool loadMesh(const std::wstring& fileName);
+    bool pushOption(const std::wstring& optionStr);
     bool reloadMesh();
     std::wstring saveMesh(const irr::io::path path, const std::string& nameOrBlank, const std::string& extension);
     void reloadTexture();

@@ -713,9 +713,9 @@ bool UserInterface::loadNextTexture(int direction)
         vector<wstring> paths = this->m_MatchingTextures;
         if (this->m_MatchingTextures.size() < 1) {
             paths = this->m_AllTextures;
-            debug() << "There were no matching textures."
-                    << " The entire list of " << this->m_AllTextures.size()
-                    << " found textures will be used." << std::endl;
+            debug() << "There were no matching textures so"
+                    << " the entire list of " << this->m_AllTextures.size()
+                    << " found textures will be used..." << std::flush;
         }
         else {
             // Assume the user wants to view name-matched texture using
@@ -763,25 +763,34 @@ bool UserInterface::loadNextTexture(int direction)
         }
         if (lastTexture.length() > 0) {
             if (direction < 0) {
+                cerr << "loading the previous texture...";
                 ret = this->m_Engine->loadTexture(prevTexture);
             }
             else if (direction > 0) {
+                cerr << "loading the next texture...";
                 ret = this->m_Engine->loadTexture(nextTexture);
             }
             else {
                 // If direction is 0 (such as when a model is loaded that has
-                // no texture), only load a preloaded or matching texture.
+                // no texture), only load a specified or matching texture.
                 if (this->m_Engine->m_LoadedTexturePath.length() > 0) {
+                    cerr << "using a specified texture...";
                     ret = this->m_Engine->loadTexture(
                         this->m_Engine->m_LoadedTexturePath
                     );
                 }
                 else if (this->m_MatchingTextures.size() >= 1) {
+                    cerr << "loading matching texture...";
                     ret = this->m_Engine->loadTexture(firstTexture);
+                }
+                else {
+                    ret = true;
+                    cerr << "(cycling was off and there is no matching texture) ";
                 }
             }
         }
         else if (this->m_Engine->m_LoadedTexturePath.length() > 0) {
+            cerr << "loading the first texture...";
             ret = this->m_Engine->loadTexture(
                 this->m_Engine->m_LoadedTexturePath
             );

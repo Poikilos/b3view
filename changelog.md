@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [git] - 2021-03-28
+### Added
+- a `--test-and-exit ` option
 
 ## [git] - 2021-02-22
 ### Added

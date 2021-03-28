@@ -39,9 +39,16 @@ int main(int argc, char** argv)
 
     Engine* engine = new Engine();
     if (argc >= 2) {
-        wchar_t* initialFileName = getWideCharString(argv[1]);
-        engine->loadMesh(wstring(initialFileName));
-        free(initialFileName);
+        for (int i = 1; i < argc; i++) {
+            wchar_t* optionCS = getWideCharString(argv[1]);
+            if ((strlen(argv[i]) >=2) && (argv[i][0] == '-') && argv[i][1] == '-') {
+                engine->pushOption(wstring(optionCS));
+            }
+            else {
+                engine->loadMesh(wstring(optionCS));
+            }
+            free(optionCS);
+        }
     }
     //else
     //    engine->loadMesh(L"test.b3d");

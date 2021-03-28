@@ -218,6 +218,8 @@ only applies to Visual Studio users.)
 * View, choose "Up" axis: change camera "up" axis to Z or Y (Y is
   default; automatically changed to Z when 3ds file is loaded)
 
+### Command-line arguments
+- `--test-and-exit`: This option is primarily for test scripts to run the program and see if it is working. It loads "dist/share/b3view/meshes/penguin-lowpoly-poikilos.b3d", loads the next texture, and (may perform other tests and) exits. It only works if the file exists such as if you are running from the repo directory.
 
 ## Known Issues
 * Warn on missing texture.
