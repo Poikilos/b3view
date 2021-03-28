@@ -274,6 +274,18 @@ void UserInterface::setupUserInterface()
     if (!Utility::isFile(m_Engine->m_FontPath)) {
         m_Engine->m_FontPath = L"/usr/share/fonts/google-droid/DroidSans-Bold.ttf";
     }
+    if (!Utility::isFile(m_Engine->m_FontPath)) {
+        m_Engine->m_FontPath = L"/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf";
+        // ^ This is present on Debian 10. No previous fonts further up are.
+    }
+
+    // if (!Utility::isFile(m_Engine->m_FontPath)) {
+    //    m_Engine->m_FontPath = L"/usr/share/fonts-droid-fallback/truetype/DroidSansFallback.ttf";
+    //    /usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf
+    //    ^ These are CJK fonts!
+    // }
+
+
 
     if (m_GuiFontFace->load(m_Engine->m_FontPath.c_str())) { // actually takes `const io::path &`
         m_GuiFont = new CGUITTFont(m_Gui);
@@ -854,9 +866,11 @@ void UserInterface::clearRecent()
 void UserInterface::addRecentMenuItem(std::string path, bool addToEngine)
 {
     if (!this->recent_initialized) {
-        throw std::runtime_error("The UI is not ready in addRecent.");
+        throw std::runtime_error("The UI is not ready in addRecentMenuItem.");
     }
+    std::cerr << "[addRecentMenuItem] " << path << "..." << std::flush;
     if (!this->hasRecent(path)) {
+        std::cerr << "adding since new..." << std::endl;
         wstring path_ws = Utility::toWstring(path);
         if (this->uic_file_recent_next < UserInterface::UIC_FILE_RECENT_FIRST) {
             throw std::runtime_error("this->uic_file_recent_next is "
@@ -904,14 +918,17 @@ bool UserInterface::hasRecent(std::string path)
     if (!this->recent_initialized) {
         throw std::runtime_error("The UI is not ready in addRecent.");
     }
+    std::cerr << "* checking recent menu items for " << path << "..." << std::endl;
     for (std::vector<u32>::iterator uiIt = this->recentIndices.begin() ; uiIt != this->recentIndices.end(); ++uiIt) {
         IGUIContextMenu* menu = this->recentMenu->getSubMenu(*uiIt);
         if (menu != nullptr) {
+            std::cerr << "  - " << *uiIt << ": " << Utility::toString(menu->getText()) << std::endl;
             if (Utility::toString(menu->getText()) == path) {
                 return true;
             }
         }
         else {
+            std::cerr << "  - null at " << *uiIt << std::endl;
             std::string uiItMsg = std::to_string(*uiIt);
             // std::string uiItMsg = "<bad uiIt value in recentIndices: ";
             // try {
@@ -933,7 +950,7 @@ bool UserInterface::openRecent(s32 selectedItemID)
 {
     bool result = false;
     if (!this->recent_initialized) {
-        throw std::runtime_error("The UI is not ready in addRecent.");
+        throw std::runtime_error("The UI is not ready in openRecent.");
     }
     // IGUIElement* submenu = this->recentMenu->getElementFromId(commandID);
     // ^ There is no element for menuID (such as 1100) nor for commandID (such as 1)
