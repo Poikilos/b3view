@@ -13,9 +13,8 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-g" />
 					<Add option="-std=c++17" />
-					<Add directory="$(freetype)" />
+					<Add option="-g" />
 				</Compiler>
 				<Linker>
 					<Add library="freetype" />
@@ -43,6 +42,7 @@
 			<Add option="-Wall" />
 			<Add option="-std=c++11" />
 			<Add directory="$(#irrlicht.include)" />
+			<Add directory="$(#freetype.include)" />
 		</Compiler>
 		<Linker>
 			<Add library="Irrlicht" />
@@ -69,9 +69,6 @@
 		<Unit filename="settings.cpp" />
 		<Unit filename="settings.h" />
 		<Extensions>
-			<code_completion />
-			<envvars />
-			<debugger />
 			<lib_finder disable_auto="1">
 				<lib name="freetype2" />
 			</lib_finder>
