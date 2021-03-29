@@ -49,3 +49,4 @@ err.txt
 *.blend1
 /projects/meshes/penguin-lowpoly-poikilos-redochanges-messupback.blend
 /projects/meshes/penguin-lowpoly-poikilos-redochanges.blend
+/build/debug/b3view

@@ -796,11 +796,11 @@ bool UserInterface::loadNextTexture(int direction)
         if (lastTexture.length() > 0) {
             if (direction < 0) {
                 cerr << "loading the previous texture...";
-                ret = this->m_Engine->loadTexture(prevTexture);
+                ret = this->m_Engine->loadTexture(prevTexture, false);
             }
             else if (direction > 0) {
                 cerr << "loading the next texture...";
-                ret = this->m_Engine->loadTexture(nextTexture);
+                ret = this->m_Engine->loadTexture(nextTexture, false);
             }
             else {
                 // If direction is 0 (such as when a model is loaded that has
@@ -808,12 +808,13 @@ bool UserInterface::loadNextTexture(int direction)
                 if (this->m_Engine->m_LoadedTexturePath.length() > 0) {
                     cerr << "using a specified texture...";
                     ret = this->m_Engine->loadTexture(
-                        this->m_Engine->m_LoadedTexturePath
+                        this->m_Engine->m_LoadedTexturePath,
+                        false
                     );
                 }
                 else if (this->m_MatchingTextures.size() >= 1) {
                     cerr << "loading matching texture...";
-                    ret = this->m_Engine->loadTexture(firstTexture);
+                    ret = this->m_Engine->loadTexture(firstTexture, false);
                 }
                 else {
                     ret = true;
@@ -824,7 +825,8 @@ bool UserInterface::loadNextTexture(int direction)
         else if (this->m_Engine->m_LoadedTexturePath.length() > 0) {
             cerr << "loading the first texture...";
             ret = this->m_Engine->loadTexture(
-                this->m_Engine->m_LoadedTexturePath
+                this->m_Engine->m_LoadedTexturePath,
+                false
             );
         }
     } else
@@ -1156,7 +1158,7 @@ bool UserInterface::OnEvent(const SEvent& event)
                 case UIE_LOADTEXTUREDIALOG:
                     {
                         IGUIFileOpenDialog* fileOpenDialog = static_cast<IGUIFileOpenDialog*>(ge->Caller);
-                        m_Engine->loadTexture(fileOpenDialog->getFileName());
+                        m_Engine->loadTexture(fileOpenDialog->getFileName(), true);
                     }
                     break;
                 default:
@@ -1191,7 +1193,7 @@ bool UserInterface::OnEvent(const SEvent& event)
                     break;
                 case UIE_TEXTUREPATHEDITBOX:
                     if (this->m_Engine->m_LoadedMesh != nullptr) {
-                        this->m_Engine->loadTexture(texturePathEditBox->getText());
+                        this->m_Engine->loadTexture(texturePathEditBox->getText(), false);
                     }
                     break;
                 case UIE_FPSEDITBOX:

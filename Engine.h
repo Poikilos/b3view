@@ -86,7 +86,7 @@ public:
     bool reloadMesh();
     std::wstring saveMesh(const irr::io::path path, const std::string& nameOrBlank, const std::string& extension);
     bool reloadTexture();
-    bool loadTexture(const std::wstring& fileName);
+    bool loadTexture(const std::wstring& fileName, bool reload);
     void setMeshDisplayMode(bool wireframe = false, bool lighting = false, bool textureInterpolation = true);
     bool isAnimating();
     void playAnimation();

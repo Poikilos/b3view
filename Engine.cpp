@@ -716,21 +716,30 @@ bool Engine::reloadTexture()
     bool result = false;
     if (this->m_LoadedTexturePath.length() > 0) {
         if (wcslen(this->m_UserInterface->texturePathEditBox->getText()) == 0)
-            result = loadTexture(this->m_UserInterface->texturePathEditBox->getText());
+            result = loadTexture(this->m_UserInterface->texturePathEditBox->getText(), true);
         else
-            result = loadTexture(this->m_LoadedTexturePath);
+            result = loadTexture(this->m_LoadedTexturePath, true);
     }
     return result;
 }
 
-bool Engine::loadTexture(const wstring& fileName)
+bool Engine::loadTexture(const wstring& fileName, bool reload)
 {
     bool ret = false;
     if (m_LoadedMesh != nullptr) {
         ITexture* texture = this->m_Driver->getTexture(fileName.c_str());
+        if (reload) {
+            // The texture may already have been read from storage, so:
+            this->m_Driver->removeTexture(texture);
+            texture = this->m_Driver->getTexture(fileName.c_str());
+        }
         if (texture != nullptr) {
             m_LoadedMesh->setMaterialTexture(0, texture);
             ret = true;
+            debug() << "* loaded " << "" << std::endl;
+        }
+        else {
+                debug() << "* failed to load " << "" << std::endl;
         }
         this->m_LoadedTexturePath = fileName;
         std::cerr << "Setting texture path box to " << Utility::toString(this->m_LoadedTexturePath)  << std::endl;
