@@ -452,12 +452,17 @@ vector3df Engine::camTarget()
     return m_CamTarget;
 }
 
-bool Engine::loadMesh(const wstring& fileName)
+bool Engine::loadMesh(const wstring& fileName, bool enableAddRecent)
 {
     bool ret = false;
 
     irr::scene::IAnimatedMesh* mesh = m_Scene->getMesh(fileName.c_str());
     if (mesh != nullptr) {
+        // this->addRecent(Utility::toString(fileName));
+        if (enableAddRecent) {
+            this->m_UserInterface->addRecentMenuItem(Utility::toString(fileName), true);
+            // ^ hasRecent throws "There was no menu for 1 in hasRecent"
+        }
         this->m_LoadedTexturePath = L"";
         this->m_LoadedMeshPath = fileName; // even if bad, set this
             // to allow F5 to reload
@@ -601,7 +606,7 @@ bool Engine::reloadMesh()
 {
     bool ret = false;
     if (this->m_LoadedMeshPath.length() > 0) {
-        ret = loadMesh(this->m_LoadedMeshPath);
+        ret = loadMesh(this->m_LoadedMeshPath, false);
     }
     if (this->m_UserInterface != nullptr)
         this->m_UserInterface->OnSelectMesh();
@@ -706,14 +711,16 @@ std::wstring Engine::saveMesh(const io::path path, const std::string& nameOrBlan
     return ret;
 }
 
-void Engine::reloadTexture()
+bool Engine::reloadTexture()
 {
+    bool result = false;
     if (this->m_LoadedTexturePath.length() > 0) {
         if (wcslen(this->m_UserInterface->texturePathEditBox->getText()) == 0)
-            loadTexture(this->m_UserInterface->texturePathEditBox->getText());
+            result = loadTexture(this->m_UserInterface->texturePathEditBox->getText());
         else
-            loadTexture(this->m_LoadedTexturePath);
+            result = loadTexture(this->m_LoadedTexturePath);
     }
+    return result;
 }
 
 bool Engine::loadTexture(const wstring& fileName)
@@ -904,7 +911,7 @@ void Engine::run()
             std::cerr << "* running tests..." << std::endl;
             this->m_EnableTestAndExit = false;
             std::cerr << "* loading test model..." << std::endl;
-            if (!this->loadMesh(L"dist/share/b3view/meshes/penguin-lowpoly-poikilos.b3d")) {
+            if (!this->loadMesh(L"dist/share/b3view/meshes/penguin-lowpoly-poikilos.b3d", false)) {
                 throw "loading dist/share/b3view/meshes/penguin-lowpoly-poikilos.b3d failed.";
             }
             std::cerr << "* loading test model's next texture..." << std::endl;

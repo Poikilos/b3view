@@ -40,15 +40,17 @@ void UserInterface::setupUserInterface()
 
     // Menu
     menu = m_Gui->addMenu();
-    menu->addItem(L"File", UIE_FILEMENU, true, true);
-    menu->addItem(L"Playback", UIE_PLAYBACKMENU, true, true);
-    menu->addItem(L"View", UIE_VIEWMENU, true, true);
+    this->fileMenuIdx = menu->addItem(L"File", UIE_FILEMENU, true, true);
+    this->playbackMenuIdx = menu->addItem(L"Playback", UIE_PLAYBACKMENU, true, true);
+    this->viewMenuIdx = menu->addItem(L"View", UIE_VIEWMENU, true, true);
 
     // File Menu
-    fileMenu = menu->getSubMenu(0);
+    fileMenu = menu->getSubMenu(this->fileMenuIdx);
     fileMenu->addItem(L"Open", UIC_FILE_OPEN);
     this->fileRecentIdx = fileMenu->addItem(L"Open Recent", UIC_FILE_RECENT, true, true);
     std::vector<std::string> recentPaths = this->m_Engine->recentPaths();
+    fileMenu->addItem(L"Reload Model        F5", UIC_FILE_RELOAD_MESH);
+    fileMenu->addItem(L"Reload Texture      Shift F5", UIC_FILE_RELOAD_TEXTURE);
     fileMenu->addItem(L"Change Texture", UIC_FILE_OPEN_TEXTURE);
     fileMenu->addItem(L"Previous Texture    Shift F3", UIC_FILE_PREVIOUS_TEXTURE);
     fileMenu->addItem(L"Next Texture        F3", UIC_FILE_NEXT_TEXTURE);
@@ -61,8 +63,13 @@ void UserInterface::setupUserInterface()
 
     // File, Open Recent submenu
     this->recentMenu = fileMenu->getSubMenu(this->fileRecentIdx);
+    std::cerr << "+this->recentMenu text:\"" << Utility::toString((wstring)this->recentMenu->getText()) << "\""
+              << " idx:" << Utility::toString((int)this->fileRecentIdx)
+              << " id:" << Utility::toString((int)this->recentMenu->getID())
+              << std::endl;
 
-    this->recentMenu->addItem(L"Clear Recent", UIC_FILE_RECENT_CLEAR);
+    this->fileRecentClearIdx = this->recentMenu->addItem(L"Clear Recent", UIC_FILE_RECENT_CLEAR);
+    std::cerr << "+this->fileRecentClearIdx: " << this->fileRecentClearIdx << std::endl;
     this->uic_file_recent_next = UserInterface::UIC_FILE_RECENT_FIRST;
     this->m_file_recent_first_idx = -1;
     this->m_file_recent_last_idx = -1;
@@ -71,7 +78,7 @@ void UserInterface::setupUserInterface()
     this->addRecentMenuItems(recentPaths, false);
 
     // Playback Menu
-    playbackMenu = menu->getSubMenu(1);
+    playbackMenu = menu->getSubMenu(this->playbackMenuIdx);
     playbackMenu->addItem(L"Previous Frame            Left",
                       UIC_PLAYBACK_PREVIOUS, true, false,
                       false, false);
@@ -86,7 +93,7 @@ void UserInterface::setupUserInterface()
                       false, false);
 
     // View Menu
-    viewMenu = menu->getSubMenu(2);
+    viewMenu = menu->getSubMenu(this->viewMenuIdx);
     viewWireframeIdx = viewMenu->addItem(L"Wireframe",
                                          UIC_VIEW_WIREFRAME, true,
                                          false, this->m_Engine->getEnableWireframe(), true);
@@ -357,19 +364,21 @@ bool UserInterface::handleMenuItemPressed(const SEvent::SGUIEvent* ge)
         //         && (ge->Caller->getID() <= m_file_recent_last_idx)) {
         // NOTE: ge->Caller->getID() is probably UIE_RECENTMENU now, but that is not to be used directly!
         cerr << "selected " << selected << std::endl;
-        if (std::find(this->recentIndices.begin(), this->recentIndices.end(), selected) != this->recentIndices.end()) {
-            // cerr << "parent callerID: " << callerID << endl;
-            // ^ commandID is the parent such as 1100 (or whatever UI_RECENTMENU is)
+        if (std::find(this->recentIndices.begin(), this->recentIndices.end(), commandID) != this->recentIndices.end()) {
             // ge->Caller->getText()  // Don't do this. Caller is the parent!
-            // cerr << "  commandID: " << commandID << std::endl;
+            cerr << "parent callerID: " << callerID << endl;
+            // ^ callerID is the parent such as 1100 (or whatever UI_RECENTMENU is)
+            cerr << "  commandID: " << commandID << std::endl;
+            // ^ commandID is a menu id specified on creation
+            //   such as starting from 1101
+            //   or from whatever UIC_FILE_RECENT_FIRST is--usually UI_RECENTMENU+1).
             // selectedItemID is a sequential number.
-            // commandID is a menu id specified on create such as starting from 1101
-            // (or from whatever UIC_FILE_RECENT_FIRST is--usually UI_RECENTMENU+1)
             // std::wstring menuItemText = menu->getItemText(selected);
-            this->openRecent(selected);
+            this->openRecent(commandID, selected);
         }
         else {
-            cerr << "Unknown selected id: " << selected << " Text:" << Utility::toString(menu->getItemText(selected)) << endl;
+            cerr << "Unknown commandID: " << commandID << " Text:" << Utility::toString(menu->getItemText(selected)) << endl;
+            // ^ getItemText takes the index (NOT the commandID specified on creation)
             if (this->recentIndices.size() < 1) {
                 cerr << "- recentIndices.size(): " << recentIndices.size() << endl;
             }
@@ -419,6 +428,14 @@ bool UserInterface::handleMenuItemPressed(const SEvent::SGUIEvent* ge)
 
         case UIC_FILE_EXPORT_STL:
             exportMeshToHome("stl");
+            break;
+
+        case UIC_FILE_RELOAD_MESH:
+            m_Engine->reloadMesh();
+            break;
+
+        case UIC_FILE_RELOAD_TEXTURE:
+            m_Engine->reloadTexture();
             break;
 
         case UIC_FILE_OPEN_TEXTURE:
@@ -871,9 +888,9 @@ void UserInterface::addRecentMenuItem(std::string path, bool addToEngine)
     if (!this->recent_initialized) {
         throw std::runtime_error("The UI is not ready in addRecentMenuItem.");
     }
-    std::cerr << "[addRecentMenuItem] " << path << "..." << std::flush;
+    std::cerr << "[addRecentMenuItem] " << path << "..." << std::endl;
     if (!this->hasRecent(path)) {
-        std::cerr << "adding since new..." << std::endl;
+        std::cerr << "* adding since new..." << std::endl;
         wstring path_ws = Utility::toWstring(path);
         if (this->uic_file_recent_next < UserInterface::UIC_FILE_RECENT_FIRST) {
             throw std::runtime_error("this->uic_file_recent_next is "
@@ -884,11 +901,16 @@ void UserInterface::addRecentMenuItem(std::string path, bool addToEngine)
         // The first this->uic_file_recent_next is 1101 or whatever
         // UserInterface::UIC_FILE_RECENT_FIRST (usually UIC_FILE_RECENT+1) is.
         u32 newI = this->recentMenu->addItem(path_ws.c_str(), this->uic_file_recent_next);
+        std::cerr << "+this->recentMenu->addItem"
+                  << " idx:" << newI
+                  << " commandID:" << this->uic_file_recent_next
+                  << std::endl;
         // IGUIContextMenu* menu = this->recentMenu->getSubMenu(newI);
         // NOTE: Caller would be the parent menu id on click!
         // newI is a sequential number starting at 1 which becomes the
         // selected item (See menu->getSelectedItem() in handleMenuItemPressed)
-        this->recentIndices.push_back(newI);
+        // this->recentIndices.push_back(newI);
+        this->recentIndices.push_back(this->uic_file_recent_next);
         this->uic_file_recent_next++;
         /*
         if (this->m_file_recent_first_idx < 0) {
@@ -923,17 +945,69 @@ bool UserInterface::hasRecent(std::string path)
     if (!this->recent_initialized) {
         throw std::runtime_error("The UI is not ready in addRecent.");
     }
-    std::cerr << "* checking recent menu items for " << path << "..." << std::endl;
+    std::cerr << "  [hasRecent]" << std::endl;
+    std::cerr << "  * checking children..." << std::endl;
+
+    // See http://irrlicht.sourceforge.net/docu/_i_g_u_i_element_8h_source.html#l00570
+    // core::list< IGUIElement * > Children = this->getChildren();
+    // ^ ‘class UserInterface’ has no member named ‘getChildren’
+    // core::list< IGUIElement * > Children = this->recentMenu->getChildren();
+    // ^ gets no results
+    // core::list< IGUIElement * > Children = this->menu->getChildren();
+    // ^ only gets UIE_FILEMENU, UIE_PLAYBACKMENU, and UIE_VIEWMENU
+
+    std::string thisItemStr = " ";
+    for (u32 i = 0; i < this->recentMenu->getItemCount(); i++) {
+        thisItemStr = Utility::toString((wstring)this->recentMenu->getItemText(i));
+        // getItemText gets wchar_t*
+        // std::cerr << "    * text:" << thisItemStr
+        //           << std::endl;
+        if (thisItemStr == path)
+            return true;
+    }
+    return false;
+    // The commented section below is not valid since there are no children
+    // apparently, only items (inaccessible internals obtained by index).
+    /*
+    core::list< IGUIElement * > Children = this->recentMenu->getChildren();
+    core::list<IGUIElement*>::Iterator it = Children.begin();
+    for (; it != Children.end(); ++it)
+    {
+        irr::gui::IGUIElement* child = *it;
+        std::cerr << "    * text:" << Utility::toString((std::wstring)child->getText())
+                  << " parent:" << Utility::toString((std::wstring)child->getParent()->getText())
+                  << " id:" << Utility::toString(child->getID())
+                  << std::endl;
+        // - getText is a const wchar_t*
+        // - getParent is an IGUIElement*
+        // (*it)->Parent;
+    }
+    // ^ gets no results
+    std::cerr << "  * checking recent menu items for " << path << "..." << std::endl;
+
     for (std::vector<u32>::iterator uiIt = this->recentIndices.begin() ; uiIt != this->recentIndices.end(); ++uiIt) {
-        IGUIContextMenu* menu = this->recentMenu->getSubMenu(*uiIt);
-        if (menu != nullptr) {
-            std::cerr << "  - " << *uiIt << ": " << Utility::toString(menu->getText()) << std::endl;
-            if (Utility::toString(menu->getText()) == path) {
+        // In the comments below, 1 is selected (idx) and 1101 is commandID.
+        // None of the commands work! An item is not an IGUI element apparently!
+        // IGUIContextMenu* child = this->recentMenu->getSubMenu(*uiIt);
+        // ^ null for 1 or 1101
+        // irr::gui::IGUIElement* child = this->recentMenu->getElementFromId(*uiIt, true);
+        // ^ null for 1101
+        // irr::gui::IGUIElement* child = this->menu->getElementFromId(*uiIt, true);
+        // ^ null for 1 or 1101
+        // irr::gui::IGUIElement* child = this->recentMenu->getElementFromId(*uiIt, true);
+        // ^ null for 1 or 1101
+        irr::gui::IGUIElement* child = this->getGUIEnvironment()->getRootGUIElement()->getElementFromId(1, true);
+        // ^ null for 1 or 1101
+        // ^ cast to the specific IGUI... interface before use!
+        // ^ See <http://irrlicht.sourceforge.net/forum/viewtopic.php?f=1&t=29322>
+        if (child != nullptr) {
+            std::cerr << "    - " << *uiIt << " (1): " << Utility::toString(child->getText()) << std::endl;
+            if (Utility::toString(child->getText()) == path) {
                 return true;
             }
         }
         else {
-            std::cerr << "  - null at " << *uiIt << std::endl;
+            std::cerr << "    - null at " << *uiIt << std::endl;
             std::string uiItMsg = std::to_string(*uiIt);
             // std::string uiItMsg = "<bad uiIt value in recentIndices: ";
             // try {
@@ -943,15 +1017,16 @@ bool UserInterface::hasRecent(std::string path)
             //     uiItMsg += ex.what();
             // }
             // uiItMsg += ">";
-            const std::string msg = "There was no menu for " + uiItMsg + " in hasRecent";
-            cerr << msg << endl;
+            const std::string msg = "There was no child for " + uiItMsg + " in hasRecent";
+            cerr << "  " << msg << endl;
             throw std::runtime_error(msg);
         }
     }
+    */
     return false;
 }
 
-bool UserInterface::openRecent(s32 selectedItemID)
+bool UserInterface::openRecent(s32 commandID, s32 selectedItemID)
 {
     bool result = false;
     if (!this->recent_initialized) {
@@ -970,6 +1045,7 @@ bool UserInterface::openRecent(s32 selectedItemID)
     // IGUIElement* submenu = this->menu->getSubMenu(commandID);
     // ^ There is no submenu for commandID (such as 1101)
     IGUIElement* submenu = this->menu->getSubMenu(selectedItemID);
+    // ^ requires the sequential selectedItemID (NOT commandID specified on create)
     if (submenu != nullptr) {
         std::wstring menuText = this->recentMenu->getItemText(selectedItemID);
         // std::string path = Utility::toString(submenu->getText());
@@ -978,7 +1054,7 @@ bool UserInterface::openRecent(s32 selectedItemID)
         cerr << "path: " << path << endl;
         cerr << "selectedItemID: " << selectedItemID << endl;
         cerr << "menuText: " << Utility::toString(menuText) << endl;
-        result = m_Engine->loadMesh(menuText);
+        result = m_Engine->loadMesh(menuText, true);  // true to adjust recent menu order
         if (!result) {
             this->m_Engine->m_Device->getGUIEnvironment()->addMessageBox(
                         L"Load Mesh", L"The model is inaccessible or not in a compatible format.");
@@ -1045,7 +1121,7 @@ bool UserInterface::OnEvent(const SEvent& event)
                             result = m_Engine->loadScene(fileOpenDialog->getFileName());
                         }
                         else {
-                            result = m_Engine->loadMesh(fileOpenDialog->getFileName());
+                            result = m_Engine->loadMesh(fileOpenDialog->getFileName(), true);
                         }
                         if (result) {
                             try {
@@ -1181,7 +1257,7 @@ bool UserInterface::OnEvent(const SEvent& event)
                 handled = false;
                 break;
             case EGET_ELEMENT_HOVERED:
-                debug() << "hovered over " << callerID << "." << std::endl;
+                // debug() << "hovered over " << callerID << "." << std::endl;
                 handled = false;
                 break;
             case EGET_ELEMENT_LEFT:
@@ -1205,6 +1281,10 @@ bool UserInterface::OnEvent(const SEvent& event)
                 this->m_Engine->m_View->m_MouseUser = "";
                 handled = false;
                 break;
+            case EGET_EDITBOX_MARKING_CHANGED:
+                this->m_Engine->m_View->m_MouseUser = "edit box";
+                handled = false;
+                break;
             default:
                 // EET_MOUSE_INPUT_EVENT EET_KEY_INPUT_EVENT EET_JOYSTICK_INPUT_EVENT
                 cerr <<  "[UserInterface] (verbose message) event.GUIEvent.EventType " << ge->EventType << " (See EGET_* in irrlicht/IEventReciever.h) is not handled (event.EventType is EET_GUI_EVENT)." << std::endl;
@@ -1221,7 +1301,11 @@ bool UserInterface::OnEvent(const SEvent& event)
             if (event.KeyInput.Key == irr::KEY_F5) {
                 if (m_Engine->KeyIsDown[irr::KEY_LSHIFT]
                         || m_Engine->KeyIsDown[irr::KEY_RSHIFT]) {
-                    m_Engine->reloadTexture();
+                    bool result = m_Engine->reloadTexture();
+                    if (!result) {
+                        this->m_Engine->m_Device->getGUIEnvironment()->addMessageBox(
+                                    L"Reload Texture", L"The texture is inaccessible or not in a compatible format.");
+                    }
                 }
                 else {
                     if (m_Engine->m_LoadedMeshPath.length() > 0) {

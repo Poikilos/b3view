@@ -11,7 +11,7 @@
 class Engine;
 
 enum UserInterfaceElements {
-    UIE_FILEMENU                    = 1003,
+    UIE_FILEMENU                    = 1000,
 
     // This whole range (1100-1198) must stay free for generated submenus:
     UIE_RECENTMENU                  = 1100,
@@ -44,7 +44,7 @@ enum UserInterfaceElements {
 };
 
 enum UserInterfaceCommands {
-    UIC_FILE_OPEN                   = 1000,
+    UIC_FILE_OPEN                   = 1001,
     UIC_FILE_RECENT                 = 1100, // this whole range (1100-1198) must stay free for generated submenus
     UIC_FILE_RECENT_CLEAR           = 1199,
     UIC_FILE_QUIT                   = 1002,
@@ -56,6 +56,8 @@ enum UserInterfaceCommands {
     UIC_FILE_EXPORT_IRRMESH         = 1008,
     UIC_FILE_EXPORT_OBJ             = 1009,
     UIC_FILE_EXPORT_STL             = 1010,
+    UIC_FILE_RELOAD_MESH            = 1011,
+    UIC_FILE_RELOAD_TEXTURE         = 1012,
     UIC_PLAYBACK_PREVIOUS           = 2001,
     UIC_PLAYBACK_NEXT               = 2002,
     UIC_PLAYBACK_SLOWER             = 2003,
@@ -114,6 +116,10 @@ public:
     irr::gui::IGUIStaticText* axisSizeStaticText;
     irr::gui::IGUIEditBox* axisSizeEditBox;
     irr::u32 fileRecentIdx;
+    irr::u32 fileRecentClearIdx;
+    irr::u32 playbackMenuIdx;
+    irr::u32 viewMenuIdx;
+    irr::u32 fileMenuIdx;
     std::vector<irr::u32> recentIndices;
     irr::u32 viewTextureInterpolationIdx;
     irr::u32 viewWireframeIdx;
@@ -135,7 +141,7 @@ public:
     void addRecentMenuItem(std::string path, bool addToEngine);
     void addRecentMenuItems(std::vector<std::string> paths, bool addToEngine);
     bool hasRecent(std::string path);
-    bool openRecent(irr::s32 selectedItemID);
+    bool openRecent(irr::s32 commandID, irr::s32 selectedItemID);
     bool OnSelectMesh();
     void setPlaybackText(irr::s32 id, const wchar_t* str);
 

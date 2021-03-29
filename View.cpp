@@ -173,7 +173,10 @@ bool View::OnEvent(const SEvent& event)
     // Handle mouse event
     const SEvent::SMouseInput* mouseEvent = &(event.MouseInput);
     if (this->m_MouseUser != "") {
-        std::cerr << "[View] The mouse is being used by " << this->m_MouseUser << std::endl;
+        // std::cerr << "[View] The mouse is being used by " << this->m_MouseUser << std::endl;
+        // Do not allow dragging or scroll wheel movement (or anything else
+        // that may be implemented) to affect the view while the user is using
+        // a panel or dialog.
         return false;
     }
     if (mouseEvent->Event == EMIE_MMOUSE_PRESSED_DOWN) {

@@ -22,20 +22,24 @@ done
 OPTION1="-O2"
 OPTION2=
 OPTION3=
+
+OUT_BIN=build/b3view
+
 if [ "@$DEBUG" = "@true" ]; then
     OPTION1="-g"
     #OPTION2="-DQT_QML_DEBUG"
     OPTION3="-DDEBUG=true"
-    echo "* build:Debug"
+    OUT_BIN=build/debug/b3view
+    mkdir -p "build/debug"
+    echo "* build:Debug (`pwd`/$OUT_BIN)"
 else
-    echo "* build:Release"
+    echo "* build:Release (`pwd`/$OUT_BIN)"
 fi
 SYSTEM_INCDIR=$PREFIX/include
 #IRR_INCDIR=
 #IRR_LIBDIR=
 # FT2_INCDIR=$PREFIX/include/freetype2
 FT2_INCDIR=$PREFIX/include/freetype2
-OUT_BIN=build/b3view
 #FT2_LIBDIR=
 OBJDIR="./build/tmp"
 

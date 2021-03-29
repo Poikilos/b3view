@@ -81,11 +81,11 @@ public:
     irr::core::vector3df camTarget();
     void run();
     bool loadScene(const std::wstring& fileName);
-    bool loadMesh(const std::wstring& fileName);
+    bool loadMesh(const std::wstring& fileName, bool enableAddRecent);
     bool pushOption(const std::wstring& optionStr);
     bool reloadMesh();
     std::wstring saveMesh(const irr::io::path path, const std::string& nameOrBlank, const std::string& extension);
-    void reloadTexture();
+    bool reloadTexture();
     bool loadTexture(const std::wstring& fileName);
     void setMeshDisplayMode(bool wireframe = false, bool lighting = false, bool textureInterpolation = true);
     bool isAnimating();

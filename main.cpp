@@ -45,7 +45,7 @@ int main(int argc, char** argv)
                 engine->pushOption(wstring(optionCS));
             }
             else {
-                engine->loadMesh(wstring(optionCS));
+                engine->loadMesh(wstring(optionCS), false);
             }
             free(optionCS);
         }
