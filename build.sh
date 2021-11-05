@@ -4,6 +4,7 @@ if [ -z "$PREFIX" ]; then
     PREFIX="/usr"
 fi
 REPO_PATH="`pwd`"
+SRC_PATH="$REPO_PATH"
 mkdir -p $PREFIX || exit 1
 
 if [ -z "$DEBUG" ]; then
@@ -59,31 +60,26 @@ fi
 #^ can't find a pc file
 # gcc -o build/b3view main.cpp Debug.cpp Engine.cpp EventHandler.cpp settings.cpp  UserInterface.cpp  Utility.cpp  View.cpp -I$FT2_INCDIR
 
-# based on qtcreator's build after clean (see contributing.md; some options are unclear):
-g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/main.o $REPO_PATH/main.cpp
-if [ $? -ne 0 ]; then echo "Error: building main failed."; exit 1; fi
-g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/Engine.o $REPO_PATH/Engine.cpp
-if [ $? -ne 0 ]; then echo "Error: building Engine failed."; exit 1; fi
-g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/EventHandler.o $REPO_PATH/EventHandler.cpp
-if [ $? -ne 0 ]; then echo "Error: building EventHandler failed."; exit 1; fi
-g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/UserInterface.o $REPO_PATH/UserInterface.cpp
-if [ $? -ne 0 ]; then echo "Error: building UserInterface failed."; exit 1; fi
-g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/View.o $REPO_PATH/View.cpp
-if [ $? -ne 0 ]; then echo "Error: building View failed."; exit 1; fi
-g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/Debug.o $REPO_PATH/Debug.cpp
-if [ $? -ne 0 ]; then echo "Error: building Debug failed."; exit 1; fi
-g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/CGUITTFont.o $REPO_PATH/extlib/CGUITTFont.cpp
-if [ $? -ne 0 ]; then echo "Error: building CGUITTFont failed."; exit 1; fi
-g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/Utility.o $REPO_PATH/Utility.cpp
-if [ $? -ne 0 ]; then echo "Error: building Utility failed."; exit 1; fi
-g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/settings.o $REPO_PATH/settings.cpp
-if [ $? -ne 0 ]; then echo "Error: building settings failed."; exit 1; fi
-#-w: suppress warning
-# -I.: include the current directory (suppresses errors when using include < instead of include "
-#-pipe: "Use pipes rather than intermediate files."
-#Options starting with -g, -f, -m, -O, -W, or --param are automatically
-# passed on to the various sub-processes invoked by g++.  In order to pass
-# other options on to these processes the -W<letter> options must be used.
+_O_FILES=""
+for fn in main Engine EventHandler UserInterface View Debug CGUITTFont Utility settings
+do
+    # based on qtcreator's build after clean (see contributing.md; some options are unclear):
+    THIS_PATH=$SRC_PATH/$fn.cpp
+    if [ -f "$SRC_PATH/extlib/$fn.cpp" ]; then
+        THIS_PATH=$SRC_PATH/extlib/$fn.cpp
+    fi
+    g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/$fn.o $THIS_PATH
+    if [ $? -ne 0 ]; then echo "Error: building $fn failed."; exit 1; fi
+    #-w: suppress warning
+    # -I.: include the current directory (suppresses errors when using include < instead of include "
+    #-pipe: "Use pipes rather than intermediate files."
+    #Options starting with -g, -f, -m, -O, -W, or --param are automatically
+    # passed on to the various sub-processes invoked by g++.  In order to pass
+    # other options on to these processes the -W<letter> options must be used.
+    _O_FILES="$_O_FILES $OBJDIR/$fn.o"
+done
+
+
 if [ -f "$$OUT_BIN" ]; then
     mv "$OUT_BIN" "$OUT_BIN.BAK"
     if [ $? -ne 0 ]; then
@@ -91,7 +87,7 @@ if [ -f "$$OUT_BIN" ]; then
         exit 1
     fi
 fi
-g++  -o $OUT_BIN $OBJDIR/main.o $OBJDIR/Engine.o $OBJDIR/EventHandler.o $OBJDIR/UserInterface.o $OBJDIR/Debug.o $OBJDIR/View.o $OBJDIR/CGUITTFont.o $OBJDIR/Utility.o $OBJDIR/settings.o -lIrrlicht -lX11 -lGL -lXxf86vm -lXcursor -lstdc++fs -lfreetype
+g++  -o $OUT_BIN $_O_FILES -lIrrlicht -lX11 -lGL -lXxf86vm -lXcursor -lstdc++fs -lfreetype
 if [ $? -ne 0 ]; then
     cat <<END
 Error: Linking failed. Ensure you have installed:
@@ -99,6 +95,7 @@ Error: Linking failed. Ensure you have installed:
 - libXcursor-devel
 - freetype-devel
 END
+    exit 1
 else
     echo "* linking succeeded."
 fi
