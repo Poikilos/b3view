@@ -1,11 +1,124 @@
 #!/bin/bash
-# ^ bash is required for the "if" syntax used here.
+# This file should be identical in all projects. See documentation
+# under "usage" below.
+
+usage(){
+    cat <<END
+build.sh
+(c) 2021 Poikilos
+License of this file: [MIT License](https://opensource.org/licenses/MIT)
+
+This is a modular script to build C++ programs without any make or build tools.
+
+This script is designed to run using a build-settings.rc file containing settings,
+or by having all of the settings set in the environment.
+
+To run this script without bash, your shell must be able to process bash-style "if" syntax as used here.
+
+
+Settings:
+    SRC_PATH is the full path to the repository's source code.
+
+    IN_FILES should be a space-separated list of cpp files not including the extension.
+    The full path to each file must not include spaces, but the path must be
+    relative to the SRC_PATH (since the filenames are collected in a bash
+    string then used as the input param for g++).
+    If the file is in a subdirectory, you must also specify the name of the
+    directory in OTHER_DIRS so a corresponding directory under the objects
+    directory gets created (or you simply do that and not specify the subdir
+    here, and that option will cause the file to be found--see OTHER_DIRS
+    below).
+
+    BIN_NAME is the filename for the binary to compile.
+
+    OTHER_DIRS is a list of other subdirectories where files may exist.
+    The filenames (without extension) must not be the same as in any other
+    folder (since this script places all o files in the same directory).
+    Each directory must be free of spaces since it is iterated based on spaces.
+    Any matching file in such a directory will override the file in the SRC_PATH
+    directory if the file name is the same, so there will be no conflict in that
+    case, but the file in the SRC_PATH will be ignored.
+
+
+    DIST_FILES (optional) is a space-separated list of files or directories that should
+    be copied to the build directory along with the binary. This is for
+    required files that should be distributed with the program.
+
+    BUILD_DIR (optional, default is "build") is the directory to place the binary
+    executable and DIST_FILES if any.
+
+Example build-settings.rc:
+SRC_PATH="$REPO_PATH/src"
+IN_FILES="Application ApplicationDelegate IrrlichtEventReceiver main SaveFileDialog"
+BIN_NAME=my_program
+OTHER_DIRS="extlib"
+
+With the correct use of a build-settings.rc file,
+This script is identical in every project.
+For examples, see the following repos by Poikilos on GitHub:
+- b3view
+- irrPaint3D
+
+END
+}
+
+if [ -z "$REPO_PATH" ]; then
+    REPO_PATH="`pwd`"
+fi
+
+HAS_ALL=false
+if [ ! -z "$SRC_PATH" ]; then
+    if [ ! -z "$IN_FILES" ]; then
+        if [ ! -z "$BIN_NAME" ]; then
+            HAS_ALL=true
+        fi
+    fi
+fi
+
+if [ "@$HAS_ALL" != "@true" ]; then
+    . build-settings.rc
+    if [ ! -f build-settings.rc ]; then
+        usage
+        echo "Error: build-settings.rc is missing."
+        exit 1
+    fi
+else
+    echo "INFO: The variables are in the environment, so checking for build-settings.rc was skipped."
+fi
+
+if [ -z "$SRC_PATH" ]; then
+    cat <<END
+
+    Error: You must set SRC_PATH in build-settings.rc or the environment.
+
+END
+    exit 1
+fi
+if [ -z "$IN_FILES" ]; then
+    cat <<END
+
+Error: You must set IN_FILES in build-settings.rc or the environment.
+
+END
+    exit 1
+fi
+if [ -z "$BIN_NAME" ]; then
+    cat <<END
+
+Error: You must set BIN_NAME in build-settings.rc or the environment.
+END
+    exit 1
+fi
+
+
 if [ -z "$PREFIX" ]; then
     PREFIX="/usr"
 fi
-REPO_PATH="`pwd`"
-SRC_PATH="$REPO_PATH"
-mkdir -p $PREFIX || exit 1
+mkdir -p $PREFIX
+if [ $? -ne 0 ]; then
+    echo "Error: 'mkdir -p $PREFIX' failed."
+    exit 1
+fi
 
 if [ -z "$DEBUG" ]; then
     DEBUG=false
@@ -24,13 +137,17 @@ OPTION1="-O2"
 OPTION2=
 OPTION3=
 
-OUT_BIN=build/b3view
+if [ -z "$BUILD_DIR" ]; then
+    BUILD_DIR="build"
+fi
+
+OUT_BIN="$BUILD_DIR/$BIN_NAME"
 
 if [ "@$DEBUG" = "@true" ]; then
     OPTION1="-g"
     #OPTION2="-DQT_QML_DEBUG"
     OPTION3="-DDEBUG=true"
-    OUT_BIN=build/debug/b3view
+    OUT_BIN=build/debug/$BIN_NAME
     mkdir -p "build/debug"
     echo "* build:Debug (`pwd`/$OUT_BIN)"
 else
@@ -50,25 +167,30 @@ if [ ! -d "$OBJDIR" ]; then
     mkdir -p "$OBJDIR"
 fi
 
-# only for pc file if exists for irrlicht:
-#if [ -z "$PKG_CONFIG_PATH" ]; then
-#    PKG_CONFIG_PATH=$IRR_PATH
-#else
-#    PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$IRR_PATH
-#fi
-#gcc -o build/b3view main.cpp Debug.cpp Engine.cpp EventHandler.cpp settings.cpp  UserInterface.cpp  Utility.cpp  View.cpp $(pkg-config --libs --cflags irrlicht --cflags freetype2)
-#^ can't find a pc file
-# gcc -o build/b3view main.cpp Debug.cpp Engine.cpp EventHandler.cpp settings.cpp  UserInterface.cpp  Utility.cpp  View.cpp -I$FT2_INCDIR
+for extra_dir in $OTHER_DIRS
+do
+    mkdir -p $OBJDIR/$extra_dir
+done
 
 _O_FILES=""
-for fn in main Engine EventHandler UserInterface View Debug CGUITTFont Utility settings
+_I_FILES=""
+for fn in $IN_FILES
 do
+    echo "* [$0] compiling $fn..."
     # based on qtcreator's build after clean (see contributing.md; some options are unclear):
-    THIS_PATH=$SRC_PATH/$fn.cpp
-    if [ -f "$SRC_PATH/extlib/$fn.cpp" ]; then
-        THIS_PATH=$SRC_PATH/extlib/$fn.cpp
-    fi
-    g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $OBJDIR/$fn.o $THIS_PATH
+    THIS_NAME=$fn.cpp
+    THIS_PATH=$SRC_PATH/$THIS_NAME
+    THIS_OBJ_PATH="$OBJDIR/$fn.o"
+    for extra_dir in $OTHER_DIRS
+    do
+        if [ -f "$SRC_PATH/$extra_dir/$fn.cpp" ]; then
+            THIS_NAME=$extra_dir/$fn.cpp
+            THIS_PATH=$SRC_PATH/$THIS_NAME
+            break
+        fi
+    done
+    _I_FILES="$_I_FILES $THIS_PATH"
+    g++ -c -pipe $OPTION1 $OPTION2 $OPTION3 -fPIC -I$REPO_PATH -I$FT2_INCDIR -o $THIS_OBJ_PATH $THIS_PATH
     if [ $? -ne 0 ]; then echo "Error: building $fn failed."; exit 1; fi
     #-w: suppress warning
     # -I.: include the current directory (suppresses errors when using include < instead of include "
@@ -76,8 +198,18 @@ do
     #Options starting with -g, -f, -m, -O, -W, or --param are automatically
     # passed on to the various sub-processes invoked by g++.  In order to pass
     # other options on to these processes the -W<letter> options must be used.
-    _O_FILES="$_O_FILES $OBJDIR/$fn.o"
+    _O_FILES="$_O_FILES $THIS_OBJ_PATH"
 done
+
+# only for pc file if exists for irrlicht:
+#if [ -z "$PKG_CONFIG_PATH" ]; then
+#    PKG_CONFIG_PATH=$IRR_PATH
+#else
+#    PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$IRR_PATH
+#fi
+#gcc -o build/$BIN_NAME $_I_FILES $(pkg-config --libs --cflags irrlicht --cflags freetype2)
+#^ can't find a pc file
+# gcc -o build/$BIN_NAME $_I_FILES -I$FT2_INCDIR
 
 
 if [ -f "$$OUT_BIN" ]; then
@@ -106,7 +238,32 @@ else
     echo "Building $OUT_BIN is complete."
 fi
 
-INSTALLED_BIN="$HOME/.local/bin/b3view"
+if [ ! -z "$DIST_FILES" ]; then
+    echo "* copying dist files..."
+    for fn in $DIST_FILES
+    do
+        printf "  * $fn..."
+        if [ -d "$fn" ]; then
+            cp -R "$fn" $BUILD_DIR/
+            if [ $? -ne 0 ]; then
+                echo "Error: 'cp -R \"$fn\" $BUILD_DIR/' failed in \"`pwd`\"."
+                exit 1
+            else
+                echo "OK"
+            fi
+        else
+            cp -f "$fn" $BUILD_DIR/
+            if [ $? -ne 0 ]; then
+                echo "Error: 'cp -f \"$fn\" $BUILD_DIR/' failed in \"`pwd`\"."
+                exit 1
+            else
+                echo "OK"
+            fi
+        fi
+    done
+fi
+
+INSTALLED_BIN="$HOME/.local/bin/$BIN_NAME"
 
 if [ "@$RUN_DEBUG" = "@true" ]; then
     if [ "@$DEBUG" = "@true" ]; then
@@ -149,3 +306,4 @@ if [ "@$DEBUG" != "@true" ]; then
     fi
 fi
 echo "Done"
+

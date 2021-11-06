@@ -1,8 +1,19 @@
 #!/bin/bash
 # ^ bash for if syntax and to avoid "Bad fd number" on using $?
+
+# This file should be identical in each project as it uses build-settings.rc. See build.sh for documentation and license.
+
 # echo "run" > gdb.batch.txt
 # echo "bt" >> gdb.batch.txt
-MY_EXE=build/b3view
+if [ ! -f "build-settings.rc" ]; then
+    echo "This file requires build-settings.rc. For documentation see build.sh."
+    exit 1
+fi
+. build-settings.rc
+if [ -z "$BIN_NAME" ]; then
+    echo "BIN_NAME is required from build-settings.rc or the environment. For documentation see build.sh."
+fi
+MY_EXE=build/$BIN_NAME
 # gdb "$MY_EXE" --command=gdb.batch.txt --batch
 echo
 ERR_TXT=err.txt
