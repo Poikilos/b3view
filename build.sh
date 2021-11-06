@@ -31,7 +31,7 @@ Settings:
 
     BIN_NAME is the filename for the binary to compile.
 
-    OTHER_DIRS is a list of other subdirectories where files may exist.
+    OTHER_DIRS (optional) is a list of other subdirectories where files may exist.
     The filenames (without extension) must not be the same as in any other
     folder (since this script places all o files in the same directory).
     Each directory must be free of spaces since it is iterated based on spaces.
@@ -48,10 +48,11 @@ Settings:
     executable and DIST_FILES if any.
 
 Example build-settings.rc:
-SRC_PATH="$REPO_PATH/src"
-IN_FILES="Application ApplicationDelegate IrrlichtEventReceiver main SaveFileDialog"
-BIN_NAME=my_program
-OTHER_DIRS="extlib"
+    SRC_PATH="$REPO_PATH/src"
+    IN_FILES="Application ApplicationDelegate IrrlichtEventReceiver main SaveFileDialog"
+    BIN_NAME=my_program
+    #OTHER_DIRS="extlib"
+    #DIST_FILES="media"
 
 With the correct use of a build-settings.rc file,
 This script is identical in every project.
