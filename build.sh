@@ -143,6 +143,8 @@ if [ -z "$BUILD_DIR" ]; then
 fi
 
 OUT_BIN="$BUILD_DIR/$BIN_NAME"
+OUT_BIN_PATH="`realpath $OUT_BIN`"
+OUT_BIN_CWD="`realpath $BUILD_DIR`"
 
 if [ "@$DEBUG" = "@true" ]; then
     OPTION1="-g"
@@ -307,4 +309,6 @@ if [ "@$DEBUG" != "@true" ]; then
     fi
 fi
 echo "Done"
-
+echo "You can now make a shortcut to:"
+echo "  Exec=$OUT_BIN_PATH"
+echo "  Path=$OUT_BIN_CWD"
