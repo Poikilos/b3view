@@ -238,6 +238,7 @@ void UserInterface::setupUserInterface()
         true,
         playbackWindow,
         UIE_TEXTUREPATHEDITBOX);
+    texturePathEditBox ->setTextAlignment(EGUIA_LOWERRIGHT, EGUIA_UPPERLEFT);
     y += margin_y;
 
     y += size_y + spacing_y;
