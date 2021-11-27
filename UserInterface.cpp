@@ -122,7 +122,7 @@ void UserInterface::setupUserInterface()
     dimension2d<u32> windowSize = m_Engine->m_Driver->getScreenSize();
     playbackWindow = m_Gui->addWindow(
         rect<s32>(vector2d<s32>(windowSize.Width - 4 - 160, 28),
-                  dimension2d<s32>(160, 300)),
+                  dimension2d<s32>(160, 500)),
         false,
         L"Playback",
         nullptr,
