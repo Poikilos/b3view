@@ -40,7 +40,10 @@ private:
     bool m_EnableWireframe;
     bool m_EnableLighting;
     bool m_EnableTextureInterpolation;
-    bool m_EnableTestAndExit;
+    bool m_EnableTests;
+    bool m_EnableExit;
+    bool m_EnableCountMeshes;
+    bool m_EnableVerbose;
 
     EventHandler* m_EventHandler;
     UserInterface* m_UserInterface;

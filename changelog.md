@@ -3,9 +3,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+
+## [git] - 2021-11-28
+### Added
+- --exit option
+
+### Changed
+- Split the `m_EnableTests` and `m_EnableExit` options (from
+  `m_EnableTestAndExit`).
+- Reduce verbosity unless `--verbose` is specified.
+
+
 ## [git] - 2021-03-28
 ### Added
-- a `--test-and-exit ` option
+- a `--test-and-exit` option
+
 
 ## [git] - 2021-02-22
 ### Added
@@ -13,6 +25,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 - identification of recent menu items
+
 
 ## [git] - 2021-02-21
 ### Added

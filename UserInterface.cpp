@@ -37,7 +37,12 @@ void UserInterface::setupUserInterface()
 {
     this->recent_initialized = false;
     this->recentMenu = nullptr;
-
+    bool enableVerbose = false;
+    if (this->m_Engine != nullptr) {
+        enableVerbose = this->m_Engine->m_EnableVerbose;
+    } else {
+        std::cerr << "Error: The engine is not ready in setupUserInterface." << std::endl;
+    }
     // Menu
     menu = m_Gui->addMenu();
     this->fileMenuIdx = menu->addItem(L"File", UIE_FILEMENU, true, true);
@@ -63,13 +68,16 @@ void UserInterface::setupUserInterface()
 
     // File, Open Recent submenu
     this->recentMenu = fileMenu->getSubMenu(this->fileRecentIdx);
-    std::cerr << "+this->recentMenu text:\"" << Utility::toString((wstring)this->recentMenu->getText()) << "\""
-              << " idx:" << Utility::toString((int)this->fileRecentIdx)
-              << " id:" << Utility::toString((int)this->recentMenu->getID())
-              << std::endl;
-
+    if (enableVerbose) {
+        std::cerr << "+this->recentMenu text:\"" << Utility::toString((wstring)this->recentMenu->getText()) << "\""
+                  << " idx:" << Utility::toString((int)this->fileRecentIdx)
+                  << " id:" << Utility::toString((int)this->recentMenu->getID())
+                  << std::endl;
+    }
     this->fileRecentClearIdx = this->recentMenu->addItem(L"Clear Recent", UIC_FILE_RECENT_CLEAR);
-    std::cerr << "+this->fileRecentClearIdx: " << this->fileRecentClearIdx << std::endl;
+    if (enableVerbose) {
+        std::cerr << "+this->fileRecentClearIdx: " << this->fileRecentClearIdx << std::endl;
+    }
     this->uic_file_recent_next = UserInterface::UIC_FILE_RECENT_FIRST;
     this->m_file_recent_first_idx = -1;
     this->m_file_recent_last_idx = -1;
@@ -303,12 +311,16 @@ void UserInterface::setupUserInterface()
         m_GuiFont->attach(m_GuiFontFace, 14);
         m_Gui->getSkin()->setFont(m_GuiFont);
     } else {
-        std::wcerr << L"WARNING: '" << m_Engine->m_FontPath << L"' is missing."
-                   << endl;
+        if (enableVerbose) {
+            std::wcerr << L"WARNING: '" << m_Engine->m_FontPath << L"' is missing."
+                       << endl;
+        }
         delete m_GuiFontFace;
         m_GuiFontFace = nullptr;
         if (m_GuiFont != nullptr) {
-            std::wcerr << L"  - The old font will remain loaded." << endl;
+            if (enableVerbose) {
+                std::wcerr << L"  - The old font will remain loaded." << endl;
+            }
         }
     }
     // }
@@ -359,21 +371,26 @@ bool UserInterface::handleMenuItemPressed(const SEvent::SGUIEvent* ge)
     s32 callerID = ge->Caller->getID();
     s32 selected = menu->getSelectedItem();
     s32 commandID = menu->getItemCommandId(static_cast<u32>(selected));
+    bool enableVerbose = this->m_Engine->m_EnableVerbose;
     switch (callerID) {
     case UIE_RECENTMENU:
         // if ((ge->Caller->getID() >= this->m_file_recent_first_idx)
         //         && (ge->Caller->getID() <= m_file_recent_last_idx)) {
         // NOTE: ge->Caller->getID() is probably UIE_RECENTMENU now, but that is not to be used directly!
-        cerr << "selected " << selected << std::endl;
+        if (enableVerbose) {
+            cerr << "selected " << selected << std::endl;
+        }
         if (std::find(this->recentIndices.begin(), this->recentIndices.end(), commandID) != this->recentIndices.end()) {
             // ge->Caller->getText()  // Don't do this. Caller is the parent!
-            cerr << "parent callerID: " << callerID << endl;
-            // ^ callerID is the parent such as 1100 (or whatever UI_RECENTMENU is)
-            cerr << "  commandID: " << commandID << std::endl;
-            // ^ commandID is a menu id specified on creation
-            //   such as starting from 1101
-            //   or from whatever UIC_FILE_RECENT_FIRST is--usually UI_RECENTMENU+1).
-            // selectedItemID is a sequential number.
+            if (enableVerbose) {
+                cerr << "parent callerID: " << callerID << endl;
+                // ^ callerID is the parent such as 1100 (or whatever UI_RECENTMENU is)
+                cerr << "  commandID: " << commandID << std::endl;
+                // ^ commandID is a menu id specified on creation
+                //   such as starting from 1101
+                //   or from whatever UIC_FILE_RECENT_FIRST is--usually UI_RECENTMENU+1).
+                // selectedItemID is a sequential number.
+            }
             // std::wstring menuItemText = menu->getItemText(selected);
             this->openRecent(commandID, selected);
         }
@@ -381,13 +398,16 @@ bool UserInterface::handleMenuItemPressed(const SEvent::SGUIEvent* ge)
             cerr << "Unknown commandID: " << commandID << " Text:" << Utility::toString(menu->getItemText(selected)) << endl;
             // ^ getItemText takes the index (NOT the commandID specified on creation)
             if (this->recentIndices.size() < 1) {
+
                 cerr << "- recentIndices.size(): " << recentIndices.size() << endl;
             }
             else {
-                cerr << "  recentIndices: " << recentIndices.size() << endl;
-                // range based for loop requires C++11 or higher:
-                for(irr::u32 i : this->recentIndices) {
-                    cerr << "  - " << i << endl;
+                if (enableVerbose) {
+                    cerr << "  recentIndices: " << recentIndices.size() << endl;
+                    // range based for loop requires C++11 or higher:
+                    for(irr::u32 i : this->recentIndices) {
+                        cerr << "  - " << i << endl;
+                    }
                 }
             }
             handled = false;
@@ -653,7 +673,13 @@ void UserInterface::setPlaybackText(s32 id, const wchar_t* text)
  */
 bool UserInterface::loadNextTexture(int direction)
 {
-    cerr << "Loading texture..." << flush;
+    bool enableVerbose = false;
+    if (this->m_Engine != nullptr) {
+        enableVerbose = this->m_Engine->m_EnableVerbose;
+    }
+    if (enableVerbose) {
+        cerr << "Loading texture..." << flush;
+    }
     bool ret = false;
     std::wstring basePath = L".";
     if (this->m_Engine->m_LoadedMeshPath.length() > 0) {
@@ -746,9 +772,11 @@ bool UserInterface::loadNextTexture(int direction)
         vector<wstring> paths = this->m_MatchingTextures;
         if (this->m_MatchingTextures.size() < 1) {
             paths = this->m_AllTextures;
-            debug() << "There were no matching textures so"
-                    << " the entire list of " << this->m_AllTextures.size()
-                    << " found textures will be used..." << std::flush;
+            if (enableVerbose) {
+                debug() << "There were no matching textures so"
+                        << " the entire list of " << this->m_AllTextures.size()
+                        << " found textures will be used..." << std::flush;
+            }
         }
         else {
             // Assume the user wants to view name-matched texture using
@@ -796,43 +824,60 @@ bool UserInterface::loadNextTexture(int direction)
         }
         if (lastTexture.length() > 0) {
             if (direction < 0) {
-                cerr << "loading the previous texture...";
+                if (enableVerbose) {
+                    cerr << "loading the previous texture...";
+                }
                 ret = this->m_Engine->loadTexture(prevTexture, false);
             }
             else if (direction > 0) {
-                cerr << "loading the next texture...";
+                if (enableVerbose) {
+                    cerr << "loading the next texture...";
+                }
                 ret = this->m_Engine->loadTexture(nextTexture, false);
             }
             else {
                 // If direction is 0 (such as when a model is loaded that has
                 // no texture), only load a specified or matching texture.
                 if (this->m_Engine->m_LoadedTexturePath.length() > 0) {
-                    cerr << "using a specified texture...";
+                    if (enableVerbose) {
+                        cerr << "using a specified texture...";
+                    }
                     ret = this->m_Engine->loadTexture(
                         this->m_Engine->m_LoadedTexturePath,
                         false
                     );
                 }
                 else if (this->m_MatchingTextures.size() >= 1) {
-                    cerr << "loading matching texture...";
+                    if (enableVerbose) {
+                        cerr << "loading matching texture...";
+                    }
                     ret = this->m_Engine->loadTexture(firstTexture, false);
                 }
                 else {
                     ret = true;
-                    cerr << "(cycling was off and there is no matching texture) ";
+                    if (enableVerbose) {
+                        cerr << "(cycling was off and there is no matching texture) ";
+                    }
                 }
             }
         }
         else if (this->m_Engine->m_LoadedTexturePath.length() > 0) {
-            cerr << "loading the first texture...";
+            if (enableVerbose) {
+                cerr << "loading the first texture...";
+            }
             ret = this->m_Engine->loadTexture(
                 this->m_Engine->m_LoadedTexturePath,
                 false
             );
         }
-    } else
-        debug() << "Can't cycle texture since no file was opened" << endl;
-    cerr << (ret?"OK":"FAILED") << endl;
+    } else {
+        if (enableVerbose) {
+            debug() << "Can't cycle texture since no file was opened" << endl;
+        }
+    }
+    if (enableVerbose) {
+        cerr << (ret?"OK":"FAILED") << endl;
+    }
     return ret;
 }
 
@@ -888,12 +933,22 @@ void UserInterface::clearRecent()
 
 void UserInterface::addRecentMenuItem(std::string path, bool addToEngine)
 {
+    bool enableVerbose = false;
+    if (this->m_Engine != nullptr) {
+        enableVerbose = this->m_Engine->m_EnableVerbose;
+    } else {
+        std::cerr << "Error: m_Engine isn't ready in addRecentMenuItem." << std::endl;
+    }
     if (!this->recent_initialized) {
         throw std::runtime_error("The UI is not ready in addRecentMenuItem.");
     }
-    std::cerr << "[addRecentMenuItem] " << path << "..." << std::endl;
+    if (enableVerbose) {
+        std::cerr << "[addRecentMenuItem] " << path << "..." << std::endl;
+    }
     if (!this->hasRecent(path)) {
-        std::cerr << "* adding since new..." << std::endl;
+        if (enableVerbose) {
+            std::cerr << "* adding since new..." << std::endl;
+        }
         wstring path_ws = Utility::toWstring(path);
         if (this->uic_file_recent_next < UserInterface::UIC_FILE_RECENT_FIRST) {
             throw std::runtime_error("this->uic_file_recent_next is "
@@ -904,10 +959,12 @@ void UserInterface::addRecentMenuItem(std::string path, bool addToEngine)
         // The first this->uic_file_recent_next is 1101 or whatever
         // UserInterface::UIC_FILE_RECENT_FIRST (usually UIC_FILE_RECENT+1) is.
         u32 newI = this->recentMenu->addItem(path_ws.c_str(), this->uic_file_recent_next);
-        std::cerr << "+this->recentMenu->addItem"
-                  << " idx:" << newI
-                  << " commandID:" << this->uic_file_recent_next
-                  << std::endl;
+        if (enableVerbose) {
+            std::cerr << "+this->recentMenu->addItem"
+                      << " idx:" << newI
+                      << " commandID:" << this->uic_file_recent_next
+                      << std::endl;
+        }
         // IGUIContextMenu* menu = this->recentMenu->getSubMenu(newI);
         // NOTE: Caller would be the parent menu id on click!
         // newI is a sequential number starting at 1 which becomes the
@@ -945,12 +1002,19 @@ void UserInterface::addRecentMenuItems(std::vector<std::string> paths, bool addT
 
 bool UserInterface::hasRecent(std::string path)
 {
+    bool enableVerbose = false;
+    if (this->m_Engine != nullptr) {
+        enableVerbose = this->m_Engine->m_EnableVerbose;
+    } else {
+        std::cerr << "Error: The engine is not ready in hasRecent." << std::endl;
+    }
     if (!this->recent_initialized) {
         throw std::runtime_error("The UI is not ready in addRecent.");
     }
-    std::cerr << "  [hasRecent]" << std::endl;
-    std::cerr << "  * checking children..." << std::endl;
-
+    if (enableVerbose) {
+        std::cerr << "  [hasRecent]" << std::endl;
+        std::cerr << "  * checking children..." << std::endl;
+    }
     // See http://irrlicht.sourceforge.net/docu/_i_g_u_i_element_8h_source.html#l00570
     // core::list< IGUIElement * > Children = this->getChildren();
     // ^ ‘class UserInterface’ has no member named ‘getChildren’
@@ -1264,7 +1328,7 @@ bool UserInterface::OnEvent(const SEvent& event)
                 handled = false;
                 break;
             case EGET_ELEMENT_LEFT:
-                debug() << "left " << callerID << "." << std::endl;
+                // debug() << "left " << callerID << "." << std::endl;
                 handled = false;
                 break;
             case EGET_MENU_ITEM_SELECTED:

@@ -120,7 +120,15 @@ View::View(Engine* engine)
     // m_Yaw = rotationVec3.Y;
     // m_Pitch = rotationVec3.X;
 
-    debug() << "STARTING Yaw: " << radToDeg(m_YawFromTarget)<< " Pitch: " << radToDeg(m_PitchFromTarget) << endl;
+    bool enableVerbose = false;
+    if (this->m_Engine != nullptr) {
+        enableVerbose = this->m_Engine->m_EnableVerbose;
+    } else {
+        std::cerr << "Error: The engine is not ready in View::View." << std::endl;
+    }
+    if (enableVerbose) {
+        debug() << "STARTING Yaw: " << radToDeg(m_YawFromTarget)<< " Pitch: " << radToDeg(m_PitchFromTarget) << endl;
+    }
     setNewCameraPosition();
 }
 
@@ -225,12 +233,18 @@ bool View::OnEvent(const SEvent& event)
             m_CameraDistance /= 2;
         }
         setNewCameraPosition();
-        debug() << "View got the event and used event.MouseInput."
-                // << " event.GUIEvent.Caller: " << callerID // not avail in Irrlicht (Use this->m_MouseUser instead)
-                << ", m_CamPos: " << m_Engine->m_CamPos.X
-                << "," << m_Engine->m_CamPos.Y
-                << " m_CamTarget: " << m_Engine->m_CamTarget.X
-                << "," << m_Engine->m_CamTarget.Y << endl;
+        bool enableVerbose = true;
+        if (this->m_Engine != nullptr) {
+            enableVerbose = this->m_Engine->m_EnableVerbose;
+        }
+        if (enableVerbose) {
+            debug() << "View got the event and used event.MouseInput."
+                    // << " event.GUIEvent.Caller: " << callerID // not avail in Irrlicht (Use this->m_MouseUser instead)
+                    << ", m_CamPos: " << m_Engine->m_CamPos.X
+                    << "," << m_Engine->m_CamPos.Y
+                    << " m_CamTarget: " << m_Engine->m_CamTarget.X
+                    << "," << m_Engine->m_CamTarget.Y << endl;
+        }
     } else if (m_RotMouse) {
         // debug() << "Yaw: " << radToDeg(m_Yaw) << " Pitch: " << radToDeg(m_Pitch) << endl;
         int dx = mouseEvent->X - m_LastMousePosition->X;

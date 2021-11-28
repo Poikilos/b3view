@@ -340,7 +340,10 @@ s32 Engine::getNumberOfVertices()
 
 Engine::Engine()
 {
-    this->m_EnableTestAndExit = false;
+    this->m_EnableTests = false;
+    this->m_EnableCountMeshes = false;
+    this->m_EnableVerbose = false;
+    this->m_EnableExit = false;
     settings.set_int("max_recent", 10);
     std::string profile = std::getenv("HOME");
     // ^ changes to USERPROFILE  below if blank
@@ -473,15 +476,19 @@ bool Engine::loadMesh(const wstring& fileName, bool enableAddRecent)
 
         m_Device->setWindowCaption((wstring(L"b3view - ") + fileName).c_str());
         m_LoadedMesh = m_Scene->addAnimatedMeshSceneNode(mesh);
-        Utility::dumpMeshInfoToConsole(m_LoadedMesh);
-        std::cerr << "Arranging scene..." << std::flush;
+        if (this->m_EnableVerbose) {
+            Utility::dumpMeshInfoToConsole(m_LoadedMesh);
+            std::cerr << "Arranging scene..." << std::flush;
+        }
         if (Utility::toLower(Utility::extensionOf(fileName)) == L"3ds") {
             m_View->setZUp(true);
         } else {
             m_View->setZUp(false);
         }
         if (m_LoadedMesh != nullptr) {
-            std::cerr << "unloading old mesh..." << std::flush;
+            if (this->m_EnableVerbose) {
+                std::cerr << "unloading old mesh..." << std::flush;
+            }
             ret = true;
             this->m_UserInterface->playbackFPSEditBox->setText(
                 Utility::toWstring(m_LoadedMesh->getAnimationSpeed()).c_str()
@@ -534,14 +541,20 @@ bool Engine::loadMesh(const wstring& fileName, bool enableAddRecent)
             // EMT_TRANSPARENT_ALPHA_CHANNEL: constant transparency
 
         }
-        std::cerr << "setting display mode..." << std::flush;
+        if (this->m_EnableVerbose) {
+            std::cerr << "setting display mode..." << std::flush;
+        }
         this->setMeshDisplayMode(this->m_EnableWireframe, this->m_EnableLighting,
                                  this->m_EnableTextureInterpolation);
-        std::cerr << "preparing UI..." << std::flush;
+        if (this->m_EnableVerbose) {
+            std::cerr << "preparing UI..." << std::flush;
+        }
         if (this->m_UserInterface != nullptr)
             this->m_UserInterface->OnSelectMesh();
-        std::cerr << "checking for textures..." << std::flush;
-        std::cerr << "OK" << std::endl;
+        if (this->m_EnableVerbose) {
+            std::cerr << "checking for textures..." << std::flush;
+            std::cerr << "OK" << std::endl;
+        }
         if (Utility::getTextureCount(m_LoadedMesh) == 0) {
             // NOTE: getMaterialCount doesn't work, since there may not
             // be loaded textures in any material.
@@ -549,7 +562,9 @@ bool Engine::loadMesh(const wstring& fileName, bool enableAddRecent)
                 this->m_UserInterface->loadNextTexture(0);
             }
         }
-        std::cerr << "detecting last frame..." << std::flush;
+        if (this->m_EnableVerbose) {
+            std::cerr << "detecting last frame..." << std::flush;
+        }
         std::wstring prevStartStr;
         std::wstring prevEndStr;
         if (this->m_UserInterface->playbackMenu->getItemText(UIE_PLAYBACKSTARTFRAMEEDITBOX) != nullptr)
@@ -565,16 +580,22 @@ bool Engine::loadMesh(const wstring& fileName, bool enableAddRecent)
             prevEnd = Utility::toF32(prevEndStr);
         // std::cerr << prevEnd << "..." << std::flush;
         f32 endFrameF32 = static_cast<f32>(m_LoadedMesh->getEndFrame());
-        std::cerr << endFrameF32 << "..." << std::flush;
+        if (this->m_EnableVerbose) {
+            std::cerr << endFrameF32 << "..." << std::flush;
+        }
         if (prevEnd < 0 || prevEnd > endFrameF32) {
-            std::cerr << "showing End Frame..." << std::flush;
+            if (this->m_EnableVerbose) {
+                std::cerr << "showing End Frame..." << std::flush;
+            }
             this->m_UserInterface->setPlaybackText(
                 UIE_PLAYBACKENDFRAMEEDITBOX,
                 Utility::toWstring(endFrameF32).c_str()
             );
         }
         if (prevStart < 0 || prevStart > endFrameF32) {
-            std::cerr << "showing Start Frame..." << std::flush;
+            if (this->m_EnableVerbose) {
+                std::cerr << "showing Start Frame..." << std::flush;
+            }
             this->m_UserInterface->setPlaybackText(
                 UIE_PLAYBACKSTARTFRAMEEDITBOX,
                 L"0.0"
@@ -582,7 +603,9 @@ bool Engine::loadMesh(const wstring& fileName, bool enableAddRecent)
         }
         //this->m_UserInterface->playbackMenu->setItemText(UIE_PLAYBACKSTARTFRAMEEDITBOX, );
         //;
-        std::cerr << "OK" << std::endl;
+        if (this->m_EnableVerbose) {
+            std::cerr << "OK" << std::endl;
+        }
     }
     // Don't do anything outside of the mesh != nullptr case that will try to
     // use mesh!
@@ -592,8 +615,26 @@ bool Engine::loadMesh(const wstring& fileName, bool enableAddRecent)
 bool Engine::pushOption(const std::wstring& optionStr)
 {
     if (optionStr == L"--test-and-exit") {
-        this->m_EnableTestAndExit = true;
-        std::cerr << "* using option --test-and-exit" << std::endl;
+        this->m_EnableTests = true;
+        this->m_EnableExit = true;
+    }
+    else if (optionStr == L"--exit") {
+        this->m_EnableExit = true;
+    }
+    else if (optionStr == L"--count-meshes") {
+        this->m_EnableCountMeshes = true;
+    }
+    else if (optionStr == L"--verbose") {
+        this->m_EnableVerbose = true;
+    }
+    else if (optionStr == L"--help") {
+        std::cerr
+            << "--test-and-exit    Run tests then exit the program." << std::endl
+            << "--count-meshes     Count the number of meshes in the file." << std::endl
+            << "--verbose          Show mesh metadata (must be before mesh filename to show that) and internal events." << std::endl
+            << "--exit             Exit the program after processing other options." << std::endl
+        ;
+        this->m_EnableExit = true;
     }
     else {
         std::cerr << "The option is not valid: " << Utility::toString(optionStr) << std::endl;
@@ -742,13 +783,17 @@ bool Engine::loadTexture(const wstring& fileName, bool reload)
                 debug() << "* failed to load " << "" << std::endl;
         }
         this->m_LoadedTexturePath = fileName;
-        std::cerr << "Setting texture path box to " << Utility::toString(this->m_LoadedTexturePath)  << std::endl;
+        if (this->m_EnableVerbose) {
+            std::cerr << "Setting texture path box to " << Utility::toString(this->m_LoadedTexturePath)  << std::endl;
+        }
         this->m_UserInterface->texturePathEditBox->setText(
             this->m_LoadedTexturePath.c_str()
         );
     }
     else {
-        std::cerr << "NOT Setting texture path box to " << Utility::toString(this->m_LoadedTexturePath)  << std::endl;
+        if (this->m_EnableVerbose) {
+            std::cerr << "NOT Setting texture path box to " << Utility::toString(this->m_LoadedTexturePath)  << std::endl;
+        }
     }
     return ret;
 }
@@ -916,9 +961,15 @@ void Engine::run()
 
     // Run the Device with fps frames/sec
     while (m_Device->run() && m_RunEngine) {
-        if (this->m_EnableTestAndExit) {
+        if (this->m_EnableCountMeshes) {
+            this->m_EnableCountMeshes = false;
+            if (this->m_LoadedMesh != nullptr) {
+                std::cout << "mesh_count=" << this->m_LoadedMesh->getMesh()->getMeshBufferCount() << std::endl;
+            }
+        }
+        if (this->m_EnableTests) {
             std::cerr << "* running tests..." << std::endl;
-            this->m_EnableTestAndExit = false;
+            this->m_EnableTests = false;
             std::cerr << "* loading test model..." << std::endl;
             if (!this->loadMesh(L"dist/share/b3view/meshes/penguin-lowpoly-poikilos.b3d", false)) {
                 throw "loading dist/share/b3view/meshes/penguin-lowpoly-poikilos.b3d failed.";
@@ -927,9 +978,15 @@ void Engine::run()
             if (!this->m_UserInterface->loadNextTexture(1)) {
                 throw "loading the next texture for dist/share/b3view/meshes/penguin-lowpoly-poikilos.b3d failed.";
             }
-            this->m_RunEngine = false;
-            // Don't break yet. Test the main event loop tooo.
         }
+        if (this->m_EnableExit) {
+            this->m_RunEngine = false;
+            if (!this->m_EnableTests) {
+                break;
+            }
+            // else don't break yet: Test the main event loop too.
+        }
+
         u32 startTime = timer->getRealTime();
 
         checkResize();

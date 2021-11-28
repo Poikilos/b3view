@@ -9,6 +9,7 @@ bat: [github.com/poikilos/mobs_sky](https://github.com/poikilos/mobs_sky)
 
 Website: [poikilos.org](https://poikilos.org)
 
+
 ## Requirements
 - libirrlicht (such as libirrlicht1.8 and libirrlicht-dev on Debian 10)
 - freetype (such as libfreetype6 and libfreetype6-dev on Debian 10)
@@ -36,6 +37,7 @@ CodeBlocks says it is looking for boost_filesystem and boost_system, which may b
   - In CodeBlocks (once per computer): Settings, Compiler, Search paths, /usr/include/freetype2
 * libboost-system-dev
 
+
 ## Main Features in poikilos fork
 * stabilized (makes sure font, model or texture loads before using;
   makes sure model is loaded before setting View options)
@@ -57,6 +59,13 @@ CodeBlocks says it is looking for boost_filesystem and boost_system, which may b
   or `../textures` (where model would be in a parallel directory next to
   textures).
 * Set the animation loop range (the animation includes the end frame).
+* Use the `--count-meshes` option to count the number of meshes in the
+  model file (such as for knowing how many copies of the Minetest
+  texture to apply for each variant).
+* Use the `--verbose` option to see model metadata (**before** the model
+  filename if a filename is part of the command) and various internal
+  events.
+* Use the --help option to see additional features.
 
 
 ## Related Software

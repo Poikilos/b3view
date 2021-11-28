@@ -40,8 +40,8 @@ int main(int argc, char** argv)
     Engine* engine = new Engine();
     if (argc >= 2) {
         for (int i = 1; i < argc; i++) {
-            wchar_t* optionCS = getWideCharString(argv[1]);
-            if ((strlen(argv[i]) >=2) && (argv[i][0] == '-') && argv[i][1] == '-') {
+            wchar_t* optionCS = getWideCharString(argv[i]);
+            if ((strlen(argv[i]) >=2 ) && (argv[i][0] == '-') && (argv[i][1] == '-')) {
                 engine->pushOption(wstring(optionCS));
             }
             else {
