@@ -31,6 +31,13 @@ If not using Code::Blocks, compile using the included `./build.sh` (requires bas
 * libfreetype6-dev
   - In CodeBlocks (once per computer): Settings, Compiler, Search paths, /usr/include/freetype2
     - Ensure includes do not put freetype2 first (that directory contains freetype and ft2build.h. Also, freetype itself does its includes as freetype not freetype2/freetype).
+* If you try QT Creator (old build method) and there are no valid targets:
+  - NOTE: The program itself doesn't use QT, so you don't need these steps if you use the build instructions.
+    - These are legacy instructions for the purpose of general QT troubleshooting
+  - Install the qt5-developent package such as on Linux Mint 21.3 (Or Ubuntu 22.04 Jammy Jellyfish. Some earlier versions may require `qt5-default` instead):
+    `sudo apt update; sudo apt install qt5base-dev` (installs `libqt5opengl5-dev libvulkan-dev qt5-qmake qt5-qmake-bin qtbase5-dev`. `qt5-qmake` alone isn't enough to solve the problem)
+  -
+  - If it still doesn't build, use the non-QT compile instructions (recommended) or type `qmake` then `make` in the project directory.
 
 CodeBlocks says it is looking for boost_filesystem and boost_system, which may be due to Irrlicht.
 * libbost-filesystem-dev
