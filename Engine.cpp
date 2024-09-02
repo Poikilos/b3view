@@ -455,32 +455,40 @@ vector3df Engine::camTarget()
     return m_CamTarget;
 }
 
-bool Engine::loadMesh(const wstring& fileName, bool enableAddRecent)
+bool Engine::loadMesh(const wstring& filePath, bool enableAddRecent)
 {
+    // enable reload even if fails (in case model is created/repaired outside of this process):
+    std::wstring fileName = filePath.substr(filePath.find_last_of(L"/\\") + 1);  // safe since if -1, still does +1
+
+    std::wstring combinedText = std::wstring(L"Reload Model (" + fileName + L")        F5 ");
+    this->m_UserInterface->fileMenu->setItemText(this->m_UserInterface->fileReloadModelIdx, combinedText.c_str());
+    this->m_UserInterface->fileMenu->setItemEnabled(this->m_UserInterface->fileReloadModelIdx, true);
+    this->m_LoadedMeshPath = filePath; // even if bad, set this
+
     bool ret = false;
 
-    irr::scene::IAnimatedMesh* mesh = m_Scene->getMesh(fileName.c_str());
+    irr::scene::IAnimatedMesh* mesh = m_Scene->getMesh(filePath.c_str());
+    //   to allow F5 to reload
     if (mesh != nullptr) {
         // this->addRecent(Utility::toString(fileName));
         if (enableAddRecent) {
-            this->m_UserInterface->addRecentMenuItem(Utility::toString(fileName), true);
+            this->m_UserInterface->addRecentMenuItem(Utility::toString(filePath), true);
             // ^ hasRecent throws "There was no menu for 1 in hasRecent"
         }
         this->m_LoadedTexturePath = L"";
-        this->m_LoadedMeshPath = fileName; // even if bad, set this
-            // to allow F5 to reload
+        this->m_UserInterface->fileMenu->setItemEnabled(this->m_UserInterface->fileReloadTextureIdx, true);
 
         if (m_LoadedMesh != nullptr)
             m_LoadedMesh->remove();
         this->m_LoadedMesh = nullptr;
 
-        m_Device->setWindowCaption((wstring(L"b3view - ") + fileName).c_str());
+        m_Device->setWindowCaption((wstring(L"b3view - ") + filePath).c_str());
         m_LoadedMesh = m_Scene->addAnimatedMeshSceneNode(mesh);
         if (this->m_EnableVerbose) {
             Utility::dumpMeshInfoToConsole(m_LoadedMesh);
             std::cerr << "Arranging scene..." << std::flush;
         }
-        if (Utility::toLower(Utility::extensionOf(fileName)) == L"3ds") {
+        if (Utility::toLower(Utility::extensionOf(filePath)) == L"3ds") {
             m_View->setZUp(true);
         } else {
             m_View->setZUp(false);
@@ -647,7 +655,23 @@ bool Engine::reloadMesh()
 {
     bool ret = false;
     if (this->m_LoadedMeshPath.length() > 0) {
+        if (m_LoadedMesh != nullptr) {
+            // See <https://irrlicht.sourceforge.io/forum/viewtopic.php?t=52859>:
+            // only deleted when ref count is 0.
+            // m_Scene = m_Device->getSceneManager();
+            m_LoadedMesh->remove();
+            m_LoadedMesh = nullptr;
+            irr::scene::IMeshCache* mesh_cache = m_Scene->getMeshCache();
+            mesh_cache->clear();
+            // video_driver->removeAllTextures();
+            // node->remove();
+            // m_LoadedMesh->drop(); // if m_LoadedMesh is not set to nullptr above, this causes a later crash (in remove() in loadMesh?)
+            // m_LoadedMesh->remove();
+        }
         ret = loadMesh(this->m_LoadedMeshPath, false);
+    }
+    else {
+        this->m_UserInterface->fileMenu->setItemText(this->m_UserInterface->fileReloadModelIdx, L"Reload Model        F5");
     }
     if (this->m_UserInterface != nullptr)
         this->m_UserInterface->OnSelectMesh();

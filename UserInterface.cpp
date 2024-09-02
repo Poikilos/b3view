@@ -54,8 +54,12 @@ void UserInterface::setupUserInterface()
     fileMenu->addItem(L"Open", UIC_FILE_OPEN);
     this->fileRecentIdx = fileMenu->addItem(L"Open Recent", UIC_FILE_RECENT, true, true);
     std::vector<std::string> recentPaths = this->m_Engine->recentPaths();
-    fileMenu->addItem(L"Reload Model        F5", UIC_FILE_RELOAD_MESH);
-    fileMenu->addItem(L"Reload Texture      Shift F5", UIC_FILE_RELOAD_TEXTURE);
+    this->fileReloadModelIdx = fileMenu->addItem(L"Reload Model        F5", UIC_FILE_RELOAD_MESH);
+    this->fileMenu->setItemEnabled(this->fileReloadModelIdx, false);
+    // ^ Model reload is not relevant/possible until loadMesh is at least attempted
+    this->fileReloadTextureIdx = fileMenu->addItem(L"Reload Texture      Shift F5", UIC_FILE_RELOAD_TEXTURE);
+    this->fileMenu->setItemEnabled(this->fileReloadTextureIdx, false);
+    // ^ Texture reload is not relevant/possible until loadMesh is successful (and texture load is attempted/checked)
     fileMenu->addItem(L"Change Texture", UIC_FILE_OPEN_TEXTURE);
     fileMenu->addItem(L"Previous Texture    Shift F3", UIC_FILE_PREVIOUS_TEXTURE);
     fileMenu->addItem(L"Next Texture        F3", UIC_FILE_NEXT_TEXTURE);

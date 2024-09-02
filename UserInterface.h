@@ -116,6 +116,8 @@ public:
     irr::gui::IGUIStaticText* axisSizeStaticText;
     irr::gui::IGUIEditBox* axisSizeEditBox;
     irr::u32 fileRecentIdx;
+    irr::u32 fileReloadModelIdx;
+    irr::u32 fileReloadTextureIdx;
     irr::u32 fileRecentClearIdx;
     irr::u32 playbackMenuIdx;
     irr::u32 viewMenuIdx;
