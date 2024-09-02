@@ -115,9 +115,13 @@ public:
     irr::gui::IGUIEditBox* texturePathEditBox;
     irr::gui::IGUIStaticText* axisSizeStaticText;
     irr::gui::IGUIEditBox* axisSizeEditBox;
+    std::vector<irr::u32> fileExportIndices;
     irr::u32 fileRecentIdx;
     irr::u32 fileReloadModelIdx;
     irr::u32 fileReloadTextureIdx;
+    irr::u32 fileChangeTextureIdx;
+    irr::u32 filePreviousTextureIdx;
+    irr::u32 fileNextTextureIdx;
     irr::u32 fileRecentClearIdx;
     irr::u32 playbackMenuIdx;
     irr::u32 viewMenuIdx;

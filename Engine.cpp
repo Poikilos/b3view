@@ -477,6 +477,12 @@ bool Engine::loadMesh(const wstring& filePath, bool enableAddRecent)
         }
         this->m_LoadedTexturePath = L"";
         this->m_UserInterface->fileMenu->setItemEnabled(this->m_UserInterface->fileReloadTextureIdx, true);
+        this->m_UserInterface->fileMenu->setItemEnabled(this->m_UserInterface->fileChangeTextureIdx, true);
+        this->m_UserInterface->fileMenu->setItemEnabled(this->m_UserInterface->filePreviousTextureIdx, true);
+        this->m_UserInterface->fileMenu->setItemEnabled(this->m_UserInterface->fileNextTextureIdx, true);
+        for (const auto& itr : this->m_UserInterface->fileExportIndices) {
+            this->m_UserInterface->fileMenu->setItemEnabled(itr, true);
+        }
 
         if (m_LoadedMesh != nullptr)
             m_LoadedMesh->remove();

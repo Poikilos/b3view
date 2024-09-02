@@ -59,15 +59,21 @@ void UserInterface::setupUserInterface()
     // ^ Model reload is not relevant/possible until loadMesh is at least attempted
     this->fileReloadTextureIdx = fileMenu->addItem(L"Reload Texture      Shift F5", UIC_FILE_RELOAD_TEXTURE);
     this->fileMenu->setItemEnabled(this->fileReloadTextureIdx, false);
-    // ^ Texture reload is not relevant/possible until loadMesh is successful (and texture load is attempted/checked)
-    fileMenu->addItem(L"Change Texture", UIC_FILE_OPEN_TEXTURE);
-    fileMenu->addItem(L"Previous Texture    Shift F3", UIC_FILE_PREVIOUS_TEXTURE);
-    fileMenu->addItem(L"Next Texture        F3", UIC_FILE_NEXT_TEXTURE);
-    fileMenu->addItem(L"Export DAE (non-Blender COLLADA)", UIC_FILE_EXPORT_DAE);
-    fileMenu->addItem(L"Export IRR (Irrlicht Scene settings and mesh paths only)", UIC_FILE_EXPORT_IRR);
-    fileMenu->addItem(L"Export IRRMESH (Static Irrlicht Mesh)", UIC_FILE_EXPORT_IRRMESH);
-    fileMenu->addItem(L"Export OBJ (Wavefront)", UIC_FILE_EXPORT_OBJ);
-    fileMenu->addItem(L"Export STL (stereolithography)", UIC_FILE_EXPORT_STL);
+    // ^ Texture change/reload is not relevant/possible until loadMesh is successful (and texture load is attempted/checked)
+    this->fileChangeTextureIdx = fileMenu->addItem(L"Change Texture", UIC_FILE_OPEN_TEXTURE);
+    this->filePreviousTextureIdx = fileMenu->addItem(L"Previous Texture    Shift F3", UIC_FILE_PREVIOUS_TEXTURE);
+    this->fileNextTextureIdx = fileMenu->addItem(L"Next Texture        F3", UIC_FILE_NEXT_TEXTURE);
+    this->fileMenu->setItemEnabled(this->fileChangeTextureIdx, false);
+    this->fileMenu->setItemEnabled(this->filePreviousTextureIdx, false);
+    this->fileMenu->setItemEnabled(this->fileNextTextureIdx, false);
+    this->fileExportIndices.push_back(fileMenu->addItem(L"Export DAE (non-Blender COLLADA)", UIC_FILE_EXPORT_DAE));
+    this->fileExportIndices.push_back(fileMenu->addItem(L"Export IRR (Irrlicht Scene settings and mesh paths only)", UIC_FILE_EXPORT_IRR));
+    this->fileExportIndices.push_back(fileMenu->addItem(L"Export IRRMESH (Static Irrlicht Mesh)", UIC_FILE_EXPORT_IRRMESH));
+    this->fileExportIndices.push_back(fileMenu->addItem(L"Export OBJ (Wavefront)", UIC_FILE_EXPORT_OBJ));
+    this->fileExportIndices.push_back(fileMenu->addItem(L"Export STL (stereolithography)", UIC_FILE_EXPORT_STL));
+    for (const auto& itr : this->fileExportIndices) {
+        fileMenu->setItemEnabled(itr, false);
+    }
     fileMenu->addItem(L"Quit", UIC_FILE_QUIT);
 
     // File, Open Recent submenu
