@@ -96,6 +96,9 @@ private:
     irr::core::dimension2d<irr::u32> m_WindowSize; // previous size
     std::vector<std::wstring> m_AllTextures;
     std::vector<std::wstring> m_MatchingTextures;
+    std::vector<irr::u32> m_fileExportIndices;
+    std::vector<irr::u32> m_fileModelingIndices;
+    std::vector<irr::u32> m_fileTextureIndices;
 public:
     irr::gui::IGUIContextMenu* menu;
     irr::gui::IGUIContextMenu* fileMenu;
@@ -115,7 +118,6 @@ public:
     irr::gui::IGUIEditBox* texturePathEditBox;
     irr::gui::IGUIStaticText* axisSizeStaticText;
     irr::gui::IGUIEditBox* axisSizeEditBox;
-    std::vector<irr::u32> fileExportIndices;
     irr::u32 fileRecentIdx;
     irr::u32 fileReloadModelIdx;
     irr::u32 fileReloadTextureIdx;
@@ -150,6 +152,9 @@ public:
     bool openRecent(irr::s32 commandID, irr::s32 selectedItemID);
     bool OnSelectMesh();
     void setPlaybackText(irr::s32 id, const wchar_t* str);
+    void setModelingEnabled(bool enabled, bool modelIsOK);
+    void setTexturingEnabled(bool enabled);
+    void setLastLoadedMeshPath(std::wstring filePath);
 
     // IEventReceiver
     virtual bool OnEvent(const irr::SEvent& event);

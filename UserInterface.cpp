@@ -32,6 +32,35 @@ namespace fs = std::experimental::filesystem;
 
 const u32 UserInterface::UIC_FILE_RECENT_FIRST = UIE_RECENTMENU + 1;
 
+void UserInterface::setLastLoadedMeshPath(std::wstring filePath) {
+    // enable reload even if fails (in case model is created/repaired outside of this process):
+    std::wstring fileName = filePath.substr(filePath.find_last_of(L"/\\") + 1);  // safe since if -1, still does +1
+    std::wstring combinedText = std::wstring(L"Reload Model (" + fileName + L")        F5 ");
+    fileMenu->setItemText(fileReloadModelIdx, combinedText.c_str());
+}
+
+void UserInterface::setModelingEnabled(bool enable, bool modelIsOK) {
+    // for (const auto& itr : this->m_fileExportIndices) {
+    //     fileMenu->setItemEnabled(itr, enable);
+    // }
+    // playbackMenu->setEnabled(enable);  // Doesn't work (until after init?) so:
+    menu->setItemEnabled(playbackMenuIdx, enable);
+    // viewMenu->setEnabled(enable);  // Doesn't work (until after init?) so:
+    menu->setItemEnabled(viewMenuIdx, enable);
+    fileMenu->setItemEnabled(fileReloadModelIdx, enable);
+    if (modelIsOK || !enable) {
+        for (const auto& itr : this->m_fileModelingIndices) {
+            fileMenu->setItemEnabled(itr, enable);
+        }
+    }
+}
+
+void UserInterface::setTexturingEnabled(bool enable) {
+    for (const auto& itr : this->m_fileTextureIndices) {
+        fileMenu->setItemEnabled(itr, enable);
+    }
+}
+
 // PRIVATE
 void UserInterface::setupUserInterface()
 {
@@ -55,24 +84,23 @@ void UserInterface::setupUserInterface()
     this->fileRecentIdx = fileMenu->addItem(L"Open Recent", UIC_FILE_RECENT, true, true);
     std::vector<std::string> recentPaths = this->m_Engine->recentPaths();
     this->fileReloadModelIdx = fileMenu->addItem(L"Reload Model        F5", UIC_FILE_RELOAD_MESH);
-    this->fileMenu->setItemEnabled(this->fileReloadModelIdx, false);
     // ^ Model reload is not relevant/possible until loadMesh is at least attempted
     this->fileReloadTextureIdx = fileMenu->addItem(L"Reload Texture      Shift F5", UIC_FILE_RELOAD_TEXTURE);
-    this->fileMenu->setItemEnabled(this->fileReloadTextureIdx, false);
     // ^ Texture change/reload is not relevant/possible until loadMesh is successful (and texture load is attempted/checked)
     this->fileChangeTextureIdx = fileMenu->addItem(L"Change Texture", UIC_FILE_OPEN_TEXTURE);
     this->filePreviousTextureIdx = fileMenu->addItem(L"Previous Texture    Shift F3", UIC_FILE_PREVIOUS_TEXTURE);
     this->fileNextTextureIdx = fileMenu->addItem(L"Next Texture        F3", UIC_FILE_NEXT_TEXTURE);
-    this->fileMenu->setItemEnabled(this->fileChangeTextureIdx, false);
-    this->fileMenu->setItemEnabled(this->filePreviousTextureIdx, false);
-    this->fileMenu->setItemEnabled(this->fileNextTextureIdx, false);
-    this->fileExportIndices.push_back(fileMenu->addItem(L"Export DAE (non-Blender COLLADA)", UIC_FILE_EXPORT_DAE));
-    this->fileExportIndices.push_back(fileMenu->addItem(L"Export IRR (Irrlicht Scene settings and mesh paths only)", UIC_FILE_EXPORT_IRR));
-    this->fileExportIndices.push_back(fileMenu->addItem(L"Export IRRMESH (Static Irrlicht Mesh)", UIC_FILE_EXPORT_IRRMESH));
-    this->fileExportIndices.push_back(fileMenu->addItem(L"Export OBJ (Wavefront)", UIC_FILE_EXPORT_OBJ));
-    this->fileExportIndices.push_back(fileMenu->addItem(L"Export STL (stereolithography)", UIC_FILE_EXPORT_STL));
-    for (const auto& itr : this->fileExportIndices) {
-        fileMenu->setItemEnabled(itr, false);
+    this->m_fileTextureIndices.push_back(this->fileChangeTextureIdx);
+    this->m_fileTextureIndices.push_back(this->filePreviousTextureIdx);
+    this->m_fileTextureIndices.push_back(this->fileNextTextureIdx);
+    this->m_fileTextureIndices.push_back(this->fileReloadTextureIdx);
+    this->m_fileExportIndices.push_back(fileMenu->addItem(L"Export DAE (non-Blender COLLADA)", UIC_FILE_EXPORT_DAE));
+    this->m_fileExportIndices.push_back(fileMenu->addItem(L"Export IRR (Irrlicht Scene settings and mesh paths only)", UIC_FILE_EXPORT_IRR));
+    this->m_fileExportIndices.push_back(fileMenu->addItem(L"Export IRRMESH (Static Irrlicht Mesh)", UIC_FILE_EXPORT_IRRMESH));
+    this->m_fileExportIndices.push_back(fileMenu->addItem(L"Export OBJ (Wavefront)", UIC_FILE_EXPORT_OBJ));
+    this->m_fileExportIndices.push_back(fileMenu->addItem(L"Export STL (stereolithography)", UIC_FILE_EXPORT_STL));
+    for (const auto& itr : this->m_fileExportIndices) {
+        m_fileModelingIndices.push_back(itr);
     }
     fileMenu->addItem(L"Quit", UIC_FILE_QUIT);
 
@@ -135,6 +163,9 @@ void UserInterface::setupUserInterface()
     viewZUpIdx = viewMenu->addItem(L"Z Up",
                                    UIC_VIEW_Z_UP, true, false,
                                    false, true);
+
+    setModelingEnabled(false, false);
+    setTexturingEnabled(false);
 
     // Playback Control Window
     dimension2d<u32> windowSize = m_Engine->m_Driver->getScreenSize();

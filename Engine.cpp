@@ -457,12 +457,8 @@ vector3df Engine::camTarget()
 
 bool Engine::loadMesh(const wstring& filePath, bool enableAddRecent)
 {
-    // enable reload even if fails (in case model is created/repaired outside of this process):
-    std::wstring fileName = filePath.substr(filePath.find_last_of(L"/\\") + 1);  // safe since if -1, still does +1
-
-    std::wstring combinedText = std::wstring(L"Reload Model (" + fileName + L")        F5 ");
-    this->m_UserInterface->fileMenu->setItemText(this->m_UserInterface->fileReloadModelIdx, combinedText.c_str());
-    this->m_UserInterface->fileMenu->setItemEnabled(this->m_UserInterface->fileReloadModelIdx, true);
+    this->m_UserInterface->setLastLoadedMeshPath(filePath);
+    this->m_UserInterface->setModelingEnabled(true, false);
     this->m_LoadedMeshPath = filePath; // even if bad, set this
 
     bool ret = false;
@@ -476,13 +472,8 @@ bool Engine::loadMesh(const wstring& filePath, bool enableAddRecent)
             // ^ hasRecent throws "There was no menu for 1 in hasRecent"
         }
         this->m_LoadedTexturePath = L"";
-        this->m_UserInterface->fileMenu->setItemEnabled(this->m_UserInterface->fileReloadTextureIdx, true);
-        this->m_UserInterface->fileMenu->setItemEnabled(this->m_UserInterface->fileChangeTextureIdx, true);
-        this->m_UserInterface->fileMenu->setItemEnabled(this->m_UserInterface->filePreviousTextureIdx, true);
-        this->m_UserInterface->fileMenu->setItemEnabled(this->m_UserInterface->fileNextTextureIdx, true);
-        for (const auto& itr : this->m_UserInterface->fileExportIndices) {
-            this->m_UserInterface->fileMenu->setItemEnabled(itr, true);
-        }
+        this->m_UserInterface->setModelingEnabled(true, true);
+        this->m_UserInterface->setTexturingEnabled(true);
 
         if (m_LoadedMesh != nullptr)
             m_LoadedMesh->remove();
