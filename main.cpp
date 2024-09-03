@@ -42,10 +42,13 @@ int main(int argc, char** argv)
         for (int i = 1; i < argc; i++) {
             wchar_t* optionCS = getWideCharString(argv[i]);
             if ((strlen(argv[i]) >=2 ) && (argv[i][0] == '-') && (argv[i][1] == '-')) {
+                std::cerr << "using option: " << argv[i] << std::endl;
                 engine->pushOption(wstring(optionCS));
             }
             else {
-                engine->loadMesh(wstring(optionCS), false);
+                std::cerr << "loading mesh: " << argv[i] << std::endl;
+                engine->loadMesh(wstring(optionCS), false);  // false: do not add to recent, since is loaded via CLI
+                // TODO: ^ Add to recent anyway?
             }
             free(optionCS);
         }

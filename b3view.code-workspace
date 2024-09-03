@@ -6,15 +6,16 @@
 	],
 	"settings": {
 		"cSpell.words": [
-				"CGUITTFace",
-				"CGUITTFont",
-				"IGUI",
-				"IRRMESH",
-				"SGUIEvent",
-				"USERINTERFACE",
-				"wireframe"
-			]
-		},
+			"CGUITTFace",
+			"CGUITTFont",
+			"IGUI",
+			"IRRMESH",
+			"SGUIEvent",
+			"USERINTERFACE",
+			"USERPROFILE",
+			"wireframe"
+		]
+		,
 		"files.associations": {
 			"string": "cpp",
 			"*.tcc": "cpp",
@@ -69,6 +70,7 @@
 			"streambuf": "cpp",
 			"cinttypes": "cpp",
 			"typeinfo": "cpp"
-		}
+		},
+		"trailing-spaces.trimOnSave": true
 	}
 }

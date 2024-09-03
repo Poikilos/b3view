@@ -70,13 +70,15 @@ void Engine::setEnableTextureInterpolation(bool EnableTextureInterpolation)
     }
 }
 
-void Engine::addRecent(std::string path)
+int Engine::addRecent(std::string path)
 {
     if (!this->hasRecent(path)) {
         int count = this->countRecent();
         std::string name = "recent" + std::to_string(count);
         this->settings.set(name, path);
+        return count;
     }
+    return -1;
 }
 
 void Engine::addRecentPaths(std::vector<std::string> paths)
@@ -96,21 +98,50 @@ int Engine::countRecent()
 }
 
 bool Engine::hasRecent(std::string path) {
+    return findRecent(path) >= 0;
+}
+
+int Engine::findRecent(std::string path) {
     int count = 0;
-    while (true) {
+    const int max_attempts = 256; // Hard limit
+
+    while (count < max_attempts) {
         bool found = false;
         std::string value = this->settings.get("recent" + std::to_string(count), found);
+
         if (found) {
+            // Index exists, so check value:
             if (value == path) {
-                break;
+                return count;
             }
             count++;
-        }
-        else {
+        } else {
             break;
         }
     }
-    return false;
+
+    // If the loop reaches this point, the limit has been exceeded:
+    if (count >= max_attempts) {
+        throw std::runtime_error("Exceeded maximum iterations. Possible issue with the 'get' method implementation.");
+    }
+
+    return -1; // Return -1 if the path is not found
+}
+
+std::string Engine::getRecent(int index) {
+    bool found = false;
+    return getRecent(index, found);
+    std::string value = this->settings.get("recent" + std::to_string(index), found);
+    if (!found) {
+        std::cerr << "[Engine::getRecent] Warning: recent" << index << " does not exist." << std::endl;
+        return "";
+    }
+    return value;
+}
+
+std::string Engine::getRecent(int index, bool& found) {
+    std::string value = this->settings.get("recent" + std::to_string(index), found);
+    return value;
 }
 
 std::vector<std::string> Engine::recentPaths()
@@ -358,6 +389,7 @@ Engine::Engine()
     else {
         appdataParent = profile;
         appdatas = appdataParent + path_separator_s + ".config";
+        // same on macOS, to mimic .NET Core
     }
     if (appdatas.length() > 0) {
         myAppData = appdatas + path_separator_s + std::string("b3view");
@@ -468,7 +500,7 @@ bool Engine::loadMesh(const wstring& filePath, bool enableAddRecent)
     if (mesh != nullptr) {
         // this->addRecent(Utility::toString(fileName));
         if (enableAddRecent) {
-            this->m_UserInterface->addRecentMenuItem(Utility::toString(filePath), true);
+            this->m_UserInterface->addRecentMenuItem(Utility::toString(filePath));
             // ^ hasRecent throws "There was no menu for 1 in hasRecent"
         }
         this->m_LoadedTexturePath = L"";
@@ -665,7 +697,7 @@ bool Engine::reloadMesh()
             // m_LoadedMesh->drop(); // if m_LoadedMesh is not set to nullptr above, this causes a later crash (in remove() in loadMesh?)
             // m_LoadedMesh->remove();
         }
-        ret = loadMesh(this->m_LoadedMeshPath, false);
+        ret = loadMesh(this->m_LoadedMeshPath, false);  // false: do not add to recent, since reloading
     }
     else {
         this->m_UserInterface->fileMenu->setItemText(this->m_UserInterface->fileReloadModelIdx, L"Reload Model        F5");
@@ -993,6 +1025,7 @@ void Engine::run()
             this->m_EnableTests = false;
             std::cerr << "* loading test model..." << std::endl;
             if (!this->loadMesh(L"dist/share/b3view/meshes/penguin-lowpoly-poikilos.b3d", false)) {
+                // ^ false: Do not add to recent, since testing
                 throw "loading dist/share/b3view/meshes/penguin-lowpoly-poikilos.b3d failed.";
             }
             std::cerr << "* loading test model's next texture..." << std::endl;

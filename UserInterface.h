@@ -74,10 +74,10 @@ enum UserInterfaceCommands {
 class UserInterface : public irr::IEventReceiver {
 private:
     irr::s32 spacing_y;
-    static const irr::u32 UIC_FILE_RECENT_FIRST;
-    irr::u32 uic_file_recent_next;
-    irr::s32 m_file_recent_first_idx;
-    irr::s32 m_file_recent_last_idx;
+    static const irr::s32 UIC_FILE_RECENT_FIRST;
+    irr::s32 uic_file_recent_next;  // *command* is s32 (index is u32)
+    // irr::s32 m_file_recent_first_idx; // index should be u32 (command is s32)
+    // irr::s32 m_file_recent_last_idx; // index should be u32 (command is s32)
     Engine* m_Engine;
     irr::gui::IGUIEnvironment* m_Gui;
     irr::gui::CGUITTFont* m_GuiFont;
@@ -99,6 +99,7 @@ private:
     std::vector<irr::u32> m_fileExportIndices;
     std::vector<irr::u32> m_fileModelingIndices;
     std::vector<irr::u32> m_fileTextureIndices;
+    std::map<int, std::wstring> recentEngineIndices;
 public:
     irr::gui::IGUIContextMenu* menu;
     irr::gui::IGUIContextMenu* fileMenu;
@@ -128,7 +129,8 @@ public:
     irr::u32 playbackMenuIdx;
     irr::u32 viewMenuIdx;
     irr::u32 fileMenuIdx;
-    std::vector<irr::u32> recentIndices;
+    std::vector<irr::s32> m_recentCommandIDs;
+    std::vector<irr::u32> m_recentIndices;
     irr::u32 viewTextureInterpolationIdx;
     irr::u32 viewWireframeIdx;
     irr::u32 viewAxisWidgetIdx;
@@ -146,9 +148,12 @@ public:
     bool loadNextTexture(int direction);
     void exportMeshToHome(std::string extension);
     void clearRecent();
-    void addRecentMenuItem(std::string path, bool addToEngine);
-    void addRecentMenuItems(std::vector<std::string> paths, bool addToEngine);
+    irr::u32 addRecentMenuItem(std::string path, int engineRecentIndex);
+    irr::u32 addRecentMenuItem(std::string path);
+    // void addRecentMenuItems(std::vector<std::string> paths, bool addToEngine);
+    void addRecentMenuItems();
     bool hasRecent(std::string path);
+    int findRecent(std::string path);
     bool openRecent(irr::s32 commandID, irr::s32 selectedItemID);
     bool OnSelectMesh();
     void setPlaybackText(irr::s32 id, const wchar_t* str);

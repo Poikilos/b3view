@@ -105,11 +105,14 @@ public:
     void setEnableWireframe(bool EnableWireframe);
     void setEnableLighting(bool EnableLighting);
     void setEnableTextureInterpolation(bool EnableTextureInterpolation);
-    void addRecent(std::string path);
+    int addRecent(std::string path);
     void addRecentPaths(std::vector<std::string> paths);
     int countRecent();
     std::vector<std::string> recentPaths();
     bool hasRecent(std::string path);
+    int findRecent(std::string path);
+    std::string getRecent(int index);
+    std::string getRecent(int index, bool& found);
 };
 
 #endif // ENGINE_H
